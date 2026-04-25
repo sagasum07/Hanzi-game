@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HSK 1~3급 수준의 한자를 재미있게 학습하는 퀴즈 게임">
+  <title>한자 학습 게임 - HSK 1~3급</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- ===== Start Screen ===== -->
+    <div class="start-screen" id="start-screen">
+      <div class="start-decoration">
+        <span class="start-hanzi-bg">漢</span>
+      </div>
+      <h1 class="start-title">漢字 학습</h1>
+      <p class="start-subtitle">HSK 한자 퀴즈 게임</p>
+      <button class="btn-start" id="btn-start">시작</button>
+      <p class="start-hint">한자의 뜻을 맞혀보세요!</p>
+    </div>
+
+    <!-- ===== Difficulty Selection Screen ===== -->
+    <div class="difficulty-screen" id="difficulty-screen" style="display:none;">
+      <h2 class="difficulty-title">난이도 선택</h2>
+      <p class="difficulty-subtitle">학습할 HSK 등급을 선택하세요</p>
+      <div class="difficulty-cards">
+        <button class="difficulty-card" data-level="1" id="btn-hsk1">
+          <span class="difficulty-badge">HSK 1급</span>
+          <span class="difficulty-emoji">🌱</span>
+          <span class="difficulty-label">입문</span>
+          <span class="difficulty-desc">기초 한자 100자</span>
+        </button>
+        <button class="difficulty-card" data-level="2" id="btn-hsk2">
+          <span class="difficulty-badge">HSK 2급</span>
+          <span class="difficulty-emoji">🌿</span>
+          <span class="difficulty-label">초급</span>
+          <span class="difficulty-desc">초급 한자 100자</span>
+        </button>
+        <button class="difficulty-card" data-level="3" id="btn-hsk3">
+          <span class="difficulty-badge">HSK 3급</span>
+          <span class="difficulty-emoji">🌳</span>
+          <span class="difficulty-label">중급</span>
+          <span class="difficulty-desc">중급 한자 100자</span>
+        </button>
+      </div>
+      <button class="btn-back" id="btn-back-to-start">← 뒤로</button>
+    </div>
+
+    <!-- ===== Count Selection Screen ===== -->
+    <div class="count-screen" id="count-screen" style="display:none;">
+      <h2 class="count-title">문제 수 선택</h2>
+      <p class="count-subtitle">학습할 한자의 개수를 선택하세요</p>
+      <div class="count-display">
+        <span class="count-number" id="count-number">10</span>
+        <span class="count-unit">문제</span>
+      </div>
+      <div class="count-slider-wrapper">
+        <span class="count-label-min">10</span>
+        <input type="range" id="count-slider" class="count-slider" min="10" max="30" step="1" value="10">
+        <span class="count-label-max">30</span>
+      </div>
+      <div class="count-presets">
+        <button class="count-preset-btn" data-count="10">10개</button>
+        <button class="count-preset-btn" data-count="15">15개</button>
+        <button class="count-preset-btn" data-count="20">20개</button>
+        <button class="count-preset-btn" data-count="25">25개</button>
+        <button class="count-preset-btn" data-count="30">30개</button>
+      </div>
+      <button class="btn-start-quiz" id="btn-start-quiz">학습 시작 🚀</button>
+      <button class="btn-back" id="btn-back-to-difficulty">← 뒤로</button>
+    </div>
+
+    <!-- ===== Quiz Screen ===== -->
+    <div id="quiz-screen" style="display:none;">
+      <!-- Header -->
+      <header id="header">
+        <h1>漢字 학습</h1>
+        <p class="subtitle" id="level-subtitle">HSK 1급 한자 퀴즈</p>
+      </header>
+
+      <!-- Progress Bar -->
+      <div class="progress-wrapper" id="progress-wrapper">
+        <div class="progress-text">
+          <span id="progress-current">1</span> / <span id="progress-total">10</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="score-display">
+          <span class="score-correct" id="score-correct">✓ 0</span>
+          <span class="score-wrong" id="score-wrong">✗ 0</span>
+        </div>
+      </div>
+
+      <!-- Quiz Card -->
+      <main class="quiz-card" id="quiz-card">
+        <div class="hanzi-display" id="hanzi-display">
+          <span class="hanzi-char" id="hanzi-char">大</span>
+          <span class="hanzi-pinyin" id="hanzi-pinyin">dà</span>
+        </div>
+        <div class="choices" id="choices">
+          <!-- Choices dynamically inserted here -->
+        </div>
+        <div class="feedback-area" id="feedback-area">
+          <!-- Feedback message -->
+        </div>
+        <button class="btn-next" id="btn-next" style="display:none;">다음 문제 →</button>
+      </main>
+
+      <!-- Result Screen -->
+      <div class="result-screen" id="result-screen" style="display:none;">
+        <div class="result-icon">🎉</div>
+        <h2>학습 완료!</h2>
+        <div class="result-stats">
+          <div class="stat-item stat-correct">
+            <span class="stat-number" id="final-correct">0</span>
+            <span class="stat-label">정답</span>
+          </div>
+          <div class="stat-item stat-wrong">
+            <span class="stat-number" id="final-wrong">0</span>
+            <span class="stat-label">오답</span>
+          </div>
+          <div class="stat-item stat-percent">
+            <span class="stat-number" id="final-percent">0%</span>
+            <span class="stat-label">정답률</span>
+          </div>
+        </div>
+        <div class="result-buttons">
+          <button class="btn-restart" id="btn-restart">다시 도전하기 🔄</button>
+          <button class="btn-home" id="btn-home">처음으로 🏠</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Section -->
+    <footer class="feedback-section" id="feedback-section">
+      <p class="feedback-title">이 게임이 어떠셨나요?</p>
+      <div class="feedback-buttons">
+        <button class="btn-feedback" id="btn-like" aria-label="좋아요">👍</button>
+        <button class="btn-feedback" id="btn-dislike" aria-label="싫어요">👎</button>
+      </div>
+      <div class="feedback-input-wrapper">
+        <input type="text" id="feedback-input" class="feedback-input" placeholder="한 줄 의견을 남겨주세요..." maxlength="100">
+        <button class="btn-send" id="btn-send">보내기</button>
+      </div>
+      <div class="feedback-toast" id="feedback-toast"></div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
