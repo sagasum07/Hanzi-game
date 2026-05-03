@@ -620,6 +620,14 @@ header h1 {
   transform: scale(1.06);
 }
 
+.pinyin-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
 .hanzi-pinyin {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 1.3rem;
@@ -628,7 +636,36 @@ header h1 {
   letter-spacing: 1.5px;
   line-height: 1.6;
   display: inline-block;
-  padding-top: 4px;
+}
+
+.btn-speak {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-light);
+  color: var(--accent);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-speak:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(232, 132, 74, 0.25);
+}
+
+.btn-speak:active {
+  transform: scale(0.95);
+}
+
+.btn-speak svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* ---- Choices ---- */

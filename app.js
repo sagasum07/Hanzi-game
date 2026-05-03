@@ -353,6 +353,7 @@ const levelSubtitle = document.getElementById('level-subtitle');
 
 const hanziChar = document.getElementById('hanzi-char');
 const hanziPinyin = document.getElementById('hanzi-pinyin');
+const btnSpeak = document.getElementById('btn-speak');
 const choicesContainer = document.getElementById('choices');
 const feedbackArea = document.getElementById('feedback-area');
 const btnNext = document.getElementById('btn-next');
@@ -411,6 +412,69 @@ function shuffle(arr) {
   }
   return a;
 }
+
+// ========================================
+// Text-to-Speech (TTS) Logic
+// ========================================
+function speakHanzi(text) {
+  if (!('speechSynthesis' in window)) return;
+  
+  // Cancel any ongoing speech
+  window.speechSynthesis.cancel();
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'zh-CN'; // Chinese (Simplified)
+  
+  // 글자 수에 따라 발음 속도를 동적으로 조절
+  if (text.length === 1) {
+    utterance.rate = 0.75; // 1글자는 덜 늘어지도록 조금 빠르게
+  } else if (text.length === 2) {
+    utterance.rate = 0.65; // 2글자는 중간 속도
+  } else {
+    utterance.rate = 0.6; // 3글자 이상은 천천히 또렷하게
+  }
+  
+  utterance.pitch = 0.95; // 톤을 살짝 낮춰서 좀 더 자연스럽게 
+  
+  // Try to find a high-quality Chinese voice
+  const voices = window.speechSynthesis.getVoices();
+  
+  // 구글 네트워크 음성이나 애플 프리미엄 음성을 우선적으로 찾습니다.
+  const premiumKeywords = ['Google', 'Tingting', 'Lili', 'Yaqi', 'Meijia'];
+  let selectedVoice = null;
+  
+  for (const keyword of premiumKeywords) {
+    selectedVoice = voices.find(v => (v.lang.includes('zh') || v.lang.includes('zh-CN')) && v.name.includes(keyword));
+    if (selectedVoice) break;
+  }
+  
+  // 프리미엄 음성이 없으면 일반 중국어 음성 선택
+  if (!selectedVoice) {
+    selectedVoice = voices.find(v => v.lang.includes('zh-CN') || v.lang.includes('zh_CN') || v.lang.includes('zh'));
+  }
+  
+  if (selectedVoice) {
+    utterance.voice = selectedVoice;
+  }
+  
+  window.speechSynthesis.speak(utterance);
+}
+
+// Ensure voices are loaded (some browsers load them asynchronously)
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    window.speechSynthesis.getVoices();
+  };
+}
+
+if (btnSpeak) {
+  btnSpeak.addEventListener('click', () => {
+    if (hanziChar.textContent) {
+      speakHanzi(hanziChar.textContent);
+    }
+  });
+}
+
 
 // ========================================
 // Generate quiz data with choices

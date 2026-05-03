@@ -61,15 +61,15 @@
       </div>
       <div class="count-slider-wrapper">
         <span class="count-label-min">10</span>
-        <input type="range" id="count-slider" class="count-slider" min="10" max="30" step="1" value="10">
-        <span class="count-label-max">30</span>
+        <input type="range" id="count-slider" class="count-slider" min="10" max="50" step="1" value="10">
+        <span class="count-label-max">50</span>
       </div>
       <div class="count-presets">
         <button class="count-preset-btn" data-count="10">10개</button>
-        <button class="count-preset-btn" data-count="15">15개</button>
         <button class="count-preset-btn" data-count="20">20개</button>
-        <button class="count-preset-btn" data-count="25">25개</button>
         <button class="count-preset-btn" data-count="30">30개</button>
+        <button class="count-preset-btn" data-count="40">40개</button>
+        <button class="count-preset-btn" data-count="50">50개</button>
       </div>
       <button class="btn-start-quiz" id="btn-start-quiz">학습 시작 🚀</button>
       <button class="btn-back" id="btn-back-to-difficulty">← 뒤로</button>
@@ -101,7 +101,15 @@
       <main class="quiz-card" id="quiz-card">
         <div class="hanzi-display" id="hanzi-display">
           <span class="hanzi-char" id="hanzi-char">大</span>
-          <span class="hanzi-pinyin" id="hanzi-pinyin">dà</span>
+          <div class="pinyin-row">
+            <span class="hanzi-pinyin" id="hanzi-pinyin">dà</span>
+            <button class="btn-speak" id="btn-speak" aria-label="발음 듣기" title="발음 듣기">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53M19.07 4.93C20.9447 6.80528 21.998 9.34836 21.998 12C21.998 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
         </div>
         <div class="choices" id="choices">
           <!-- Choices dynamically inserted here -->
