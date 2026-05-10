@@ -596,8 +596,99 @@ const wordsByLevel = {
 };
 
 // ========================================
+// HSK Sentence Data (문장 작문 게임용)
+// ========================================
+const hsk1Sentences = [
+  { korean: '나는 내일 베이징에 갑니다.', chinese: '我明天去北京。', words: ['我', '明天', '去', '北京'], traps: ['昨天', '来'] },
+  { korean: '그는 내 친구입니다.', chinese: '他是我的朋友。', words: ['他', '是', '我', '的', '朋友'], traps: ['她', '老师'] },
+  { korean: '이것은 누구의 책입니까?', chinese: '这是谁的书？', words: ['这', '是', '谁', '的', '书'], traps: ['那', '什么'] },
+  { korean: '나는 중국어를 할 줄 압니다.', chinese: '我会说汉语。', words: ['我', '会', '说', '汉语'], traps: ['能', '写'] },
+  { korean: '지금 몇 시인가요?', chinese: '现在几点？', words: ['现在', '几点'], traps: ['今天', '什么'] },
+  { korean: '만나서 반갑습니다.', chinese: '很高兴认识你。', words: ['很', '高兴', '认识', '你'], traps: ['太', '看'] },
+  { korean: '우리 아빠는 의사입니다.', chinese: '我爸爸是医生。', words: ['我', '爸爸', '是', '医生'], traps: ['妈妈', '在'] },
+  { korean: '어제 비가 내렸습니다.', chinese: '昨天大雨了。', words: ['昨天', '下雨', '了'], traps: ['明天', '天气'] },
+  { korean: '그녀는 사과 먹는 것을 좋아합니다.', chinese: '她喜欢吃苹果。', words: ['她', '喜欢', '吃', '苹果'], traps: ['他', '喝'] },
+  { korean: '도서관에 사람이 매우 많습니다.', chinese: '图书馆人很多。', words: ['图书馆', '人', '很', '多'], traps: ['少', '哪儿'] }
+];
+
+const hsk2Sentences = [
+  { korean: '내 여동생은 노래 부르는 것을 좋아해.', chinese: '我妹妹喜欢唱歌。', words: ['我', '妹妹', '喜欢', '唱歌'], traps: ['姐姐', '跳舞'] },
+  { korean: '너는 매일 아침 몇 시에 일어나니?', chinese: '你每天早上几点起床？', words: ['你', '每天', '早上', '几点', '起床'], traps: ['睡觉', '晚上'] },
+  { korean: '이 옷은 매우 싸다.', chinese: '这件衣服很便宜。', words: ['这', '件', '衣服', '很', '便宜'], traps: ['那', '贵'] },
+  { korean: '나는 이미 밥을 다 먹었어.', chinese: '我已经吃完饭了。', words: ['我', '已经', '吃完', '饭', '了'], traps: ['还', '没'] },
+  { korean: '문 밖에 한 사람이 서 있습니다.', chinese: '门外站着一个人。', words: ['门', '外', '站着', '一个', '人'], traps: ['里', '坐着'] },
+  { korean: '너 어제 왜 안 왔어?', chinese: '你昨天为什么没来？', words: ['你', '昨天', '为什么', '没', '来'], traps: ['怎么', '不'] },
+  { korean: '방 안이 너무 어두워요.', chinese: '房间里太黑了。', words: ['房间', '里', '太', '黑', '了'], traps: ['外', '白'] },
+  { korean: '도와주셔서 정말 감사합니다.', chinese: '非常感谢你的帮助。', words: ['非常', '感谢', '你', '的', '帮助'], traps: ['觉得', '客气'] },
+  { korean: '우리는 내일 같이 농구할 거야.', chinese: '我们明天一起打篮球。', words: ['我们', '明天', '一起', '打篮球'], traps: ['你们', '踢足球'] },
+  { korean: '그는 시험을 매우 잘 봤다.', chinese: '他考试考得很好。', words: ['他', '考试', '考得', '很', '好'], traps: ['的', '错'] }
+];
+
+const hsk3Sentences = [
+  { korean: '회의가 방금 끝났습니다.', chinese: '会议刚才结束了。', words: ['会议', '刚才', '结束', '了'], traps: ['终于', '开始'] },
+  { korean: '이 문제는 해결하기 비교적 간단하다.', chinese: '这个问题解决起来比较简单。', words: ['这个', '问题', '解决', '起来', '比较', '简单'], traps: ['办法', '容易'] },
+  { korean: '나는 내일 상하이로 출장을 가야 해.', chinese: '我明天必须去上海出差。', words: ['我', '明天', '必须', '去', '上海', '出差'], traps: ['应该', '旅游'] },
+  { korean: '집안 환경을 깨끗하게 유지해야 합니다.', chinese: '要保持家里环境的干净。', words: ['要', '保持', '家里', '环境', '的', '干净'], traps: ['保护', '安静'] },
+  { korean: '내 생각에 이 신발은 너에게 매우 잘 어울려.', chinese: '我觉得这双鞋对你很合适。', words: ['我', '觉得', '这', '双', '鞋', '对', '你', '很', '合适'], traps: ['看', '件'] },
+  { korean: '그는 감기에 걸려서 병원에 갔습니다.', chinese: '他感冒了，所以去医院了。', words: ['他', '感冒', '了，', '所以', '去', '医院', '了'], traps: ['发烧', '因为'] },
+  { korean: '봄이 오면 날씨가 따뜻해진다.', chinese: '春天来了，天气变暖和了。', words: ['春天', '来', '了，', '天气', '变', '暖和', '了'], traps: ['秋天', '冷'] },
+  { korean: '그들은 이야기를 하며 웃기 시작했다.', chinese: '他们说着说着就笑了起来。', words: ['他们', '说着', '说着', '就', '笑', '了', '起来'], traps: ['哭', '才'] },
+  { korean: '나는 지하철을 타고 퇴근하는 것을 선호해.', chinese: '我更愿意坐地铁下班。', words: ['我', '更', '愿意', '坐地铁', '下班'], traps: ['最', '上班'] },
+  { korean: '갑자기 비가 오기 시작했다.', chinese: '突然下起雨来了。', words: ['突然', '下起', '雨', '来', '了'], traps: ['虽然', '雪'] }
+];
+
+const hsk4Sentences = [
+  { korean: '실패는 성공의 어머니이다.', chinese: '失败是成功之母。', words: ['失败', '是', '成功', '之', '母'], traps: ['错误', '的'] },
+  { korean: '모두가 이번 행사에 적극적으로 참여했습니다.', chinese: '大家都积极参加了这次活动。', words: ['大家', '都', '积极', '参加', '了', '这次', '活动'], traps: ['热情', '那次'] },
+  { korean: '그녀는 뛰어난 피아노 연주 실력을 가지고 있다.', chinese: '她有非常出色的钢琴弹奏水平。', words: ['她', '有', '非常', '出色', '的', '钢琴', '弹奏', '水平'], traps: ['他', '吉他'] },
+  { korean: '자연을 보호하는 것은 우리 모두의 책임입니다.', chinese: '保护自然是我们共同的责任。', words: ['保护', '自然', '是', '我们', '共同', '的', '责任'], traps: ['保证', '决定'] },
+  { korean: '나는 이 영화가 꽤 감동적이라고 생각해.', chinese: '我认为这部电影挺感人的。', words: ['我', '认为', '这', '部', '电影', '挺', '感人', '的'], traps: ['以为', '本'] },
+  { korean: '계획대로 진행하면 문제없을 거야.', chinese: '按计划进行就不会有问题。', words: ['按', '计划', '进行', '就', '不会', '有', '问题'], traps: ['照', '能'] },
+  { korean: '그는 경험이 풍부한 변호사입니다.', chinese: '他是一位经验丰富的律师。', words: ['他', '是', '一位', '经验', '丰富', '的', '律师'], traps: ['经历', '大夫'] },
+  { korean: '현대 사회에서 인터넷은 필수 불가결하다.', chinese: '在现代社会，网络是必不可少的。', words: ['在', '现代', '社会，', '网络', '是', '必不可少', '的'], traps: ['网球', '不得不'] },
+  { korean: '오해를 풀기 위해서는 소통이 중요합니다.', chinese: '为了解除误会，沟通很重要。', words: ['为了', '解除', '误会，', '沟通', '很', '重要'], traps: ['除了', '理解'] },
+  { korean: '그의 유머러스한 성격이 분위기를 띄웠다.', chinese: '他幽默的性格活跃了气氛。', words: ['他', '幽默', '的', '性格', '活跃', '了', '气氛'], traps: ['脾气', '活泼'] }
+];
+
+const hsk5Sentences = [
+  { korean: '인생은 수많은 선택의 연속이다.', chinese: '人生是无数次选择的延续。', words: ['人生', '是', '无数次', '选择', '的', '延续'], traps: ['生活', '决定'] },
+  { korean: '환경 오염 문제는 갈수록 심각해지고 있다.', chinese: '环境污染问题日益严重。', words: ['环境污染', '问题', '日益', '严重'], traps: ['保护', '逐渐'] },
+  { korean: '기업은 혁신을 통해 경쟁력을 강화해야 한다.', chinese: '企业需要通过创新增强竞争力。', words: ['企业', '需要', '通过', '创新', '增强', '竞争力'], traps: ['创造', '公司'] },
+  { korean: '그는 뛰어난 리더십으로 팀을 승리로 이끌었다.', chinese: '他凭借出色的领导力带领团队走向胜利。', words: ['他', '凭借', '出色', '的', '领导力', '带领', '团队', '走向', '胜利'], traps: ['依靠', '成功'] },
+  { korean: '전통 문화를 보존하는 것은 매우 가치 있는 일이다.', chinese: '保存传统文化是一件非常有价值的事情。', words: ['保存', '传统文化', '是', '一件', '非常', '有价值', '的', '事情'], traps: ['保留', '价格'] },
+  { korean: '건강한 식습관이 장수의 비결입니다.', chinese: '健康的饮食习惯是长寿的秘诀。', words: ['健康', '的', '饮食', '习惯', '是', '长寿', '的', '秘诀'], traps: ['食品', '秘密'] },
+  { korean: '지나친 스트레스는 정신 건강에 해롭다.', chinese: '过度的压力对心理健康有害。', words: ['过度', '的', '压力', '对', '心理健康', '有害'], traps: ['过分', '精神'] },
+  { korean: '그녀는 어떠한 어려움에도 결코 포기하지 않는다.', chinese: '无论遇到什么困难，她都决不放弃。', words: ['无论', '遇到', '什么', '困难，', '她', '都', '决不', '放弃'], traps: ['虽然', '绝望'] },
+  { korean: '경제 발전과 환경 보호는 균형을 이루어야 한다.', chinese: '经济发展和环境保护必须取得平衡。', words: ['经济', '发展', '和', '环境保护', '必须', '取得', '平衡'], traps: ['条件', '得到'] },
+  { korean: '이 프로젝트의 성공 여부는 협력에 달려 있다.', chinese: '这个项目的成败取决于团队合作。', words: ['这个', '项目', '的', '成败', '取决于', '团队', '合作'], traps: ['成功', '在于'] }
+];
+
+const hsk6Sentences = [
+  { korean: '인공지능 기술의 비약적인 발전은 인류 사회에 혁명적인 변화를 가져왔다.', chinese: '人工智能技术的飞跃发展给人类社会带来了革命性的变化。', words: ['人工智能', '技术', '的', '飞跃', '发展', '给', '人类社会', '带来', '了', '革命性', '的', '变化'], traps: ['机器', '飞翔'] },
+  { korean: '지구 온난화를 억제하기 위해서는 전 지구적인 탄소 배출 감축 노력이 시급하다.', chinese: '为了遏制全球变暖，全球范围内的减排努力迫在眉睫。', words: ['为了', '遏制', '全球', '变暖，', '全球', '范围内', '的', '减排', '努力', '迫在眉睫'], traps: ['阻止', '迫不及待'] },
+  { korean: '그는 역경 속에서도 불굴의 의지로 자신의 신념을 끝까지 관철했다.', chinese: '在逆境中，他以不屈不挠的意志贯彻了自己的信念。', words: ['在', '逆境', '中，', '他', '以', '不屈不挠', '的', '意志', '贯彻', '了', '自己', '的', '信念'], traps: ['顺境', '坚定'] },
+  { korean: '현대 자본주의 사회에서 부의 양극화 현상은 날로 심화되고 있다.', chinese: '在现代资本主义社会中，财富两极分化现象日益加剧。', words: ['在', '现代', '资本主义', '社会', '中，', '财富', '两极分化', '现象', '日益', '加剧'], traps: ['金钱', '增加'] },
+  { korean: '문화의 다양성을 존중하는 것은 글로벌 시대의 필수적인 미덕이다.', chinese: '尊重文化多样性是全球化时代必不可少的美德。', words: ['尊重', '文化', '多样性', '是', '全球化', '时代', '必不可少', '的', '美德'], traps: ['重视', '道德'] },
+  { korean: '저명한 학자들의 학술적 논쟁은 학문 발전에 새로운 영감을 부여했다.', chinese: '著名学者的学术争论为学术发展赋予了新的灵感。', words: ['著名', '学者', '的', '学术', '争论', '为', '学术', '发展', '赋予', '了', '新', '的', '灵感'], traps: ['有名', '给予'] },
+  { korean: '정부는 저출산 고령화 문제에 대응하기 위한 근본적인 대책을 마련해야 한다.', chinese: '政府必须制定根本性对策以应对少子老龄化问题。', words: ['政府', '必须', '制定', '根本性', '对策', '以', '应对', '少子', '老龄化', '问题'], traps: ['应付', '规定'] },
+  { korean: '예술 작품의 가치는 시대적 맥락과 감상자의 주관적 해석에 따라 달라진다.', chinese: '艺术作品的价值因时代脉络和欣赏者的主观诠释而异。', words: ['艺术作品', '的', '价值', '因', '时代', '脉络', '和', '欣赏者', '的', '主观', '诠释', '而异'], traps: ['解释', '客观'] },
+  { korean: '기업의 사회적 책임은 단순한 이윤 창출을 넘어 지속 가능한 경영을 추구하는 것이다.', chinese: '企业的社会责任超越了单纯的创造利润，在于追求可持续经营。', words: ['企业', '的', '社会责任', '超越', '了', '单纯', '的', '创造', '利润，', '在于', '追求', '可持续', '经营'], traps: ['利益', '维持'] },
+  { korean: '우주 탐사는 인류의 지적 호기심을 충족시키고 미래 생존 가능성을 넓힌다.', chinese: '太空探索满足了人类的智力好奇心，并拓宽了未来生存的可能性。', words: ['太空探索', '满足', '了', '人类', '的', '智力', '好奇心，', '并', '拓宽', '了', '未来', '生存', '的', '可能性'], traps: ['宇宙', '扩大'] }
+];
+
+const sentencesByLevel = {
+  1: hsk1Sentences,
+  2: hsk2Sentences,
+  3: hsk3Sentences,
+  4: hsk4Sentences,
+  5: hsk5Sentences,
+  6: hsk6Sentences
+};
+
+// ========================================
 // Game State
 // ========================================
+let currentMode = 'word'; // 'word' 또는 'sentence'
 let currentLevel = 1;
 let currentIndex = 0;
 let correctCount = 0;
@@ -606,6 +697,11 @@ let answered = false;
 let shuffledQuiz = [];
 let quizCount = 10;
 
+// Sentence Game State
+let sentenceQuestions = [];
+let currentSentenceCorrectWords = [];
+let selectedWords = [];
+
 // ========================================
 // DOM Elements
 // ========================================
@@ -613,13 +709,31 @@ const startScreen = document.getElementById('start-screen');
 const difficultyScreen = document.getElementById('difficulty-screen');
 const countScreen = document.getElementById('count-screen');
 const quizScreen = document.getElementById('quiz-screen');
-const btnStart = document.getElementById('btn-start');
+const sentenceScreen = document.getElementById('sentence-screen'); // New
+const btnModeWord = document.getElementById('btn-mode-word'); // New
+const btnModeSentence = document.getElementById('btn-mode-sentence'); // New
 const btnBackToStart = document.getElementById('btn-back-to-start');
 const btnBackToDifficulty = document.getElementById('btn-back-to-difficulty');
 const btnStartQuiz = document.getElementById('btn-start-quiz');
 const countSlider = document.getElementById('count-slider');
 const countNumber = document.getElementById('count-number');
 const levelSubtitle = document.getElementById('level-subtitle');
+
+// Sentence Game DOM Elements
+const sentenceLevelSubtitle = document.getElementById('sentence-level-subtitle');
+const sentenceProgressCurrent = document.getElementById('sentence-progress-current');
+const sentenceProgressTotal = document.getElementById('sentence-progress-total');
+const sentenceProgressFill = document.getElementById('sentence-progress-fill');
+const sentenceScoreCorrect = document.getElementById('sentence-score-correct');
+const sentenceScoreWrong = document.getElementById('sentence-score-wrong');
+const koreanPrompt = document.getElementById('korean-prompt');
+const answerArea = document.getElementById('answer-area');
+const wordBank = document.getElementById('word-bank');
+const btnHint = document.getElementById('btn-hint');
+const btnSkip = document.getElementById('btn-skip');
+const btnSentenceNext = document.getElementById('btn-sentence-next');
+const sentenceFeedbackArea = document.getElementById('sentence-feedback-area');
+const sentenceCard = document.getElementById('sentence-card');
 
 const hanziChar = document.getElementById('hanzi-char');
 const hanziPinyin = document.getElementById('hanzi-pinyin');
@@ -655,6 +769,7 @@ function showScreen(screenName) {
   difficultyScreen.style.display = 'none';
   countScreen.style.display = 'none';
   quizScreen.style.display = 'none';
+  sentenceScreen.style.display = 'none';
 
   if (screenName === 'start') {
     startScreen.style.display = '';
@@ -667,6 +782,9 @@ function showScreen(screenName) {
     feedbackSection.style.display = '';
   } else if (screenName === 'quiz') {
     quizScreen.style.display = '';
+    feedbackSection.style.display = '';
+  } else if (screenName === 'sentence') {
+    sentenceScreen.style.display = '';
     feedbackSection.style.display = '';
   }
 }
@@ -773,7 +891,13 @@ function generateQuiz(level, count) {
 // ========================================
 // Start Screen → Difficulty Screen
 // ========================================
-btnStart.addEventListener('click', () => {
+btnModeWord.addEventListener('click', () => {
+  currentMode = 'word';
+  showScreen('difficulty');
+});
+
+btnModeSentence.addEventListener('click', () => {
+  currentMode = 'sentence';
   showScreen('difficulty');
 });
 
@@ -850,6 +974,14 @@ btnStartQuiz.addEventListener('click', () => {
 // Start Quiz
 // ========================================
 function startQuiz(level) {
+  if (currentMode === 'word') {
+    startWordQuiz(level);
+  } else {
+    startSentenceQuiz(level);
+  }
+}
+
+function startWordQuiz(level) {
   currentIndex = 0;
   correctCount = 0;
   wrongCount = 0;
@@ -966,7 +1098,7 @@ function updateScore() {
 }
 
 // ========================================
-// Next button handler
+// Next button handler (Word Quiz)
 // ========================================
 btnNext.addEventListener('click', () => {
   if (currentIndex < shuffledQuiz.length - 1) {
@@ -980,6 +1112,233 @@ btnNext.addEventListener('click', () => {
     showResult();
   }
 });
+
+// ========================================
+// Sentence Game Logic
+// ========================================
+function startSentenceQuiz(level) {
+  currentSentenceIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  answered = false;
+
+  sentenceLevelSubtitle.textContent = `HSK ${level}급 작문`;
+
+  // Get sentences for this level
+  const sentences = sentencesByLevel[level] || [];
+  sentenceQuestions = shuffle(sentences).slice(0, quizCount);
+  sentenceProgressTotal.textContent = sentenceQuestions.length;
+
+  showScreen('sentence');
+  sentenceCard.style.display = '';
+  document.getElementById('sentence-progress-wrapper').style.display = '';
+  resultScreen.style.display = 'none';
+
+  updateSentenceScore();
+  showSentenceQuestion();
+}
+
+function updateSentenceScore() {
+  sentenceScoreCorrect.textContent = `✓ ${correctCount}`;
+  sentenceScoreWrong.textContent = `✗ ${wrongCount}`;
+}
+
+function showSentenceQuestion() {
+  answered = false;
+  selectedWords = [];
+  
+  const q = sentenceQuestions[currentSentenceIndex];
+  sentenceProgressCurrent.textContent = currentSentenceIndex + 1;
+  
+  const pct = (currentSentenceIndex / sentenceQuestions.length) * 100;
+  sentenceProgressFill.style.width = pct + '%';
+
+  koreanPrompt.textContent = q.korean;
+  currentSentenceCorrectWords = q.words;
+
+  // Render drop zone (empty initially)
+  answerArea.innerHTML = '';
+  answerArea.className = 'answer-area'; // reset animations
+
+  // Render word bank
+  wordBank.innerHTML = '';
+  const allCards = shuffle([...q.words, ...(q.traps || [])]);
+  
+  allCards.forEach((word) => {
+    const span = document.createElement('span');
+    span.className = 'word-piece';
+    span.textContent = word;
+    span.dataset.word = word;
+    
+    span.addEventListener('click', () => handleWordBankClick(span));
+    wordBank.appendChild(span);
+  });
+
+  sentenceFeedbackArea.innerHTML = '';
+  btnSentenceNext.style.display = 'none';
+  btnHint.disabled = false;
+  btnSkip.disabled = false;
+}
+
+function handleWordBankClick(span) {
+  if (answered || span.classList.contains('used')) return;
+  
+  // Mark as used in word bank
+  span.classList.add('used');
+
+  // Add to answer area
+  const answerSpan = document.createElement('span');
+  answerSpan.className = 'word-piece in-answer';
+  answerSpan.textContent = span.dataset.word;
+  answerSpan.dataset.word = span.dataset.word;
+  answerSpan.dataset.originalId = Array.from(wordBank.children).indexOf(span);
+  
+  // Click in answer area to return it to word bank
+  answerSpan.addEventListener('click', () => {
+    if (answered) return;
+    answerArea.removeChild(answerSpan);
+    span.classList.remove('used');
+    selectedWords = Array.from(answerArea.children).map(child => child.dataset.word);
+  });
+
+  answerArea.appendChild(answerSpan);
+  selectedWords = Array.from(answerArea.children).map(child => child.dataset.word);
+
+  checkSentenceAnswer();
+}
+
+function checkSentenceAnswer() {
+  if (selectedWords.length === currentSentenceCorrectWords.length) {
+    const isCorrect = selectedWords.join('') === currentSentenceCorrectWords.join('');
+    
+    if (isCorrect) {
+      answered = true;
+      correctCount++;
+      updateSentenceScore();
+      
+      answerArea.classList.add('correct-anim');
+      showSentenceFeedback('정답입니다! 완벽해요 🎉', 'correct');
+      btnHint.disabled = true;
+      btnSkip.disabled = true;
+      
+      // Auto move to next after 1.5s
+      setTimeout(nextSentenceQuestion, 1500);
+    } else {
+      // Wrong sequence
+      answerArea.classList.remove('wrong-anim');
+      void answerArea.offsetWidth; // trigger reflow
+      answerArea.classList.add('wrong-anim');
+      showSentenceFeedback('순서가 맞지 않거나 잘못된 단어가 있습니다.', 'wrong');
+    }
+  } else {
+    // Hide feedback if they are still building
+    sentenceFeedbackArea.innerHTML = '';
+  }
+}
+
+function showSentenceFeedback(message, type) {
+  const msg = document.createElement('span');
+  msg.className = `feedback-msg ${type}`;
+  msg.textContent = message;
+  sentenceFeedbackArea.innerHTML = '';
+  sentenceFeedbackArea.appendChild(msg);
+}
+
+function nextSentenceQuestion() {
+  currentSentenceIndex++;
+  if (currentSentenceIndex < sentenceQuestions.length) {
+    showSentenceQuestion();
+  } else {
+    showSentenceResult();
+  }
+}
+
+btnSentenceNext.addEventListener('click', nextSentenceQuestion);
+
+// Hint logic
+btnHint.addEventListener('click', () => {
+  if (answered) return;
+  
+  // 1. Find the first incorrect or missing word index
+  let firstWrongIdx = -1;
+  for (let i = 0; i < currentSentenceCorrectWords.length; i++) {
+    if (i >= selectedWords.length || selectedWords[i] !== currentSentenceCorrectWords[i]) {
+      firstWrongIdx = i;
+      break;
+    }
+  }
+
+  if (firstWrongIdx === -1) return; // already correct but maybe extra words
+
+  // 2. Remove all words in the answer area from firstWrongIdx onwards
+  const answerChildren = Array.from(answerArea.children);
+  for (let i = firstWrongIdx; i < answerChildren.length; i++) {
+    const child = answerChildren[i];
+    // Return to bank
+    const origIdx = child.dataset.originalId;
+    if (origIdx !== undefined && wordBank.children[origIdx]) {
+      wordBank.children[origIdx].classList.remove('used');
+    }
+    answerArea.removeChild(child);
+  }
+
+  // 3. Find the correct word in the word bank and simulate a click
+  const correctWord = currentSentenceCorrectWords[firstWrongIdx];
+  const bankChildren = Array.from(wordBank.children);
+  const targetSpan = bankChildren.find(span => !span.classList.contains('used') && span.dataset.word === correctWord);
+  
+  if (targetSpan) {
+    targetSpan.click();
+    showSentenceFeedback('힌트를 사용했습니다 💡', '');
+  }
+});
+
+// Skip logic
+btnSkip.addEventListener('click', () => {
+  if (answered) return;
+  answered = true;
+  wrongCount++;
+  updateSentenceScore();
+  
+  const q = sentenceQuestions[currentSentenceIndex];
+  
+  // Auto-fill correctly
+  answerArea.innerHTML = '';
+  q.words.forEach(word => {
+    const span = document.createElement('span');
+    span.className = 'word-piece in-answer';
+    span.textContent = word;
+    answerArea.appendChild(span);
+  });
+
+  answerArea.classList.add('wrong-anim');
+  showSentenceFeedback(`정답은: ${q.chinese}`, 'wrong');
+  
+  btnHint.disabled = true;
+  btnSkip.disabled = true;
+  
+  setTimeout(nextSentenceQuestion, 2000);
+});
+
+function showSentenceResult() {
+  sentenceProgressFill.style.width = '100%';
+  sentenceCard.style.display = 'none';
+  document.getElementById('sentence-progress-wrapper').style.display = 'none';
+  resultScreen.style.display = '';
+
+  const total = sentenceQuestions.length;
+  const pct = Math.round((correctCount / total) * 100);
+
+  finalCorrect.textContent = correctCount;
+  finalWrong.textContent = wrongCount;
+  finalPercent.textContent = pct + '%';
+
+  const icon = resultScreen.querySelector('.result-icon');
+  if (pct === 100) icon.textContent = '🏆';
+  else if (pct >= 70) icon.textContent = '🎉';
+  else if (pct >= 40) icon.textContent = '💪';
+  else icon.textContent = '📖';
+}
 
 // ========================================
 // Show result screen

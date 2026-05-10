@@ -19,9 +19,19 @@
         <span class="start-hanzi-bg">漢</span>
       </div>
       <h1 class="start-title">漢字 학습</h1>
-      <p class="start-subtitle">HSK 한자 퀴즈 게임</p>
-      <button class="btn-start" id="btn-start">시작</button>
-      <p class="start-hint">한자의 뜻을 맞혀보세요!</p>
+      <p class="start-subtitle">HSK 중국어 학습 게임</p>
+      
+      <div class="mode-selection">
+        <button class="btn-mode" id="btn-mode-word">
+          <span class="mode-icon">🔤</span>
+          <span class="mode-text">단어 맞추기</span>
+        </button>
+        <button class="btn-mode" id="btn-mode-sentence">
+          <span class="mode-icon">✍️</span>
+          <span class="mode-text">문장 작문하기</span>
+        </button>
+      </div>
+      <p class="start-hint">원하는 학습 모드를 선택하세요!</p>
     </div>
 
     <!-- ===== Difficulty Selection Screen ===== -->
@@ -161,6 +171,52 @@
           <button class="btn-home" id="btn-home">처음으로 🏠</button>
         </div>
       </div>
+    </div>
+
+    <!-- ===== Sentence Game Screen ===== -->
+    <div id="sentence-screen" style="display:none;">
+      <!-- Header -->
+      <header id="sentence-header">
+        <h1>문장 작문</h1>
+        <p class="subtitle" id="sentence-level-subtitle">HSK 1급 작문</p>
+      </header>
+
+      <!-- Progress Bar -->
+      <div class="progress-wrapper" id="sentence-progress-wrapper">
+        <div class="progress-text">
+          <span id="sentence-progress-current">1</span> / <span id="sentence-progress-total">10</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="sentence-progress-fill"></div>
+        </div>
+        <div class="score-display">
+          <span class="score-correct" id="sentence-score-correct">✓ 0</span>
+          <span class="score-wrong" id="sentence-score-wrong">✗ 0</span>
+        </div>
+      </div>
+
+      <!-- Sentence Card -->
+      <main class="sentence-card" id="sentence-card">
+        <div class="korean-prompt" id="korean-prompt">나는 내일 베이징에 갑니다.</div>
+        
+        <div class="answer-area" id="answer-area">
+          <!-- Clicked words go here -->
+        </div>
+
+        <div class="word-bank" id="word-bank">
+          <!-- Word cards dynamically inserted here -->
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-action btn-hint" id="btn-hint">힌트 💡</button>
+          <button class="btn-action btn-skip" id="btn-skip">넘어가기 ⏭️</button>
+        </div>
+
+        <div class="feedback-area" id="sentence-feedback-area">
+          <!-- Feedback message -->
+        </div>
+        <button class="btn-next" id="btn-sentence-next" style="display:none;">다음 문제 →</button>
+      </main>
     </div>
 
     <!-- Feedback Section -->
