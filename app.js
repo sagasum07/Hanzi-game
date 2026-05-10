@@ -770,6 +770,7 @@ function showScreen(screenName) {
   countScreen.style.display = 'none';
   quizScreen.style.display = 'none';
   sentenceScreen.style.display = 'none';
+  resultScreen.style.display = 'none';
 
   if (screenName === 'start') {
     startScreen.style.display = '';
@@ -799,6 +800,49 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// ========================================
+// Utility: Find Pinyin for Sentence Word
+// ========================================
+function getPinyinForWord(wordText, level) {
+  if (level > 3) return '';
+  const cleanWord = wordText.replace(/[，。？！、]/g, '');
+  
+  for (let l = 1; l <= 6; l++) {
+    if (!wordsByLevel[l]) continue;
+    const found = wordsByLevel[l].find(w => w.hanzi === cleanWord);
+    if (found) return found.pinyin;
+  }
+  
+  const common = {
+    '的': 'de', '了': 'le', '是': 'shì', '我': 'wǒ', '你': 'nǐ', '他': 'tā', '她': 'tā',
+    '在': 'zài', '有': 'yǒu', '和': 'hé', '就': 'jiù', '不': 'bù', '人': 'rén', '都': 'dōu',
+    '一': 'yī', '一个': 'yí ge', '很': 'hěn', '之': 'zhī', '也': 'yě', '还': 'hái', '没': 'méi'
+  };
+  return common[cleanWord] || '';
+}
+
+function createSentenceWordSpan(wordText) {
+  const span = document.createElement('span');
+  span.className = 'word-piece';
+  span.dataset.word = wordText;
+  
+  const charDiv = document.createElement('div');
+  charDiv.className = 'word-char';
+  charDiv.textContent = wordText;
+  span.appendChild(charDiv);
+  
+  if (currentLevel <= 3) {
+    const pinyin = getPinyinForWord(wordText, currentLevel);
+    if (pinyin) {
+      const pinyinDiv = document.createElement('div');
+      pinyinDiv.className = 'word-pinyin';
+      pinyinDiv.textContent = pinyin;
+      span.appendChild(pinyinDiv);
+    }
+  }
+  return span;
 }
 
 // ========================================
@@ -1165,10 +1209,7 @@ function showSentenceQuestion() {
   const allCards = shuffle([...q.words, ...(q.traps || [])]);
   
   allCards.forEach((word) => {
-    const span = document.createElement('span');
-    span.className = 'word-piece';
-    span.textContent = word;
-    span.dataset.word = word;
+    const span = createSentenceWordSpan(word);
     
     span.addEventListener('click', () => handleWordBankClick(span));
     wordBank.appendChild(span);
@@ -1187,10 +1228,8 @@ function handleWordBankClick(span) {
   span.classList.add('used');
 
   // Add to answer area
-  const answerSpan = document.createElement('span');
+  const answerSpan = createSentenceWordSpan(span.dataset.word);
   answerSpan.className = 'word-piece in-answer';
-  answerSpan.textContent = span.dataset.word;
-  answerSpan.dataset.word = span.dataset.word;
   answerSpan.dataset.originalId = Array.from(wordBank.children).indexOf(span);
   
   // Click in answer area to return it to word bank
@@ -1305,9 +1344,8 @@ btnSkip.addEventListener('click', () => {
   // Auto-fill correctly
   answerArea.innerHTML = '';
   q.words.forEach(word => {
-    const span = document.createElement('span');
+    const span = createSentenceWordSpan(word);
     span.className = 'word-piece in-answer';
-    span.textContent = word;
     answerArea.appendChild(span);
   });
 
