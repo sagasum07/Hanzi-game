@@ -806,7 +806,7 @@ function shuffle(arr) {
 // Utility: Find Pinyin for Sentence Word
 // ========================================
 function getPinyinForWord(wordText, level) {
-  if (level > 3) return '';
+  if (level > 4) return '';
   const cleanWord = wordText.replace(/[，。？！、]/g, '');
   
   for (let l = 1; l <= 6; l++) {
@@ -833,7 +833,7 @@ function createSentenceWordSpan(wordText) {
   charDiv.textContent = wordText;
   span.appendChild(charDiv);
   
-  if (currentLevel <= 3) {
+  if (currentLevel <= 4) {
     const pinyin = getPinyinForWord(wordText, currentLevel);
     if (pinyin) {
       const pinyinDiv = document.createElement('div');
