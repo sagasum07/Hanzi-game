@@ -805,8 +805,7 @@ function shuffle(arr) {
 // ========================================
 // Utility: Find Pinyin for Sentence Word
 // ========================================
-function getPinyinForWord(wordText, level) {
-  if (level > 4) return '';
+function getPinyinForWord(wordText) {
   const cleanWord = wordText.replace(/[，。？！、]/g, '');
   
   for (let l = 1; l <= 6; l++) {
@@ -833,14 +832,12 @@ function createSentenceWordSpan(wordText) {
   charDiv.textContent = wordText;
   span.appendChild(charDiv);
   
-  if (currentLevel <= 4) {
-    const pinyin = getPinyinForWord(wordText, currentLevel);
-    if (pinyin) {
-      const pinyinDiv = document.createElement('div');
-      pinyinDiv.className = 'word-pinyin';
-      pinyinDiv.textContent = pinyin;
-      span.appendChild(pinyinDiv);
-    }
+  const pinyin = getPinyinForWord(wordText);
+  if (pinyin) {
+    const pinyinDiv = document.createElement('div');
+    pinyinDiv.className = 'word-pinyin';
+    pinyinDiv.textContent = pinyin;
+    span.appendChild(pinyinDiv);
   }
   return span;
 }
@@ -1260,8 +1257,13 @@ function checkSentenceAnswer() {
       btnHint.disabled = true;
       btnSkip.disabled = true;
       
-      // Auto move to next after 1.5s
-      setTimeout(nextSentenceQuestion, 1500);
+      // Show next button for manual advance
+      btnSentenceNext.style.display = 'inline-block';
+      if (currentSentenceIndex === sentenceQuestions.length - 1) {
+        btnSentenceNext.textContent = '결과 보기 🏆';
+      } else {
+        btnSentenceNext.textContent = '다음 문제 →';
+      }
     } else {
       // Wrong sequence
       answerArea.classList.remove('wrong-anim');
@@ -1355,7 +1357,13 @@ btnSkip.addEventListener('click', () => {
   btnHint.disabled = true;
   btnSkip.disabled = true;
   
-  setTimeout(nextSentenceQuestion, 2000);
+  // Show next button for manual advance
+  btnSentenceNext.style.display = 'inline-block';
+  if (currentSentenceIndex === sentenceQuestions.length - 1) {
+    btnSentenceNext.textContent = '결과 보기 🏆';
+  } else {
+    btnSentenceNext.textContent = '다음 문제 →';
+  }
 });
 
 function showSentenceResult() {
