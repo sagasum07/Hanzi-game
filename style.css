@@ -1139,6 +1139,12 @@ header h1 {
 .word-piece.in-answer {
   background: var(--accent);
   border-color: var(--accent);
+  cursor: grab;
+  transition: transform 0.2s ease;
+}
+
+.word-piece.in-answer:active {
+  cursor: grabbing;
 }
 
 .word-piece.in-answer .word-char,

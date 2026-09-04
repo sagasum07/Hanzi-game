@@ -815,9 +815,88 @@ function getPinyinForWord(wordText) {
   }
   
   const common = {
+    // 기본 허사/조사
     '的': 'de', '了': 'le', '是': 'shì', '我': 'wǒ', '你': 'nǐ', '他': 'tā', '她': 'tā',
     '在': 'zài', '有': 'yǒu', '和': 'hé', '就': 'jiù', '不': 'bù', '人': 'rén', '都': 'dōu',
-    '一': 'yī', '一个': 'yí ge', '很': 'hěn', '之': 'zhī', '也': 'yě', '还': 'hái', '没': 'méi'
+    '一': 'yī', '一个': 'yí ge', '很': 'hěn', '之': 'zhī', '也': 'yě', '还': 'hái', '没': 'méi',
+    '要': 'yào', '对': 'duì', '这': 'zhè', '那': 'nà', '去': 'qù', '来': 'lái', '给': 'gěi',
+    '为': 'wèi', '以': 'yǐ', '更': 'gèng', '最': 'zuì', '太': 'tài', '多': 'duō', '好': 'hǎo',
+    '会': 'huì', '能': 'néng', '说': 'shuō', '看': 'kàn', '吃': 'chī', '笑': 'xiào',
+    // HSK1 문장 단어
+    '明天': 'míng tiān', '北京': 'Běi jīng', '朋友': 'péng you', '谁': 'shéi', '书': 'shū',
+    '汉语': 'hàn yǔ', '现在': 'xiàn zài', '几点': 'jǐ diǎn', '高兴': 'gāo xìng',
+    '认识': 'rèn shi', '爸爸': 'bà ba', '医生': 'yī shēng', '昨天': 'zuó tiān',
+    '下雨': 'xià yǔ', '喜欢': 'xǐ huan', '苹果': 'píng guǒ', '图书馆': 'tú shū guǎn',
+    // HSK2 문장 단어
+    '妹妹': 'mèi mei', '唱歌': 'chàng gē', '每天': 'měi tiān', '早上': 'zǎo shang',
+    '起床': 'qǐ chuáng', '件': 'jiàn', '衣服': 'yī fu', '便宜': 'pián yi',
+    '已经': 'yǐ jīng', '吃完': 'chī wán', '饭': 'fàn', '门': 'mén', '外': 'wài',
+    '站着': 'zhàn zhe', '为什么': 'wèi shén me', '房间': 'fáng jiān', '里': 'lǐ',
+    '黑': 'hēi', '非常': 'fēi cháng', '感谢': 'gǎn xiè', '帮助': 'bāng zhù',
+    '我们': 'wǒ men', '一起': 'yì qǐ', '打篮球': 'dǎ lán qiú', '考试': 'kǎo shì',
+    '考得': 'kǎo de',
+    // HSK3 문장 단어
+    '会议': 'huì yì', '刚才': 'gāng cái', '结束': 'jié shù', '这个': 'zhè ge',
+    '问题': 'wèn tí', '解决': 'jiě jué', '起来': 'qǐ lái', '比较': 'bǐ jiào',
+    '简单': 'jiǎn dān', '必须': 'bì xū', '上海': 'Shàng hǎi', '出差': 'chū chāi',
+    '保持': 'bǎo chí', '家里': 'jiā lǐ', '环境': 'huán jìng', '干净': 'gān jìng',
+    '觉得': 'jué de', '双': 'shuāng', '鞋': 'xié', '合适': 'hé shì',
+    '感冒': 'gǎn mào', '了，': 'le,', '所以': 'suǒ yǐ', '医院': 'yī yuàn',
+    '春天': 'chūn tiān', '天气': 'tiān qì', '变': 'biàn', '暖和': 'nuǎn huo',
+    '他们': 'tā men', '说着': 'shuō zhe', '坐地铁': 'zuò dì tiě', '下班': 'xià bān',
+    '愿意': 'yuàn yì', '突然': 'tū rán', '下起': 'xià qǐ', '雨': 'yǔ',
+    // HSK4 문장 단어
+    '失败': 'shī bài', '成功': 'chéng gōng', '母': 'mǔ', '大家': 'dà jiā',
+    '积极': 'jī jí', '参加': 'cān jiā', '这次': 'zhè cì', '活动': 'huó dòng',
+    '出色': 'chū sè', '钢琴': 'gāng qín', '弹奏': 'tán zòu', '水平': 'shuǐ píng',
+    '保护': 'bǎo hù', '自然': 'zì rán', '共同': 'gòng tóng', '责任': 'zé rèn',
+    '认为': 'rèn wéi', '部': 'bù', '电影': 'diàn yǐng', '挺': 'tǐng', '感人': 'gǎn rén',
+    '按': 'àn', '计划': 'jì huà', '进行': 'jìn xíng', '不会': 'bú huì',
+    '一位': 'yí wèi', '经验': 'jīng yàn', '丰富': 'fēng fù', '律师': 'lǜ shī',
+    '现代': 'xiàn dài', '社会，': 'shè huì,', '网络': 'wǎng luò', '必不可少': 'bì bù kě shǎo',
+    '为了': 'wèi le', '解除': 'jiě chú', '误会，': 'wù huì,', '沟通': 'gōu tōng',
+    '重要': 'zhòng yào', '幽默': 'yōu mò', '性格': 'xìng gé', '活跃': 'huó yuè',
+    '气氛': 'qì fēn',
+    // HSK5 문장 단어
+    '人生': 'rén shēng', '无数次': 'wú shù cì', '选择': 'xuǎn zé', '延续': 'yán xù',
+    '环境污染': 'huán jìng wū rǎn', '日益': 'rì yì', '严重': 'yán zhòng',
+    '企业': 'qǐ yè', '需要': 'xū yào', '通过': 'tōng guò', '创新': 'chuàng xīn',
+    '增强': 'zēng qiáng', '竞争力': 'jìng zhēng lì', '凭借': 'píng jiè',
+    '领导力': 'lǐng dǎo lì', '带领': 'dài lǐng', '团队': 'tuán duì',
+    '走向': 'zǒu xiàng', '胜利': 'shèng lì', '保存': 'bǎo cún',
+    '传统文化': 'chuán tǒng wén huà', '一件': 'yí jiàn', '有价值': 'yǒu jià zhí',
+    '事情': 'shì qing', '健康': 'jiàn kāng', '饮食': 'yǐn shí', '习惯': 'xí guàn',
+    '长寿': 'cháng shòu', '秘诀': 'mì jué', '过度': 'guò dù', '压力': 'yā lì',
+    '心理健康': 'xīn lǐ jiàn kāng', '有害': 'yǒu hài', '无论': 'wú lùn',
+    '遇到': 'yù dào', '什么': 'shén me', '困难，': 'kùn nan,', '决不': 'jué bù',
+    '放弃': 'fàng qì', '经济': 'jīng jì', '发展': 'fā zhǎn', '环境保护': 'huán jìng bǎo hù',
+    '取得': 'qǔ dé', '平衡': 'píng héng', '项目': 'xiàng mù', '成败': 'chéng bài',
+    '取决于': 'qǔ jué yú', '合作': 'hé zuò',
+    // HSK6 문장 단어
+    '人工智能': 'rén gōng zhì néng', '技术': 'jì shù', '飞跃': 'fēi yuè',
+    '人类社会': 'rén lèi shè huì', '带来': 'dài lái', '革命性': 'gé mìng xìng',
+    '变化': 'biàn huà', '遏制': 'è zhì', '全球': 'quán qiú', '变暖，': 'biàn nuǎn,',
+    '范围内': 'fàn wéi nèi', '减排': 'jiǎn pái', '努力': 'nǔ lì',
+    '迫在眉睫': 'pò zài méi jié', '逆境': 'nì jìng', '中，': 'zhōng,',
+    '不屈不挠': 'bù qū bù náo', '意志': 'yì zhì', '贯彻': 'guàn chè',
+    '自己': 'zì jǐ', '信念': 'xìn niàn', '资本主义': 'zī běn zhǔ yì',
+    '社会': 'shè huì', '财富': 'cái fù', '两极分化': 'liǎng jí fēn huà',
+    '现象': 'xiàn xiàng', '加剧': 'jiā jù', '尊重': 'zūn zhòng',
+    '文化': 'wén huà', '多样性': 'duō yàng xìng', '全球化': 'quán qiú huà',
+    '时代': 'shí dài', '美德': 'měi dé', '著名': 'zhù míng', '学者': 'xué zhě',
+    '学术': 'xué shù', '争论': 'zhēng lùn', '赋予': 'fù yǔ', '新': 'xīn',
+    '灵感': 'líng gǎn', '政府': 'zhèng fǔ', '制定': 'zhì dìng',
+    '根本性': 'gēn běn xìng', '对策': 'duì cè', '应对': 'yìng duì',
+    '少子': 'shǎo zǐ', '老龄化': 'lǎo líng huà', '艺术作品': 'yì shù zuò pǐn',
+    '价值': 'jià zhí', '因': 'yīn', '脉络': 'mài luò', '欣赏者': 'xīn shǎng zhě',
+    '主观': 'zhǔ guān', '诠释': 'quán shì', '而异': 'ér yì',
+    '社会责任': 'shè huì zé rèn', '超越': 'chāo yuè', '单纯': 'dān chún',
+    '创造': 'chuàng zào', '利润，': 'lì rùn,', '在于': 'zài yú',
+    '追求': 'zhuī qiú', '可持续': 'kě chí xù', '经营': 'jīng yíng',
+    '太空探索': 'tài kōng tàn suǒ', '满足': 'mǎn zú', '人类': 'rén lèi',
+    '智力': 'zhì lì', '好奇心，': 'hào qí xīn,', '并': 'bìng',
+    '拓宽': 'tuò kuān', '未来': 'wèi lái', '生存': 'shēng cún',
+    '可能性': 'kě néng xìng'
   };
   return common[cleanWord] || '';
 }
@@ -1201,9 +1280,9 @@ function showSentenceQuestion() {
   answerArea.innerHTML = '';
   answerArea.className = 'answer-area'; // reset animations
 
-  // Render word bank
+  // Render word bank (정답 단어만, 함정 단어 제외)
   wordBank.innerHTML = '';
-  const allCards = shuffle([...q.words, ...(q.traps || [])]);
+  const allCards = shuffle([...q.words]);
   
   allCards.forEach((word) => {
     const span = createSentenceWordSpan(word);
@@ -1229,9 +1308,21 @@ function handleWordBankClick(span) {
   answerSpan.className = 'word-piece in-answer';
   answerSpan.dataset.originalId = Array.from(wordBank.children).indexOf(span);
   
+  // Drag-and-drop support
+  answerSpan.draggable = true;
+  answerSpan.addEventListener('dragstart', handleDragStart);
+  answerSpan.addEventListener('dragover', handleDragOver);
+  answerSpan.addEventListener('drop', handleDrop);
+  answerSpan.addEventListener('dragend', handleDragEnd);
+  
+  // Touch drag support
+  answerSpan.addEventListener('touchstart', handleTouchStart, { passive: false });
+  answerSpan.addEventListener('touchmove', handleTouchMove, { passive: false });
+  answerSpan.addEventListener('touchend', handleTouchEnd);
+  
   // Click in answer area to return it to word bank
-  answerSpan.addEventListener('click', () => {
-    if (answered) return;
+  answerSpan.addEventListener('click', (e) => {
+    if (answered || answerSpan._dragged) return;
     answerArea.removeChild(answerSpan);
     span.classList.remove('used');
     selectedWords = Array.from(answerArea.children).map(child => child.dataset.word);
@@ -1241,6 +1332,116 @@ function handleWordBankClick(span) {
   selectedWords = Array.from(answerArea.children).map(child => child.dataset.word);
 
   checkSentenceAnswer();
+}
+
+// ========================================
+// Drag & Drop for Answer Area
+// ========================================
+let draggedEl = null;
+
+function handleDragStart(e) {
+  if (answered) return;
+  draggedEl = this;
+  this.style.opacity = '0.4';
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  this.style.borderColor = 'var(--accent)';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  this.style.borderColor = '';
+  if (draggedEl === this || answered) return;
+  
+  const allItems = Array.from(answerArea.children);
+  const fromIdx = allItems.indexOf(draggedEl);
+  const toIdx = allItems.indexOf(this);
+  
+  if (fromIdx < toIdx) {
+    answerArea.insertBefore(draggedEl, this.nextSibling);
+  } else {
+    answerArea.insertBefore(draggedEl, this);
+  }
+  
+  selectedWords = Array.from(answerArea.children).map(child => child.dataset.word);
+  checkSentenceAnswer();
+}
+
+function handleDragEnd() {
+  this.style.opacity = '1';
+  Array.from(answerArea.children).forEach(el => el.style.borderColor = '');
+  draggedEl = null;
+}
+
+// ========================================
+// Touch Drag for Mobile
+// ========================================
+let touchDragEl = null;
+let touchClone = null;
+let touchStartX = 0;
+let touchStartY = 0;
+
+function handleTouchStart(e) {
+  if (answered) return;
+  this._dragged = false;
+  touchDragEl = this;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchMove(e) {
+  if (!touchDragEl || answered) return;
+  const dx = Math.abs(e.touches[0].clientX - touchStartX);
+  const dy = Math.abs(e.touches[0].clientY - touchStartY);
+  if (dx > 5 || dy > 5) {
+    e.preventDefault();
+    touchDragEl._dragged = true;
+    
+    if (!touchClone) {
+      touchClone = touchDragEl.cloneNode(true);
+      touchClone.style.position = 'fixed';
+      touchClone.style.pointerEvents = 'none';
+      touchClone.style.opacity = '0.7';
+      touchClone.style.zIndex = '1000';
+      touchClone.style.transform = 'scale(1.1)';
+      document.body.appendChild(touchClone);
+      touchDragEl.style.opacity = '0.3';
+    }
+    touchClone.style.left = (e.touches[0].clientX - touchClone.offsetWidth / 2) + 'px';
+    touchClone.style.top = (e.touches[0].clientY - touchClone.offsetHeight / 2) + 'px';
+  }
+}
+
+function handleTouchEnd(e) {
+  if (!touchDragEl) return;
+  
+  if (touchClone) {
+    document.body.removeChild(touchClone);
+    touchClone = null;
+    touchDragEl.style.opacity = '1';
+    
+    const touch = e.changedTouches[0];
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetPiece = dropTarget?.closest('.in-answer');
+    
+    if (targetPiece && targetPiece !== touchDragEl && answerArea.contains(targetPiece)) {
+      const allItems = Array.from(answerArea.children);
+      const fromIdx = allItems.indexOf(touchDragEl);
+      const toIdx = allItems.indexOf(targetPiece);
+      if (fromIdx < toIdx) {
+        answerArea.insertBefore(touchDragEl, targetPiece.nextSibling);
+      } else {
+        answerArea.insertBefore(touchDragEl, targetPiece);
+      }
+      selectedWords = Array.from(answerArea.children).map(child => child.dataset.word);
+      checkSentenceAnswer();
+    }
+  }
+  touchDragEl = null;
 }
 
 function checkSentenceAnswer() {
