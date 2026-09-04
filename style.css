@@ -499,7 +499,35 @@ header {
   padding: 12px 0 4px;
 }
 
-header h1 {
+.game-header {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-top-home {
+  position: absolute;
+  left: 0;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-top-home:hover {
+  background: var(--accent-light);
+  transform: scale(1.1);
+}
+
+header h1, .header-titles h1 {
   font-family: 'Noto Serif SC', 'Noto Sans KR', serif;
   font-size: 2rem;
   font-weight: 900;

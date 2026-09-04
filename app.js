@@ -735,6 +735,10 @@ const btnSentenceNext = document.getElementById('btn-sentence-next');
 const sentenceFeedbackArea = document.getElementById('sentence-feedback-area');
 const sentenceCard = document.getElementById('sentence-card');
 
+// In-Game Home Buttons
+const btnQuizHome = document.getElementById('btn-quiz-home');
+const btnSentenceHome = document.getElementById('btn-sentence-home');
+
 const hanziChar = document.getElementById('hanzi-char');
 const hanziPinyin = document.getElementById('hanzi-pinyin');
 const btnSpeak = document.getElementById('btn-speak');
@@ -898,7 +902,7 @@ function getPinyinForWord(wordText) {
     '拓宽': 'tuò kuān', '未来': 'wèi lái', '生存': 'shēng cún',
     '可能性': 'kě néng xìng'
   };
-  return common[cleanWord] || '';
+  return common[wordText] || common[cleanWord] || '';
 }
 
 function createSentenceWordSpan(wordText) {
@@ -1027,6 +1031,18 @@ btnModeSentence.addEventListener('click', () => {
 btnBackToStart.addEventListener('click', () => {
   showScreen('start');
 });
+
+if (btnQuizHome) {
+  btnQuizHome.addEventListener('click', () => {
+    showScreen('start');
+  });
+}
+
+if (btnSentenceHome) {
+  btnSentenceHome.addEventListener('click', () => {
+    showScreen('start');
+  });
+}
 
 // ========================================
 // Difficulty Selection → Count Screen
