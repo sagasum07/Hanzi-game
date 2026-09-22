@@ -915,6 +915,77 @@ header h1, .header-titles h1 {
   justify-content: center;
 }
 
+/* Retry Wrong Questions Prompt */
+.retry-prompt {
+  margin: 20px 0 8px;
+  padding: 20px;
+  background: var(--wrong-bg);
+  border: 2px solid var(--wrong);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  animation: fadeInUp 0.4s ease;
+}
+
+.retry-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+.retry-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-retry-yes {
+  background: linear-gradient(135deg, var(--correct), #2E9059);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 32px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 4px 12px rgba(61, 170, 109, 0.25);
+}
+
+.btn-retry-yes:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(61, 170, 109, 0.35);
+}
+
+.btn-retry-no {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 32px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-retry-no:hover {
+  background: var(--border);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .btn-restart {
   background: linear-gradient(135deg, var(--accent), #F4A261);
   color: #fff;

@@ -170,7 +170,16 @@
           <span class="stat-label">정답률</span>
         </div>
       </div>
-      <div class="result-buttons">
+      <!-- Retry Wrong Questions Prompt -->
+      <div class="retry-prompt" id="retry-prompt" style="display:none;">
+        <p class="retry-text">틀린 문제를 다시 풀어보시겠습니까?</p>
+        <div class="retry-buttons">
+          <button class="btn-retry-yes" id="btn-retry-yes">예 ✅</button>
+          <button class="btn-retry-no" id="btn-retry-no">아니오 ❌</button>
+        </div>
+      </div>
+
+      <div class="result-buttons" id="result-buttons-wrap">
         <button class="btn-restart" id="btn-restart">다시 도전하기 🔄</button>
         <button class="btn-home" id="btn-home">처음으로 🏠</button>
       </div>

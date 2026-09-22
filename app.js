@@ -708,17 +708,25 @@ function startQuiz(level) {
   }
 }
 
-function startWordQuiz(level) {
+let wrongQuestions = [];
+let wrongSentenceQuestions = [];
+
+function startWordQuiz(level, retryQuestions) {
   currentIndex = 0;
   correctCount = 0;
   wrongCount = 0;
   answered = false;
+  wrongQuestions = [];
 
   // Update subtitle
   levelSubtitle.textContent = `HSK ${level}급 한자 퀴즈`;
 
-  // Generate quiz
-  shuffledQuiz = generateQuiz(level, quizCount);
+  // Generate quiz or use retry questions
+  if (retryQuestions && retryQuestions.length > 0) {
+    shuffledQuiz = retryQuestions;
+  } else {
+    shuffledQuiz = generateQuiz(level, quizCount);
+  }
   progressTotal.textContent = shuffledQuiz.length;
 
   // Show quiz screen
@@ -784,6 +792,7 @@ function handleAnswer(selectedBtn, selected, answer) {
     correctCount++;
   } else {
     wrongCount++;
+    wrongQuestions.push(shuffledQuiz[currentIndex]);
   }
   updateScore();
 
@@ -843,17 +852,22 @@ btnNext.addEventListener('click', () => {
 // ========================================
 // Sentence Game Logic
 // ========================================
-function startSentenceQuiz(level) {
+function startSentenceQuiz(level, retryQuestions) {
   currentSentenceIndex = 0;
   correctCount = 0;
   wrongCount = 0;
   answered = false;
+  wrongSentenceQuestions = [];
 
   sentenceLevelSubtitle.textContent = `HSK ${level}급 작문`;
 
-  // Get sentences for this level
-  const sentences = sentencesByLevel[level] || [];
-  sentenceQuestions = shuffle(sentences).slice(0, quizCount);
+  // Get sentences for this level or use retry questions
+  if (retryQuestions && retryQuestions.length > 0) {
+    sentenceQuestions = retryQuestions;
+  } else {
+    const sentences = sentencesByLevel[level] || [];
+    sentenceQuestions = shuffle(sentences).slice(0, quizCount);
+  }
   sentenceProgressTotal.textContent = sentenceQuestions.length;
 
   showScreen('sentence');
@@ -1147,6 +1161,7 @@ btnSkip.addEventListener('click', () => {
   if (answered) return;
   answered = true;
   wrongCount++;
+  wrongSentenceQuestions.push(sentenceQuestions[currentSentenceIndex]);
   updateSentenceScore();
   
   const q = sentenceQuestions[currentSentenceIndex];
@@ -1192,6 +1207,17 @@ function showSentenceResult() {
   else if (pct >= 70) icon.textContent = '🎉';
   else if (pct >= 40) icon.textContent = '💪';
   else icon.textContent = '📖';
+
+  // Show/hide retry prompt
+  const retryPrompt = document.getElementById('retry-prompt');
+  const resultButtonsWrap = document.getElementById('result-buttons-wrap');
+  if (wrongSentenceQuestions.length > 0) {
+    retryPrompt.style.display = '';
+    resultButtonsWrap.style.display = 'none';
+  } else {
+    retryPrompt.style.display = 'none';
+    resultButtonsWrap.style.display = '';
+  }
 }
 
 // ========================================
@@ -1223,6 +1249,17 @@ function showResult() {
   } else {
     icon.textContent = '📖';
   }
+
+  // Show/hide retry prompt
+  const retryPrompt = document.getElementById('retry-prompt');
+  const resultButtonsWrap = document.getElementById('result-buttons-wrap');
+  if (wrongQuestions.length > 0) {
+    retryPrompt.style.display = '';
+    resultButtonsWrap.style.display = 'none';
+  } else {
+    retryPrompt.style.display = 'none';
+    resultButtonsWrap.style.display = '';
+  }
 }
 
 // ========================================
@@ -1237,6 +1274,25 @@ btnRestart.addEventListener('click', () => {
 // ========================================
 btnHome.addEventListener('click', () => {
   showScreen('start');
+});
+
+// ========================================
+// Retry Wrong Questions
+// ========================================
+document.getElementById('btn-retry-yes').addEventListener('click', () => {
+  if (currentMode === 'word') {
+    const retryList = [...wrongQuestions];
+    startWordQuiz(currentLevel, retryList);
+  } else {
+    const retryList = [...wrongSentenceQuestions];
+    startSentenceQuiz(currentLevel, retryList);
+  }
+});
+
+document.getElementById('btn-retry-no').addEventListener('click', () => {
+  // Hide retry prompt, show normal result buttons
+  document.getElementById('retry-prompt').style.display = 'none';
+  document.getElementById('result-buttons-wrap').style.display = '';
 });
 
 // ========================================

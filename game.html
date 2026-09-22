@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도트 게임 - 캐릭터 이동</title>
+    <link rel="stylesheet" href="game.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="title-screen">
+            <h1 id="game-title">독백</h1>
+            
+            <div id="interactive-jar">
+                <canvas id="jar-lid"></canvas>
+                <div id="jar-text">게임 시작</div>
+                <canvas id="jar-body"></canvas>
+            </div>
+
+            <button id="btn-exit" class="bottom-right-btn">종료하기</button>
+        </div>
+        <div id="score-board" style="display: none;">
+            <span>⭐ <span id="score">0</span></span>
+            <span>💰 <span id="coins">0</span></span>
+        </div>
+        <canvas id="gameCanvas" width="1024" height="768"></canvas>
+        <div id="controls-hint" style="display: none;">방향키 또는 WASD 로 이동</div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
