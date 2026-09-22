@@ -195,22 +195,10 @@ body {
   border: none;
 }
 
-.btn-google {
-  background: #ffffff;
-  color: #3c4043;
-  border: 1px solid #dadce0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.btn-google:hover {
-  background: #f8f9fa;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.login-icon {
-  font-size: 1.2rem;
-  font-weight: 900;
-  color: #4285F4;
+.google-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .btn-guest {

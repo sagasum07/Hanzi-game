@@ -297,7 +297,6 @@ let selectedWords = [];
 // DOM Elements
 // ========================================
 const loginScreen = document.getElementById('login-screen');
-const btnLoginGoogle = document.getElementById('btn-login-google');
 const btnLoginGuest = document.getElementById('btn-login-guest');
 const welcomeMessage = document.getElementById('welcome-message');
 
@@ -1365,15 +1364,36 @@ function checkLogin() {
   }
 }
 
-btnLoginGoogle.addEventListener('click', () => {
-  // 실제 구글 로그인을 모방한 닉네임 입력 (Mock UI)
-  const username = prompt('구글 계정과 연동할 닉네임을 입력해주세요.');
-  if (username && username.trim().length > 0) {
-    localStorage.setItem('hanzi_username', username.trim());
-    localStorage.removeItem('hanzi_guest');
-    checkLogin();
-  }
-});
+// 구글 JWT 토큰 디코딩 함수
+function decodeJwtResponse(token) {
+  let base64Url = token.split('.')[1];
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  return JSON.parse(jsonPayload);
+}
+
+// 구글 로그인 성공 콜백
+window.handleCredentialResponse = function(response) {
+  const responsePayload = decodeJwtResponse(response.credential);
+  const username = responsePayload.name; // 구글 계정 이름
+  
+  localStorage.setItem('hanzi_username', username);
+  localStorage.removeItem('hanzi_guest');
+  checkLogin();
+};
+
+window.onload = function () {
+  google.accounts.id.initialize({
+    client_id: "YOUR_GOOGLE_CLIENT_ID_HERE",
+    callback: handleCredentialResponse
+  });
+  google.accounts.id.renderButton(
+    document.getElementById("google-login-btn"),
+    { theme: "outline", size: "large", width: 280 }
+  );
+};
 
 btnLoginGuest.addEventListener('click', () => {
   localStorage.setItem('hanzi_guest', 'true');
