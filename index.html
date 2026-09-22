@@ -13,8 +13,27 @@
 <body>
   <div class="app-container">
 
+    <!-- ===== Login Screen ===== -->
+    <div class="login-screen" id="login-screen">
+      <div class="login-decoration">
+        <span class="login-hanzi-bg">迎</span>
+      </div>
+      <h1 class="login-title">환영합니다!</h1>
+      <p class="login-subtitle">한자 학습 게임에 오신 것을 환영합니다.</p>
+      
+      <div class="login-buttons">
+        <button class="btn-login btn-google" id="btn-login-google">
+          <span class="login-icon">G</span>
+          구글 로그인
+        </button>
+        <button class="btn-login btn-guest" id="btn-login-guest">
+          게스트로 시작하기
+        </button>
+      </div>
+    </div>
+
     <!-- ===== Start Screen ===== -->
-    <div class="start-screen" id="start-screen">
+    <div class="start-screen" id="start-screen" style="display:none;">
       <div class="start-decoration">
         <span class="start-hanzi-bg">漢</span>
       </div>
@@ -31,6 +50,7 @@
           <span class="mode-text">문장 작문하기</span>
         </button>
       </div>
+      <p class="welcome-message" id="welcome-message"></p>
       <p class="start-hint">원하는 학습 모드를 선택하세요!</p>
     </div>
 

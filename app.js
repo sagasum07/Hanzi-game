@@ -296,6 +296,11 @@ let selectedWords = [];
 // ========================================
 // DOM Elements
 // ========================================
+const loginScreen = document.getElementById('login-screen');
+const btnLoginGoogle = document.getElementById('btn-login-google');
+const btnLoginGuest = document.getElementById('btn-login-guest');
+const welcomeMessage = document.getElementById('welcome-message');
+
 const startScreen = document.getElementById('start-screen');
 const difficultyScreen = document.getElementById('difficulty-screen');
 const countScreen = document.getElementById('count-screen');
@@ -360,6 +365,7 @@ const feedbackSection = document.getElementById('feedback-section');
 // Screen Navigation
 // ========================================
 function showScreen(screenName) {
+  loginScreen.style.display = 'none';
   startScreen.style.display = 'none';
   difficultyScreen.style.display = 'none';
   countScreen.style.display = 'none';
@@ -367,7 +373,10 @@ function showScreen(screenName) {
   sentenceScreen.style.display = 'none';
   resultScreen.style.display = 'none';
 
-  if (screenName === 'start') {
+  if (screenName === 'login') {
+    loginScreen.style.display = '';
+    feedbackSection.style.display = 'none';
+  } else if (screenName === 'start') {
     startScreen.style.display = '';
     feedbackSection.style.display = '';
   } else if (screenName === 'difficulty') {
@@ -1339,6 +1348,38 @@ function showToast(message) {
 }
 
 // ========================================
-// Initial state: show start screen
+// Login & Initial state
 // ========================================
-showScreen('start');
+function checkLogin() {
+  const savedUsername = localStorage.getItem('hanzi_username');
+  const isGuest = localStorage.getItem('hanzi_guest');
+
+  if (savedUsername) {
+    welcomeMessage.textContent = `환영합니다 ${savedUsername}님!`;
+    showScreen('start');
+  } else if (isGuest) {
+    welcomeMessage.textContent = '환영합니다 게스트님!';
+    showScreen('start');
+  } else {
+    showScreen('login');
+  }
+}
+
+btnLoginGoogle.addEventListener('click', () => {
+  // 실제 구글 로그인을 모방한 닉네임 입력 (Mock UI)
+  const username = prompt('구글 계정과 연동할 닉네임을 입력해주세요.');
+  if (username && username.trim().length > 0) {
+    localStorage.setItem('hanzi_username', username.trim());
+    localStorage.removeItem('hanzi_guest');
+    checkLogin();
+  }
+});
+
+btnLoginGuest.addEventListener('click', () => {
+  localStorage.setItem('hanzi_guest', 'true');
+  localStorage.removeItem('hanzi_username');
+  checkLogin();
+});
+
+// 시작 시 로그인 체크
+checkLogin();
