@@ -1405,3 +1405,39 @@ playBgm();
 document.addEventListener('click', () => {
   playBgm();
 }, { once: true });
+
+// ========================================
+// Volume Control Logic
+// ========================================
+const volumeSlider = document.getElementById('volume-slider');
+const btnVolume = document.getElementById('btn-volume');
+
+volumeSlider.addEventListener('input', (e) => {
+  const vol = parseFloat(e.target.value);
+  bgm.volume = vol;
+  if (vol === 0) {
+    btnVolume.textContent = '🔇';
+  } else if (vol < 0.5) {
+    btnVolume.textContent = '🔉';
+  } else {
+    btnVolume.textContent = '🔊';
+  }
+});
+
+let isMuted = false;
+let previousVolume = 0.5;
+
+btnVolume.addEventListener('click', () => {
+  if (isMuted) {
+    bgm.volume = previousVolume;
+    volumeSlider.value = previousVolume;
+    isMuted = false;
+    btnVolume.textContent = previousVolume < 0.5 ? '🔉' : '🔊';
+  } else {
+    previousVolume = bgm.volume || 0.5;
+    bgm.volume = 0;
+    volumeSlider.value = 0;
+    isMuted = true;
+    btnVolume.textContent = '🔇';
+  }
+});

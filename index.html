@@ -16,6 +16,12 @@
     <!-- ===== Background Music ===== -->
     <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
 
+    <!-- ===== Volume Control ===== -->
+    <div class="volume-control-wrapper" id="volume-control-wrapper">
+      <button class="btn-volume" id="btn-volume" aria-label="음량 조절">🔊</button>
+      <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
+    </div>
+
     <!-- ===== Login Screen ===== -->
     <div class="login-screen" id="login-screen">
       <div class="login-decoration">
