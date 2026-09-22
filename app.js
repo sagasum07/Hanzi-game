@@ -1383,3 +1383,25 @@ btnLoginGuest.addEventListener('click', () => {
 
 // 시작 시 로그인 체크
 checkLogin();
+
+// ========================================
+// Background Music Logic
+// ========================================
+const bgm = document.getElementById('bgm');
+bgm.volume = 0.5; // 배경음악이 너무 크지 않도록 기본 50% 볼륨 설정
+
+function playBgm() {
+  if (bgm.paused) {
+    bgm.play().catch(error => {
+      console.log('브라우저 정책으로 인해 자동 재생이 차단되었습니다. 사용자 상호작용 후 재생됩니다.', error);
+    });
+  }
+}
+
+// 1) 시도: 브라우저 환경에 따라 바로 재생될 수 있음
+playBgm();
+
+// 2) 사용자 첫 상호작용 시 무조건 재생 (클릭 등)
+document.addEventListener('click', () => {
+  playBgm();
+}, { once: true });
