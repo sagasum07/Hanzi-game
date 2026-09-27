@@ -3,176 +3,10 @@
 // ========================================
 
 // ========================================
-// HSK 단어 데이터 (각 급별 ~100개)
+// HSK 단어 데이터
 // ========================================
 
-// HSK 1~4 데이터는 외부 파일 (data.js, data_hsk3.js, data_hsk4.js) 에서 로드됩니다.
-
-
-
-const hsk5Words = [
-  { hanzi: '哎', pinyin: 'āi', meaning: '어머나 (감탄사)' },
-  { hanzi: '爱护', pinyin: 'àihù', meaning: '아끼고 보호하다' },
-  { hanzi: '爱惜', pinyin: 'àixī', meaning: '소중히 여기다' },
-  { hanzi: '爱心', pinyin: 'àixīn', meaning: '사랑하는 마음' },
-  { hanzi: '安慰', pinyin: 'ānwèi', meaning: '위로하다' },
-  { hanzi: '安装', pinyin: 'ānzhuāng', meaning: '설치하다' },
-  { hanzi: '岸', pinyin: 'àn', meaning: '기슭, 언덕' },
-  { hanzi: '暗', pinyin: 'àn', meaning: '어둡다' },
-  { hanzi: '熬夜', pinyin: 'áoyè', meaning: '밤을 새우다' },
-  { hanzi: '把握', pinyin: 'bǎwò', meaning: '잡다, 파악하다' },
-  { hanzi: '摆', pinyin: 'bǎi', meaning: '배열하다, 놓다' },
-  { hanzi: '办理', pinyin: 'bànlǐ', meaning: '처리하다' },
-  { hanzi: '傍晚', pinyin: 'bàngwǎn', meaning: '저녁 무렵' },
-  { hanzi: '包裹', pinyin: 'bāoguǒ', meaning: '소포' },
-  { hanzi: '包含', pinyin: 'bāohán', meaning: '포함하다' },
-  { hanzi: '包括', pinyin: 'bāokuò', meaning: '포함하다' },
-  { hanzi: '薄', pinyin: 'báo', meaning: '얇다' },
-  { hanzi: '宝贝', pinyin: 'bǎobèi', meaning: '보배, 귀염둥이' },
-  { hanzi: '宝贵', pinyin: 'bǎoguì', meaning: '귀중하다' },
-  { hanzi: '保持', pinyin: 'bǎochí', meaning: '유지하다' },
-  { hanzi: '保存', pinyin: 'bǎocún', meaning: '보존하다' },
-  { hanzi: '保留', pinyin: 'bǎoliú', meaning: '보류하다' },
-  { hanzi: '保险', pinyin: 'bǎoxiǎn', meaning: '보험' },
-  { hanzi: '报到', pinyin: 'bàodào', meaning: '도착을 알리다, 등록하다' },
-  { hanzi: '报道', pinyin: 'bàodào', meaning: '보도하다' },
-  { hanzi: '报告', pinyin: 'bàogào', meaning: '보고하다' },
-  { hanzi: '报社', pinyin: 'bàoshè', meaning: '신문사' },
-  { hanzi: '抱怨', pinyin: 'bàoyuàn', meaning: '원망하다, 불평하다' },
-  { hanzi: '悲观', pinyin: 'bēiguān', meaning: '비관적이다' },
-  { hanzi: '背', pinyin: 'bèi', meaning: '등, 업다' },
-  { hanzi: '背景', pinyin: 'běijǐng', meaning: '배경' },
-  { hanzi: '被子', pinyin: 'bèizi', meaning: '이불' },
-  { hanzi: '本科', pinyin: 'běnkē', meaning: '학부 (대학)' },
-  { hanzi: '本领', pinyin: 'běnlǐng', meaning: '능력, 솜씨' },
-  { hanzi: '本质', pinyin: 'běnzhì', meaning: '본질' },
-  { hanzi: '比例', pinyin: 'bǐlì', meaning: '비례, 비율' },
-  { hanzi: '彼此', pinyin: 'bǐcǐ', meaning: '피차, 서로' },
-  { hanzi: '必然', pinyin: 'bìrán', meaning: '필연적이다' },
-  { hanzi: '必要', pinyin: 'bìyào', meaning: '필요하다' },
-  { hanzi: '毕竟', pinyin: 'bìjìng', meaning: '어쨌든, 결국' },
-  { hanzi: '避免', pinyin: 'bìmiǎn', meaning: '피하다' },
-  { hanzi: '编辑', pinyin: 'biānjí', meaning: '편집하다' },
-  { hanzi: '鞭炮', pinyin: 'biānpào', meaning: '폭죽' },
-  { hanzi: '便', pinyin: 'biàn', meaning: '곧, 편하다' },
-  { hanzi: '辩论', pinyin: 'biànlùn', meaning: '변론하다' },
-  { hanzi: '标点', pinyin: 'biāodiǎn', meaning: '구두점' },
-  { hanzi: '标志', pinyin: 'biāozhì', meaning: '상징, 표지' },
-  { hanzi: '表达', pinyin: 'biǎodá', meaning: '표현하다' },
-  { hanzi: '表面', pinyin: 'biǎomiàn', meaning: '표면' },
-  { hanzi: '表明', pinyin: 'biǎomíng', meaning: '분명하게 나타내다' },
-  { hanzi: '表情', pinyin: 'biǎoqíng', meaning: '표정' },
-  { hanzi: '表现', pinyin: 'biǎoxiàn', meaning: '표현하다, 태도' },
-  { hanzi: '冰激凌', pinyin: 'bīngjīlíng', meaning: '아이스크림' },
-  { hanzi: '病毒', pinyin: 'bìngdú', meaning: '바이러스' },
-  { hanzi: '玻璃', pinyin: 'bōli', meaning: '유리' },
-  { hanzi: '播放', pinyin: 'bōfàng', meaning: '방송하다' },
-  { hanzi: '脖子', pinyin: 'bózi', meaning: '목' },
-  { hanzi: '博物馆', pinyin: 'bówùguǎn', meaning: '박물관' },
-  { hanzi: '补充', pinyin: 'bǔchōng', meaning: '보충하다' },
-  { hanzi: '不安', pinyin: 'bù\'ān', meaning: '불안하다' },
-  { hanzi: '不得了', pinyin: 'bùdéliǎo', meaning: '큰일 났다' },
-  { hanzi: '不断', pinyin: 'búduàn', meaning: '끊임없이' },
-  { hanzi: '不见得', pinyin: 'bújiànde', meaning: '반드시 ~한 것은 아니다' },
-  { hanzi: '不耐烦', pinyin: 'búnàifán', meaning: '귀찮다, 성가시다' },
-  { hanzi: '不要紧', pinyin: 'búyàojǐn', meaning: '괜찮다, 문제없다' },
-  { hanzi: '布', pinyin: 'bù', meaning: '천, 직물' },
-  { hanzi: '步骤', pinyin: 'bùzhòu', meaning: '절차, 단계' },
-  { hanzi: '部门', pinyin: 'bùmén', meaning: '부서, 부문' },
-  { hanzi: '财产', pinyin: 'cáichǎn', meaning: '재산' },
-  { hanzi: '采访', pinyin: 'cǎifǎng', meaning: '취재하다' },
-  { hanzi: '采取', pinyin: 'cǎiqǔ', meaning: '채택하다' },
-  { hanzi: '彩虹', pinyin: 'cǎihóng', meaning: '무지개' },
-  { hanzi: '踩', pinyin: 'cǎi', meaning: '밟다' },
-  { hanzi: '参考', pinyin: 'cānkǎo', meaning: '참고하다' },
-  { hanzi: '参与', pinyin: 'cānyù', meaning: '참여하다' },
-  { hanzi: '惭愧', pinyin: 'cánkuì', meaning: '부끄럽다' },
-  { hanzi: '操场', pinyin: 'cāochǎng', meaning: '운동장' },
-  { hanzi: '操心', pinyin: 'cāoxīn', meaning: '애태우다, 신경 쓰다' },
-];
-
-const hsk6Words = [
-  { hanzi: '哎哟', pinyin: 'āiyō', meaning: '아이고 (감탄사)' },
-  { hanzi: '挨', pinyin: 'ái', meaning: '견디다, 당하다' },
-  { hanzi: '癌症', pinyin: 'áizhèng', meaning: '암 (질병)' },
-  { hanzi: '爱不释手', pinyin: 'àibúshìshǒu', meaning: '너무 좋아서 손에서 놓지 못하다' },
-  { hanzi: '爱戴', pinyin: 'àidài', meaning: '추앙하다, 존경하고 사랑하다' },
-  { hanzi: '暧昧', pinyin: 'àimèi', meaning: '애매하다, 모호하다' },
-  { hanzi: '安宁', pinyin: 'ānníng', meaning: '안녕, 평온하다' },
-  { hanzi: '安详', pinyin: 'ānxiáng', meaning: '차분하다, 평온하다' },
-  { hanzi: '安置', pinyin: 'ānzhì', meaning: '안치하다, 배치하다' },
-  { hanzi: '按摩', pinyin: 'ànmó', meaning: '안마하다' },
-  { hanzi: '案件', pinyin: 'ànjiàn', meaning: '안건, 사건' },
-  { hanzi: '案例', pinyin: 'ànlì', meaning: '사례, 판례' },
-  { hanzi: '暗示', pinyin: 'ànshì', meaning: '암시하다' },
-  { hanzi: '昂贵', pinyin: 'ángguì', meaning: '비싸다, 값비싸다' },
-  { hanzi: '凹凸', pinyin: 'āotū', meaning: '요철, 울퉁불퉁하다' },
-  { hanzi: '熬', pinyin: 'áo', meaning: '오래 끓이다, 참고 견디다' },
-  { hanzi: '奥秘', pinyin: 'àomì', meaning: '오비, 비밀' },
-  { hanzi: '巴不得', pinyin: 'bābùdé', meaning: '간절히 바라다' },
-  { hanzi: '巴结', pinyin: 'bājié', meaning: '아첨하다, 비위를 맞추다' },
-  { hanzi: '扒', pinyin: 'bā', meaning: '긁다, 파헤치다' },
-  { hanzi: '疤', pinyin: 'bā', meaning: '흉터' },
-  { hanzi: '拔苗助长', pinyin: 'bámiáozhùzhǎng', meaning: '조급하게 굴어 오히려 일을 망치다 (발묘조장)' },
-  { hanzi: '把关', pinyin: 'bǎguān', meaning: '관문을 지키다, 심사하다' },
-  { hanzi: '把手', pinyin: 'bǎshou', meaning: '손잡이' },
-  { hanzi: '霸道', pinyin: 'bàdào', meaning: '패도, 횡포하다' },
-  { hanzi: '罢工', pinyin: 'bàgōng', meaning: '파업하다' },
-  { hanzi: '掰', pinyin: 'bāi', meaning: '쪼개다, 꺾어 떼다' },
-  { hanzi: '百分点', pinyin: 'bǎifēndiǎn', meaning: '퍼센트 포인트' },
-  { hanzi: '摆脱', pinyin: 'bǎituō', meaning: '벗어나다, 빠져나오다' },
-  { hanzi: '拜访', pinyin: 'bàifǎng', meaning: '방문하다' },
-  { hanzi: '拜年', pinyin: 'bàinián', meaning: '새해 인사를 하다' },
-  { hanzi: '拜托', pinyin: 'bàituō', meaning: '부탁하다' },
-  { hanzi: '败坏', pinyin: 'bàihuài', meaning: '망치다, 훼손하다' },
-  { hanzi: '颁布', pinyin: 'bānbù', meaning: '반포하다, 공포하다' },
-  { hanzi: '颁发', pinyin: 'bānfā', meaning: '수여하다, 발급하다' },
-  { hanzi: '斑', pinyin: 'bān', meaning: '반점, 얼룩' },
-  { hanzi: '版本', pinyin: 'bǎnběn', meaning: '판본, 버전' },
-  { hanzi: '半途而废', pinyin: 'bàntú\'érfèi', meaning: '중도에 그만두다 (반도이폐)' },
-  { hanzi: '扮演', pinyin: 'bànyǎn', meaning: '역할을 맡다' },
-  { hanzi: '伴随', pinyin: 'bànsuí', meaning: '수반하다, 동반하다' },
-  { hanzi: '伴侣', pinyin: 'bànlǚ', meaning: '반려자' },
-  { hanzi: '绑架', pinyin: 'bǎngjià', meaning: '납치하다' },
-  { hanzi: '榜样', pinyin: 'bǎngyàng', meaning: '모범, 본보기' },
-  { hanzi: '磅', pinyin: 'bàng', meaning: '파운드 (무게 단위)' },
-  { hanzi: '包庇', pinyin: 'bāobì', meaning: '감싸다, 비호하다' },
-  { hanzi: '包袱', pinyin: 'bāofu', meaning: '보따리, 마음의 짐' },
-  { hanzi: '包围', pinyin: 'bāowéi', meaning: '포위하다' },
-  { hanzi: '包装', pinyin: 'bāozhuāng', meaning: '포장하다' },
-  { hanzi: '饱和', pinyin: 'bǎohé', meaning: '포화 상태' },
-  { hanzi: '饱经沧桑', pinyin: 'bǎojīngcāngsāng', meaning: '세상 풍파를 다 겪다' },
-  { hanzi: '保管', pinyin: 'bǎoguǎn', meaning: '보관하다' },
-  { hanzi: '保密', pinyin: 'bǎomì', meaning: '비밀을 유지하다' },
-  { hanzi: '保姆', pinyin: 'bǎomǔ', meaning: '보모' },
-  { hanzi: '保守', pinyin: 'bǎoshǒu', meaning: '보수적이다' },
-  { hanzi: '保卫', pinyin: 'bǎowèi', meaning: '보위하다, 지키다' },
-  { hanzi: '保养', pinyin: 'bǎoyǎng', meaning: '보양하다, 관리하다' },
-  { hanzi: '保障', pinyin: 'bǎozhàng', meaning: '보장하다' },
-  { hanzi: '保重', pinyin: 'bǎozhòng', meaning: '몸조심하다' },
-  { hanzi: '抱负', pinyin: 'bàofù', meaning: '포부' },
-  { hanzi: '抱怨', pinyin: 'bàoyuàn', meaning: '불평하다, 원망하다' },
-  { hanzi: '暴发', pinyin: 'bàofā', meaning: '갑자기 일어나다, 폭발하다' },
-  { hanzi: '暴力', pinyin: 'bàolì', meaning: '폭력' },
-  { hanzi: '暴露', pinyin: 'bàolù', meaning: '폭로하다, 드러나다' },
-  { hanzi: '曝光', pinyin: 'bàoguāng', meaning: '노출되다, 폭로되다' },
-  { hanzi: '爆发', pinyin: 'bàofā', meaning: '폭발하다 (화산, 감정)' },
-  { hanzi: '爆炸', pinyin: 'bàozhà', meaning: '폭발하다' },
-  { hanzi: '悲哀', pinyin: 'bēi\'āi', meaning: '비애, 슬프다' },
-  { hanzi: '悲惨', pinyin: 'bēicǎn', meaning: '비참하다' },
-  { hanzi: '卑鄙', pinyin: 'bēibǐ', meaning: '비열하다' },
-  { hanzi: '北极', pinyin: 'běijí', meaning: '북극' },
-  { hanzi: '贝壳', pinyin: 'bèiké', meaning: '조개껍데기' },
-  { hanzi: '备份', pinyin: 'bèifèn', meaning: '백업하다' },
-  { hanzi: '备忘录', pinyin: 'bèiwànglù', meaning: '비망록, 메모' },
-  { hanzi: '背叛', pinyin: 'bèipàn', meaning: '배반하다' },
-  { hanzi: '背诵', pinyin: 'bèisòng', meaning: '암송하다' },
-  { hanzi: '被动', pinyin: 'bèidòng', meaning: '수동적이다' },
-  { hanzi: '被告', pinyin: 'bèigào', meaning: '피고' },
-  { hanzi: '奔波', pinyin: 'bēnbō', meaning: '분주히 돌아다니다' },
-  { hanzi: '奔驰', pinyin: 'bēnchí', meaning: '질주하다' },
-  { hanzi: '本能', pinyin: 'běnnéng', meaning: '본능' },
-];
+// HSK 1~6 데이터는 외부 파일 (data.js, data_hsk3.js ~ data_hsk6.js) 에서 로드됩니다.
 
 // ========================================
 // 모든 난이도별 데이터 매핑
@@ -197,7 +31,7 @@ const hsk1Sentences = [
   { korean: '지금 몇 시인가요?', chinese: '现在几点？', words: ['现在', '几点'], traps: ['今天', '什么'] },
   { korean: '만나서 반갑습니다.', chinese: '很高兴认识你。', words: ['很', '高兴', '认识', '你'], traps: ['太', '看'] },
   { korean: '우리 아빠는 의사입니다.', chinese: '我爸爸是医生。', words: ['我', '爸爸', '是', '医生'], traps: ['妈妈', '在'] },
-  { korean: '어제 비가 내렸습니다.', chinese: '昨天大雨了。', words: ['昨天', '下雨', '了'], traps: ['明天', '天气'] },
+  { korean: '어제 비가 내렸습니다.', chinese: '昨天下雨了。', words: ['昨天', '下雨', '了'], traps: ['明天', '天气'] },
   { korean: '그녀는 사과 먹는 것을 좋아합니다.', chinese: '她喜欢吃苹果。', words: ['她', '喜欢', '吃', '苹果'], traps: ['他', '喝'] },
   { korean: '도서관에 사람이 매우 많습니다.', chinese: '图书馆人很多。', words: ['图书馆', '人', '很', '多'], traps: ['少', '哪儿'] }
 ];
@@ -299,6 +133,7 @@ let selectedWords = [];
 const loginScreen = document.getElementById('login-screen');
 const btnLoginGuest = document.getElementById('btn-login-guest');
 const welcomeMessage = document.getElementById('welcome-message');
+const btnLogout = document.getElementById('btn-logout');
 
 const startScreen = document.getElementById('start-screen');
 const difficultyScreen = document.getElementById('difficulty-screen');
@@ -1349,6 +1184,9 @@ function showToast(message) {
 // ========================================
 // Login & Initial state
 // ========================================
+// Google Cloud 콘솔에서 발급받은 OAuth 클라이언트 ID
+const GOOGLE_CLIENT_ID = '543529103530-av2ve4sk2kg9j9pcdmoosrdqt63lg229.apps.googleusercontent.com';
+
 function checkLogin() {
   const savedUsername = localStorage.getItem('hanzi_username');
   const isGuest = localStorage.getItem('hanzi_guest');
@@ -1384,20 +1222,57 @@ window.handleCredentialResponse = function(response) {
   checkLogin();
 };
 
-window.onload = function () {
-  google.accounts.id.initialize({
-    client_id: "YOUR_GOOGLE_CLIENT_ID_HERE",
-    callback: handleCredentialResponse
-  });
-  google.accounts.id.renderButton(
-    document.getElementById("google-login-btn"),
-    { theme: "outline", size: "large", width: 280 }
-  );
-};
+// 구글 로그인 버튼 초기화
+// GIS 스크립트는 async 로 로드되므로, 준비될 때까지 잠시 재시도합니다.
+// file:// 이거나 오프라인이라 로드에 실패하면 게스트 로그인만 사용할 수 있게 안내합니다.
+function initGoogleSignIn(retriesLeft = 50) {
+  const googleBtn = document.getElementById("google-login-btn");
+
+  if (location.protocol === 'file:') {
+    googleBtn.textContent = '구글 로그인은 로컬 서버(http://)에서 실행해야 사용할 수 있습니다.';
+    googleBtn.classList.add('google-btn-unavailable');
+    return;
+  }
+
+  if (!(window.google && google.accounts && google.accounts.id)) {
+    if (retriesLeft > 0) {
+      setTimeout(() => initGoogleSignIn(retriesLeft - 1), 100);
+    } else {
+      googleBtn.textContent = '구글 로그인을 불러오지 못했습니다. 게스트로 시작해 주세요.';
+      googleBtn.classList.add('google-btn-unavailable');
+    }
+    return;
+  }
+
+  try {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(googleBtn, { theme: "outline", size: "large", width: 280 });
+  } catch (error) {
+    console.error('구글 로그인 초기화 실패:', error);
+    googleBtn.textContent = '구글 로그인을 불러오지 못했습니다. 게스트로 시작해 주세요.';
+    googleBtn.classList.add('google-btn-unavailable');
+  }
+}
+
+window.addEventListener('load', () => initGoogleSignIn());
 
 btnLoginGuest.addEventListener('click', () => {
   localStorage.setItem('hanzi_guest', 'true');
   localStorage.removeItem('hanzi_username');
+  checkLogin();
+});
+
+btnLogout.addEventListener('click', () => {
+  // 구글 계정으로 로그인했다면 자동 로그인(auto select)을 해제
+  if (localStorage.getItem('hanzi_username') && window.google && google.accounts && google.accounts.id) {
+    google.accounts.id.disableAutoSelect();
+  }
+  localStorage.removeItem('hanzi_username');
+  localStorage.removeItem('hanzi_guest');
+  welcomeMessage.textContent = '';
   checkLogin();
 });
 

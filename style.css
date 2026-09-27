@@ -201,6 +201,12 @@ body {
   width: 100%;
 }
 
+.google-btn-unavailable {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
 .btn-guest {
   background: var(--bg-primary);
   color: var(--text-secondary);
@@ -219,6 +225,13 @@ body {
   color: var(--accent);
   margin-top: 16px;
   animation: fadeInScale 0.6s ease;
+}
+
+/* Logout Button */
+.btn-logout {
+  margin-top: 0;
+  padding: 6px 18px;
+  font-size: 0.85rem;
 }
 
 /* ========================================
