@@ -6,7 +6,8 @@
   "scripts": {
     "build:web": "node scripts/build-web.mjs",
     "android:sync": "npm run build:web && npx cap sync android",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "android:bundle": "node scripts/android-bundle.mjs"
   },
   "dependencies": {
     "@capacitor-community/text-to-speech": "^8.0.2",

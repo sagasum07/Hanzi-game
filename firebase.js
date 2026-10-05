@@ -65,9 +65,37 @@ try {
     await authSdk.signOut(auth);
   }
 
+  // 계정 삭제: 본인 확인을 위해 다시 로그인 → 학습 기록 문서 삭제 → Firebase 계정 삭제
+  // (Firebase 는 최근에 로그인한 경우에만 계정 삭제를 허용하므로 먼저 재인증)
+  async function deleteAccount() {
+    const user = auth.currentUser;
+    if (!user) throw new Error('로그인 상태가 아닙니다.');
+
+    if (isNativeApp) {
+      const result = await callNativeAuth('signInWithGoogle');
+      const idToken = result && result.credential && result.credential.idToken;
+      if (!idToken) throw new Error('구글 로그인 토큰을 받지 못했습니다.');
+      await authSdk.reauthenticateWithCredential(user, authSdk.GoogleAuthProvider.credential(idToken));
+    } else {
+      await authSdk.reauthenticateWithPopup(user, provider);
+    }
+
+    await firestoreSdk.deleteDoc(userDoc(user.uid));
+    await authSdk.deleteUser(user);
+
+    if (isNativeApp) {
+      try {
+        await callNativeAuth('signOut');
+      } catch (error) {
+        console.warn('기기 구글 로그아웃 실패:', error);
+      }
+    }
+  }
+
   window.hanziFirebase = {
     signIn: isNativeApp ? signInNative : () => authSdk.signInWithPopup(auth, provider),
     signOut: signOutAll,
+    deleteAccount: deleteAccount,
     loadRecord: async (uid) => {
       const snap = await firestoreSdk.getDoc(userDoc(uid));
       return snap.exists() ? snap.data() : null;

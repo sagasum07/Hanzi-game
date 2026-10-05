@@ -1790,6 +1790,7 @@ btnWordbookBack.addEventListener('click', () => showScreen('start'));
 // ========================================
 const btnLoginGoogle = document.getElementById('btn-login-google');
 const loginStatus = document.getElementById('login-status');
+const btnDeleteAccount = document.getElementById('btn-delete-account');
 let firebaseSettled = false;
 
 function setLoginStatus(message) {
@@ -1798,6 +1799,7 @@ function setLoginStatus(message) {
 
 function enterStartScreen(name) {
   welcomeMessage.textContent = `환영합니다 ${name}님!`;
+  btnDeleteAccount.textContent = recordOwner && recordOwner.type === 'google' ? '계정 삭제' : '학습 기록 삭제';
   showScreen('start');
 }
 
@@ -1904,6 +1906,48 @@ btnLogout.addEventListener('click', async () => {
     } catch (error) {
       console.error('로그아웃 실패:', error);
     }
+  }
+});
+
+// 계정 삭제 (구글 사용자) / 학습 기록 삭제 (게스트)
+// 구글 플레이 정책상 앱 안에서 계정과 데이터를 삭제할 수 있어야 합니다.
+btnDeleteAccount.addEventListener('click', async () => {
+  if (!recordOwner) return;
+
+  if (recordOwner.type === 'guest') {
+    if (!confirm('이 기기에 저장된 학습 기록(진도, 오답 노트, 단어장)을 모두 삭제할까요?\n삭제한 기록은 되돌릴 수 없습니다.')) return;
+    clearTimeout(recordSaveTimer);
+    recordSaveTimer = null;
+    localStorage.removeItem(GUEST_RECORD_KEY);
+    userRecord = normalizeRecord(null);
+    renderRecordSummary();
+    showToast('학습 기록을 삭제했어요');
+    return;
+  }
+
+  if (!confirm('계정을 삭제하면 모든 학습 기록(진도, 오답 노트, 단어장)이 영구적으로 삭제됩니다.\n정말 삭제할까요?')) return;
+  if (!confirm('마지막 확인입니다. 삭제한 계정과 기록은 되돌릴 수 없습니다.\n본인 확인을 위해 구글 로그인을 한 번 더 진행합니다.')) return;
+
+  // 삭제 도중 예약된 저장이 기록을 다시 만들지 않도록 저장을 멈춤
+  clearTimeout(recordSaveTimer);
+  recordSaveTimer = null;
+  recordSaveBlocked = true;
+  btnDeleteAccount.disabled = true;
+  try {
+    await window.hanziFirebase.deleteAccount();
+    recordOwner = null;
+    userRecord = normalizeRecord(null);
+    welcomeMessage.textContent = '';
+    showScreen('login');
+    setLoginStatus('계정과 학습 기록을 모두 삭제했습니다.');
+  } catch (error) {
+    console.error('계정 삭제 실패:', error);
+    recordSaveBlocked = false;
+    if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request' && !/cancel/i.test(error.message || '')) {
+      showToast('계정을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.');
+    }
+  } finally {
+    btnDeleteAccount.disabled = false;
   }
 });
 

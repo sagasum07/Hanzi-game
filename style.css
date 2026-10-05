@@ -1880,7 +1880,14 @@ header h1, .header-titles h1 {
     flex-basis: 32px;
     font-size: 1.4rem;
   }
+}
 
+/* 단어 목록이 좁으면(화면 폭·양옆 화살표에 따라 달라짐) 뜻을 아랫줄로 내림 */
+.plan-word-list {
+  container-type: inline-size;
+}
+
+@container (max-width: 380px) {
   .plan-word {
     grid-template-columns: auto 1fr auto;
   }
@@ -1925,4 +1932,31 @@ header h1, .header-titles h1 {
   .start-title {
     font-size: 2.4rem;
   }
+}
+
+/* 계정 삭제 (눈에 덜 띄는 작은 텍스트 버튼) */
+.btn-delete-account {
+  margin-top: -8px;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.btn-delete-account:hover {
+  color: var(--wrong);
+}
+
+.privacy-link {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.privacy-link {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
