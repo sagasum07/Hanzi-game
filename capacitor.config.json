@@ -1,0 +1,14 @@
+{
+  "appId": "com.sagasum.zhongwenxuexi",
+  "appName": "中文学习",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#FFF8F0"
+  },
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": ["google.com"]
+    }
+  }
+}

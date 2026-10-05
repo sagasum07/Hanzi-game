@@ -1,0 +1,4 @@
+node_modules/
+# 앱에 들어갈 웹 파일 복사본 (npm run build:web 으로 생성)
+www/
+.DS_Store

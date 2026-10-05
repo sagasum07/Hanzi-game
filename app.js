@@ -378,7 +378,32 @@ function createSentenceWordSpan(wordText) {
 // ========================================
 // Text-to-Speech (TTS) Logic
 // ========================================
+// 안드로이드 앱(Capacitor) 안에서 실행 중인지 여부
+const isNativeApp = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+
+// 글자 수에 따라 발음 속도를 동적으로 조절
+function getSpeechRate(text) {
+  if (text.length === 1) return 0.75; // 1글자는 덜 늘어지도록 조금 빠르게
+  if (text.length === 2) return 0.65; // 2글자는 중간 속도
+  return 0.6; // 3글자 이상은 천천히 또렷하게
+}
+
 function speakHanzi(text) {
+  // 안드로이드 앱의 WebView 에는 speechSynthesis 가 없어서 기기의 TTS 엔진을 사용
+  if (isNativeApp) {
+    window.Capacitor.nativePromise('TextToSpeech', 'speak', {
+      text: text,
+      lang: 'zh-CN',
+      rate: getSpeechRate(text),
+      pitch: 0.95,
+      queueStrategy: 0, // 이전 발음을 끊고 바로 재생
+    }).catch((error) => {
+      console.warn('발음 재생 실패:', error);
+      showToast('기기에 중국어 음성이 없어 발음을 재생할 수 없어요');
+    });
+    return;
+  }
+
   if (!('speechSynthesis' in window)) return;
   
   // Cancel any ongoing speech
@@ -386,15 +411,7 @@ function speakHanzi(text) {
   
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'zh-CN'; // Chinese (Simplified)
-  
-  // 글자 수에 따라 발음 속도를 동적으로 조절
-  if (text.length === 1) {
-    utterance.rate = 0.75; // 1글자는 덜 늘어지도록 조금 빠르게
-  } else if (text.length === 2) {
-    utterance.rate = 0.65; // 2글자는 중간 속도
-  } else {
-    utterance.rate = 0.6; // 3글자 이상은 천천히 또렷하게
-  }
+  utterance.rate = getSpeechRate(text);
   
   utterance.pitch = 0.95; // 톤을 살짝 낮춰서 좀 더 자연스럽게 
   
@@ -2035,3 +2052,35 @@ btnVolume.addEventListener('click', () => {
 document.addEventListener('click', (e) => {
   if (!volumeWrapper.contains(e.target)) collapseVolume();
 });
+
+// ========================================
+// 안드로이드 뒤로 가기 버튼
+// ========================================
+// 기본 동작은 어느 화면에서든 앱이 꺼지므로, 이전 화면으로 돌아가도록 처리합니다.
+// 시작 화면이나 로그인 화면에서 누르면 앱을 닫습니다.
+function isShown(el) {
+  return el.style.display !== 'none';
+}
+
+function handleBackButton() {
+  if (isShown(quizScreen) || isShown(sentenceScreen)) {
+    // 퀴즈 중이거나 결과 화면이면, 시작했던 곳으로 돌아감
+    if (currentPlanDay !== null) {
+      openPlan(currentLevel);
+    } else if (isWordbookQuiz) {
+      openWordbook();
+    } else {
+      showScreen('start');
+    }
+  } else if (isShown(countScreen) || isShown(planScreen)) {
+    showScreen('difficulty');
+  } else if (isShown(difficultyScreen) || isShown(wordbookScreen)) {
+    showScreen('start');
+  } else {
+    window.Capacitor.nativePromise('App', 'exitApp');
+  }
+}
+
+if (isNativeApp) {
+  window.Capacitor.nativeCallback('App', 'addListener', { eventName: 'backButton' }, handleBackButton);
+}

@@ -1,0 +1,9 @@
+# 안드로이드 앱(Capacitor) 관련 파일은 웹사이트 배포에서 제외 → Vercel 은 예전처럼 정적 사이트로 배포
+package.json
+package-lock.json
+node_modules
+android
+assets
+scripts
+capacitor.config.json
+www

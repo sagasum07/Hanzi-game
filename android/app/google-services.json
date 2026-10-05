@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "389921729328",
+    "project_id": "hskgame-885f4",
+    "storage_bucket": "hskgame-885f4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389921729328:android:98d42fab5472c47fc1f6f5",
+        "android_client_info": {
+          "package_name": "com.sagasum.zhongwenxuexi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "389921729328-fr9053hskgt62oqg3sn6302d0m5ubn5m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sagasum.zhongwenxuexi",
+            "certificate_hash": "ba242f335c3c2d78706548b4c6b9acbe3fc8ea10"
+          }
+        },
+        {
+          "client_id": "389921729328-4b9ekqv10r4q5u9641lgoh66cqno2875.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAV-SCr-q8BIFolihi1opOqjpC_yrXgeok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389921729328-4b9ekqv10r4q5u9641lgoh66cqno2875.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
