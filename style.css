@@ -1600,6 +1600,11 @@ header h1, .header-titles h1 {
 .plan-arrow {
   flex: 0 0 40px;
   height: 64px;
+  /* 단어 목록이 길어도 화살표가 화면 가운데에 따라오도록 */
+  position: sticky;
+  top: calc(50vh - 32px);
+  align-self: flex-start;
+  margin-top: 120px;
   background: var(--bg-card);
   border: 2px solid var(--border);
   border-radius: var(--radius-sm);

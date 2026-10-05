@@ -501,7 +501,7 @@ if (btnSentenceHome) {
 document.querySelectorAll('.difficulty-card').forEach((card) => {
   card.addEventListener('click', () => {
     currentLevel = parseInt(card.dataset.level);
-    // HSK 1~4급 단어 학습은 일차별 학습 플랜으로 진행
+    // 단어 학습은 모든 급수에서 일차별 학습 플랜으로 진행
     if (currentMode === 'word' && PLAN_DAYS[currentLevel]) {
       openPlan(currentLevel);
       return;
@@ -1415,12 +1415,12 @@ function startReviewQuiz() {
 btnReview.addEventListener('click', startReviewQuiz);
 
 // ========================================
-// 단어 학습 플랜 (HSK 1~4급)
+// 단어 학습 플랜 (HSK 1~6급)
 // ========================================
 // 각 급수의 단어를 일차별로 고르게 나눠서 하루씩 학습합니다.
 // 그날 퀴즈에서 PLAN_PASS_PERCENT% 이상 맞히면 완료되고, 이전 일차를 완료해야 다음 일차로 넘어갈 수 있습니다.
-const PLAN_DAYS = { 1: 14, 2: 14, 3: 30, 4: 60 };
-const PLAN_LABELS = { 1: '2주', 2: '2주', 3: '한 달', 4: '두 달' };
+const PLAN_DAYS = { 1: 14, 2: 14, 3: 30, 4: 60, 5: 60, 6: 120 };
+const PLAN_LABELS = { 1: '2주', 2: '2주', 3: '한 달', 4: '두 달', 5: '두 달', 6: '네 달' };
 const PLAN_PASS_PERCENT = 80;
 
 const planTitle = document.getElementById('plan-title');
