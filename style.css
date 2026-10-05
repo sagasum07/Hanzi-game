@@ -126,7 +126,8 @@ body {
 }
 
 /* 좁은 화면(양옆 여백이 없는 경우)에서는 콘텐츠를 가리지 않도록
-   페이지 오른쪽 위의 작은 음소거 버튼으로 바꾸고, 스크롤하면 함께 올라가게 함 */
+   페이지 오른쪽 위의 작은 아이콘으로 두고(스크롤하면 함께 올라감),
+   아이콘을 누르면 왼쪽으로 음량 슬라이더가 펼쳐짐 */
 @media (max-width: 900px) {
   .volume-control-wrapper {
     position: absolute;
@@ -134,9 +135,10 @@ body {
     right: 10px;
     bottom: auto;
     left: auto;
+    flex-direction: row-reverse;
     padding: 7px;
     gap: 0;
-    border-radius: 50%;
+    border-radius: 30px;
   }
 
   .btn-volume {
@@ -147,6 +149,22 @@ body {
 
   .volume-slider {
     display: none;
+  }
+
+  .volume-control-wrapper.expanded {
+    gap: 12px;
+    padding: 7px 7px 7px 16px;
+  }
+
+  .volume-control-wrapper.expanded .volume-slider {
+    display: block;
+    width: 120px;
+    height: 8px;
+  }
+
+  .volume-slider::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
   }
 }
 

@@ -1912,10 +1912,45 @@ if (location.protocol === 'file:') {
 // ========================================
 // Background Music Logic
 // ========================================
+// iOS Safari 는 audio.volume 변경을 무시하므로, 가능하면 Web Audio API 의 GainNode 로 음량을 조절합니다.
+// (file:// 에서는 CORS 제한으로 Web Audio 를 거치면 소리가 나지 않아 audio.volume 을 그대로 사용)
 const bgm = document.getElementById('bgm');
-bgm.volume = 0.5; // 배경음악이 너무 크지 않도록 기본 50% 볼륨 설정
+const DEFAULT_VOLUME = 0.5; // 배경음악이 너무 크지 않도록 기본 50%
+
+let currentVolume = DEFAULT_VOLUME;
+let isMuted = false;
+let audioCtx = null;
+let gainNode = null;
+
+function applyVolume() {
+  const vol = isMuted ? 0 : currentVolume;
+  if (gainNode) {
+    gainNode.gain.value = vol;
+  } else {
+    bgm.volume = vol;
+  }
+}
+
+// 사용자 상호작용 안에서 호출해야 AudioContext 가 정상 동작함
+function setupAudioGraph() {
+  if (gainNode || location.protocol === 'file:') return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  try {
+    audioCtx = new AudioCtx();
+    const gain = audioCtx.createGain();
+    audioCtx.createMediaElementSource(bgm).connect(gain);
+    gain.connect(audioCtx.destination);
+    gainNode = gain;
+    bgm.volume = 1; // 실제 음량은 gainNode 가 담당
+    applyVolume();
+  } catch (error) {
+    console.warn('Web Audio 음량 조절을 사용할 수 없어 기본 방식으로 조절합니다.', error);
+  }
+}
 
 function playBgm() {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   if (bgm.paused) {
     bgm.play().catch(error => {
       console.log('브라우저 정책으로 인해 자동 재생이 차단되었습니다. 사용자 상호작용 후 재생됩니다.', error);
@@ -1923,23 +1958,32 @@ function playBgm() {
   }
 }
 
+applyVolume();
+
 // 1) 시도: 브라우저 환경에 따라 바로 재생될 수 있음
 playBgm();
 
 // 2) 사용자 첫 상호작용 시 무조건 재생 (클릭 등)
 document.addEventListener('click', () => {
+  setupAudioGraph();
   playBgm();
 }, { once: true });
 
 // ========================================
 // Volume Control Logic
 // ========================================
+// 넓은 화면: 아이콘(음소거) + 슬라이더가 항상 보임
+// 좁은 화면: 아이콘만 보이고, 누르면 슬라이더가 펼쳐짐 → 펼친 상태에서 아이콘을 누르면 음소거
+//            바깥을 누르거나 잠시 조작이 없으면 다시 접힘
+const volumeWrapper = document.getElementById('volume-control-wrapper');
 const volumeSlider = document.getElementById('volume-slider');
 const btnVolume = document.getElementById('btn-volume');
+const compactVolumeQuery = window.matchMedia('(max-width: 900px)');
+const VOLUME_COLLAPSE_DELAY = 4000;
+let volumeCollapseTimer = null;
 
-volumeSlider.addEventListener('input', (e) => {
-  const vol = parseFloat(e.target.value);
-  bgm.volume = vol;
+function updateVolumeIcon() {
+  const vol = isMuted ? 0 : currentVolume;
   if (vol === 0) {
     btnVolume.textContent = '🔇';
   } else if (vol < 0.5) {
@@ -1947,22 +1991,47 @@ volumeSlider.addEventListener('input', (e) => {
   } else {
     btnVolume.textContent = '🔊';
   }
+}
+
+function collapseVolume() {
+  clearTimeout(volumeCollapseTimer);
+  volumeWrapper.classList.remove('expanded');
+}
+
+function keepVolumeOpen() {
+  clearTimeout(volumeCollapseTimer);
+  volumeCollapseTimer = setTimeout(collapseVolume, VOLUME_COLLAPSE_DELAY);
+}
+
+volumeSlider.addEventListener('input', (e) => {
+  currentVolume = parseFloat(e.target.value);
+  isMuted = currentVolume === 0;
+  applyVolume();
+  updateVolumeIcon();
+  keepVolumeOpen();
 });
 
-let isMuted = false;
-let previousVolume = 0.5;
-
 btnVolume.addEventListener('click', () => {
-  if (isMuted) {
-    bgm.volume = previousVolume;
-    volumeSlider.value = previousVolume;
-    isMuted = false;
-    btnVolume.textContent = previousVolume < 0.5 ? '🔉' : '🔊';
-  } else {
-    previousVolume = bgm.volume || 0.5;
-    bgm.volume = 0;
-    volumeSlider.value = 0;
-    isMuted = true;
-    btnVolume.textContent = '🔇';
+  // 좁은 화면에서 접혀 있으면 먼저 슬라이더를 펼침
+  if (compactVolumeQuery.matches && !volumeWrapper.classList.contains('expanded')) {
+    volumeWrapper.classList.add('expanded');
+    keepVolumeOpen();
+    return;
   }
+
+  if (isMuted) {
+    isMuted = false;
+    if (currentVolume === 0) currentVolume = DEFAULT_VOLUME;
+  } else {
+    isMuted = true;
+  }
+  volumeSlider.value = isMuted ? 0 : currentVolume;
+  applyVolume();
+  updateVolumeIcon();
+  if (compactVolumeQuery.matches) keepVolumeOpen();
+});
+
+// 바깥을 누르면 접기
+document.addEventListener('click', (e) => {
+  if (!volumeWrapper.contains(e.target)) collapseVolume();
 });
