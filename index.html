@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="HSK 1~6급 중국어 단어와 문장을 재미있게 학습하는 퀴즈 게임">
-  <title>한자 학습 게임 - HSK 1~6급</title>
+  <title>中文学习 - HSK 1~6급</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
         <span class="login-hanzi-bg">迎</span>
       </div>
       <h1 class="login-title">환영합니다!</h1>
-      <p class="login-subtitle">한자 학습 게임에 오신 것을 환영합니다.</p>
+      <p class="login-subtitle">中文学习에 오신 것을 환영합니다.</p>
       
       <div class="login-buttons">
         <button class="btn-login btn-google" id="btn-login-google" disabled>로그인 확인 중...</button>
@@ -42,9 +42,9 @@
     <!-- ===== Start Screen ===== -->
     <div class="start-screen" id="start-screen" style="display:none;">
       <div class="start-decoration">
-        <span class="start-hanzi-bg">漢</span>
+        <span class="start-hanzi-bg">中</span>
       </div>
-      <h1 class="start-title">漢字 학습</h1>
+      <h1 class="start-title">中文学习</h1>
       <p class="start-subtitle">HSK 중국어 학습 게임</p>
       
       <div class="mode-selection">
@@ -57,11 +57,18 @@
           <span class="mode-text">문장 작문하기</span>
         </button>
       </div>
-      <button class="btn-review" id="btn-review" disabled>
-        <span class="review-icon">📒</span>
-        <span class="review-text">오답 노트 복습</span>
-        <span class="review-count" id="review-count">0</span>
-      </button>
+      <div class="sub-mode-row">
+        <button class="btn-review" id="btn-review" disabled>
+          <span class="review-icon">📒</span>
+          <span class="review-text">오답 노트</span>
+          <span class="review-count" id="review-count">0</span>
+        </button>
+        <button class="btn-review btn-wordbook" id="btn-wordbook">
+          <span class="review-icon">⭐</span>
+          <span class="review-text">나의 단어장</span>
+          <span class="review-count wordbook-count" id="wordbook-count">0</span>
+        </button>
+      </div>
       <p class="welcome-message" id="welcome-message"></p>
       <p class="record-summary" id="record-summary"></p>
       <button class="btn-back btn-logout" id="btn-logout">로그아웃</button>
@@ -164,13 +171,28 @@
       <button class="btn-back" id="btn-plan-back">← 뒤로</button>
     </div>
 
+    <!-- ===== Wordbook Screen (나의 단어장) ===== -->
+    <div class="wordbook-screen" id="wordbook-screen" style="display:none;">
+      <h2 class="plan-title">⭐ 나의 단어장</h2>
+      <p class="plan-subtitle" id="wordbook-subtitle">저장한 단어 0개</p>
+      <div class="plan-day-card wordbook-card">
+        <p class="plan-day-hint">단어를 눌러 발음을 들어 보세요 · ★를 누르면 단어장에서 빠져요</p>
+        <ul class="plan-word-list" id="wordbook-list">
+          <!-- Saved words dynamically inserted here -->
+        </ul>
+        <p class="wordbook-empty" id="wordbook-empty">아직 저장한 단어가 없어요.<br>단어 학습 중 ☆ 버튼을 눌러 단어를 모아 보세요!</p>
+        <button class="btn-start-quiz" id="btn-wordbook-quiz">단어장 퀴즈 풀기 📝</button>
+      </div>
+      <button class="btn-back" id="btn-wordbook-back">← 뒤로</button>
+    </div>
+
     <!-- ===== Quiz Screen ===== -->
     <div id="quiz-screen" style="display:none;">
       <!-- Header -->
       <header id="header" class="game-header">
         <button class="btn-top-home" id="btn-quiz-home" title="홈으로">🏠</button>
         <div class="header-titles">
-          <h1>漢字 학습</h1>
+          <h1>中文学习</h1>
           <p class="subtitle" id="level-subtitle">HSK 1급 한자 퀴즈</p>
         </div>
       </header>
@@ -201,6 +223,7 @@
                 <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53M19.07 4.93C20.9447 6.80528 21.998 9.34836 21.998 12C21.998 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
+            <button class="btn-save-word" id="btn-save-word" aria-pressed="false">☆ 단어장에 저장</button>
           </div>
         </div>
         <div class="choices" id="choices">

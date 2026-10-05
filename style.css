@@ -125,6 +125,31 @@ body {
   transform: scale(1.2);
 }
 
+/* 좁은 화면(양옆 여백이 없는 경우)에서는 콘텐츠를 가리지 않도록
+   페이지 오른쪽 위의 작은 음소거 버튼으로 바꾸고, 스크롤하면 함께 올라가게 함 */
+@media (max-width: 900px) {
+  .volume-control-wrapper {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    bottom: auto;
+    left: auto;
+    padding: 7px;
+    gap: 0;
+    border-radius: 50%;
+  }
+
+  .btn-volume {
+    width: 26px;
+    height: 26px;
+    font-size: 1.2rem;
+  }
+
+  .volume-slider {
+    display: none;
+  }
+}
+
 /* ========================================
    LOGIN SCREEN
    ======================================== */
@@ -245,15 +270,22 @@ body {
   margin-top: -8px;
 }
 
-/* Review (오답 노트) Button */
+/* 오답 노트 · 나의 단어장 (반반 크기로 나란히) */
+.sub-mode-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: -8px;
+}
+
 .btn-review {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 14px 20px;
-  margin-top: -8px;
+  gap: 6px;
+  padding: 12px 8px;
   background: var(--bg-card);
   border: 3px solid var(--border);
   border-radius: var(--radius);
@@ -275,23 +307,29 @@ body {
 }
 
 .review-icon {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
 }
 
 .review-text {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .review-count {
-  min-width: 28px;
-  padding: 2px 8px;
+  min-width: 24px;
+  padding: 1px 7px;
   border-radius: 999px;
   background: var(--wrong-bg);
   color: var(--wrong);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
+}
+
+.review-count.wordbook-count {
+  background: var(--accent-light);
+  color: var(--accent);
 }
 
 /* Logout Button */
@@ -1691,7 +1729,7 @@ header h1, .header-titles h1 {
 
 .plan-word {
   display: grid;
-  grid-template-columns: minmax(64px, auto) minmax(72px, auto) 1fr;
+  grid-template-columns: minmax(64px, auto) minmax(72px, auto) 1fr auto;
   align-items: baseline;
   gap: 10px;
   padding: 8px 12px;
@@ -1724,6 +1762,86 @@ header h1, .header-titles h1 {
   text-align: right;
 }
 
+.plan-word-level {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--border);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* 단어장 저장 별 버튼 */
+.plan-word-star {
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.plan-word-star:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.plan-word-star.saved {
+  color: #E9A23B;
+}
+
+/* 퀴즈 화면의 단어장 저장 버튼 */
+.btn-save-word {
+  padding: 6px 12px;
+  border: 2px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-save-word:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-save-word.saved {
+  border-color: #E9A23B;
+  background: #FFF4DC;
+  color: #C7831F;
+}
+
+/* 나의 단어장 화면 */
+.wordbook-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: fadeInScale 0.5s ease;
+}
+
+.wordbook-card {
+  width: 100%;
+}
+
+.wordbook-empty {
+  padding: 32px 8px;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
 /* Result: plan message */
 .result-plan-message {
   font-size: 0.95rem;
@@ -1746,12 +1864,17 @@ header h1, .header-titles h1 {
   }
 
   .plan-word {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: auto 1fr auto;
   }
 
   .plan-word-meaning {
     grid-column: 1 / -1;
     text-align: left;
+  }
+
+  .plan-word-star {
+    grid-column: 3;
+    grid-row: 1;
   }
 }
 
