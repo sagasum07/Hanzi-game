@@ -9,7 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
   <div class="app-container">
@@ -32,7 +31,8 @@
       <p class="login-subtitle">한자 학습 게임에 오신 것을 환영합니다.</p>
       
       <div class="login-buttons">
-        <div id="google-login-btn" class="google-btn-wrapper"></div>
+        <button class="btn-login btn-google" id="btn-login-google" disabled>로그인 확인 중...</button>
+        <p class="login-status" id="login-status"></p>
         <button class="btn-login btn-guest" id="btn-login-guest">
           게스트로 시작하기
         </button>
@@ -57,7 +57,13 @@
           <span class="mode-text">문장 작문하기</span>
         </button>
       </div>
+      <button class="btn-review" id="btn-review" disabled>
+        <span class="review-icon">📒</span>
+        <span class="review-text">오답 노트 복습</span>
+        <span class="review-count" id="review-count">0</span>
+      </button>
       <p class="welcome-message" id="welcome-message"></p>
+      <p class="record-summary" id="record-summary"></p>
       <button class="btn-back btn-logout" id="btn-logout">로그아웃</button>
       <p class="start-hint">원하는 학습 모드를 선택하세요!</p>
     </div>
@@ -283,5 +289,6 @@
   <script src="data_hsk5.js"></script>
   <script src="data_hsk6.js"></script>
   <script src="app.js"></script>
+  <script type="module" src="firebase.js"></script>
 </body>
 </html>

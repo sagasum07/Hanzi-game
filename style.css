@@ -195,13 +195,24 @@ body {
   border: none;
 }
 
-.google-btn-wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100%;
+.btn-google {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 2px solid var(--border);
 }
 
-.google-btn-unavailable {
+.btn-google:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-google:disabled {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+.login-status {
+  min-height: 1.2em;
   font-size: 0.85rem;
   color: var(--text-secondary);
   text-align: center;
@@ -225,6 +236,62 @@ body {
   color: var(--accent);
   margin-top: 16px;
   animation: fadeInScale 0.6s ease;
+}
+
+/* Record Summary */
+.record-summary {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: -8px;
+}
+
+/* Review (오답 노트) Button */
+.btn-review {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  margin-top: -8px;
+  background: var(--bg-card);
+  border: 3px solid var(--border);
+  border-radius: var(--radius);
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: 0 4px 15px var(--bg-card-shadow);
+}
+
+.btn-review:hover:not(:disabled) {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.btn-review:disabled {
+  cursor: default;
+  opacity: 0.55;
+  box-shadow: none;
+}
+
+.review-icon {
+  font-size: 1.4rem;
+}
+
+.review-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.review-count {
+  min-width: 28px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--wrong-bg);
+  color: var(--wrong);
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 /* Logout Button */
@@ -479,6 +546,17 @@ body {
   color: var(--text-muted);
   font-weight: 500;
   text-align: center;
+}
+
+.difficulty-progress {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.difficulty-progress.has-record {
+  color: var(--correct);
+  font-weight: 700;
 }
 
 .btn-back {

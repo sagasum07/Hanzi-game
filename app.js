@@ -114,6 +114,7 @@ const sentencesByLevel = {
 // Game State
 // ========================================
 let currentMode = 'word'; // 'word' 또는 'sentence'
+let isReviewQuiz = false; // 오답 노트 복습 중인지 여부
 let currentLevel = 1;
 let currentIndex = 0;
 let correctCount = 0;
@@ -213,8 +214,10 @@ function showScreen(screenName) {
   } else if (screenName === 'start') {
     startScreen.style.display = '';
     feedbackSection.style.display = '';
+    renderRecordSummary();
   } else if (screenName === 'difficulty') {
     difficultyScreen.style.display = '';
+    renderLevelProgress();
     feedbackSection.style.display = '';
   } else if (screenName === 'count') {
     countScreen.style.display = '';
@@ -429,21 +432,24 @@ function generateQuiz(level, count) {
   const words = wordsByLevel[level];
   const selected = shuffle(words).slice(0, count);
 
-  return selected.map((word) => {
-    // Get 3 wrong answers from the same level, different from the correct one
-    const otherMeanings = words
-      .filter((w) => w.meaning !== word.meaning)
-      .map((w) => w.meaning);
-    const wrongChoices = shuffle(otherMeanings).slice(0, 3);
-    const choices = shuffle([word.meaning, ...wrongChoices]);
+  return selected.map((word) => generateQuestion(word, level));
+}
 
-    return {
-      hanzi: word.hanzi,
-      pinyin: word.pinyin,
-      answer: word.meaning,
-      choices: choices,
-    };
-  });
+function generateQuestion(word, level) {
+  // Get 3 wrong answers from the same level, different from the correct one
+  const otherMeanings = wordsByLevel[level]
+    .filter((w) => w.meaning !== word.meaning)
+    .map((w) => w.meaning);
+  const wrongChoices = shuffle(otherMeanings).slice(0, 3);
+  const choices = shuffle([word.meaning, ...wrongChoices]);
+
+  return {
+    level: level,
+    hanzi: word.hanzi,
+    pinyin: word.pinyin,
+    answer: word.meaning,
+    choices: choices,
+  };
 }
 
 // ========================================
@@ -451,11 +457,13 @@ function generateQuiz(level, count) {
 // ========================================
 btnModeWord.addEventListener('click', () => {
   currentMode = 'word';
+  isReviewQuiz = false;
   showScreen('difficulty');
 });
 
 btnModeSentence.addEventListener('click', () => {
   currentMode = 'sentence';
+  isReviewQuiz = false;
   showScreen('difficulty');
 });
 
@@ -562,7 +570,7 @@ function startWordQuiz(level, retryQuestions) {
   wrongQuestions = [];
 
   // Update subtitle
-  levelSubtitle.textContent = `HSK ${level}급 한자 퀴즈`;
+  levelSubtitle.textContent = isReviewQuiz ? '오답 노트 복습' : `HSK ${level}급 한자 퀴즈`;
 
   // Generate quiz or use retry questions
   if (retryQuestions && retryQuestions.length > 0) {
@@ -629,6 +637,8 @@ function handleAnswer(selectedBtn, selected, answer) {
   answered = true;
 
   const isCorrect = selected === answer;
+  const q = shuffledQuiz[currentIndex];
+  recordAnswer('words', q.level, q.hanzi, isCorrect);
 
   // Update score
   if (isCorrect) {
@@ -915,6 +925,7 @@ function checkSentenceAnswer() {
     if (isCorrect) {
       answered = true;
       correctCount++;
+      recordAnswer('sentences', currentLevel, sentenceQuestions[currentSentenceIndex].chinese, true);
       updateSentenceScore();
       
       answerArea.classList.add('correct-anim');
@@ -1006,8 +1017,9 @@ btnSkip.addEventListener('click', () => {
   wrongCount++;
   wrongSentenceQuestions.push(sentenceQuestions[currentSentenceIndex]);
   updateSentenceScore();
-  
+
   const q = sentenceQuestions[currentSentenceIndex];
+  recordAnswer('sentences', currentLevel, q.chinese, false);
   
   // Auto-fill correctly
   answerArea.innerHTML = '';
@@ -1033,6 +1045,7 @@ btnSkip.addEventListener('click', () => {
 });
 
 function showSentenceResult() {
+  flushRecordSave();
   sentenceProgressFill.style.width = '100%';
   sentenceCard.style.display = 'none';
   document.getElementById('sentence-progress-wrapper').style.display = 'none';
@@ -1067,6 +1080,8 @@ function showSentenceResult() {
 // Show result screen
 // ========================================
 function showResult() {
+  flushRecordSave();
+
   // Fill progress bar to 100%
   progressFill.style.width = '100%';
 
@@ -1109,7 +1124,11 @@ function showResult() {
 // Restart (same level)
 // ========================================
 btnRestart.addEventListener('click', () => {
-  startQuiz(currentLevel);
+  if (isReviewQuiz) {
+    startReviewQuiz();
+  } else {
+    startQuiz(currentLevel);
+  }
 });
 
 // ========================================
@@ -1182,102 +1201,325 @@ function showToast(message) {
 }
 
 // ========================================
-// Login & Initial state
+// 학습 기록 (사용자별 저장)
 // ========================================
-// Google Cloud 콘솔에서 발급받은 OAuth 클라이언트 ID
-const GOOGLE_CLIENT_ID = '543529103530-av2ve4sk2kg9j9pcdmoosrdqt63lg229.apps.googleusercontent.com';
+// 기록 구조: { words: { "급수|한자": 항목 }, sentences: { "급수|중국어 문장": 항목 }, updatedAt }
+// 항목: { c: 맞힌 횟수, w: 틀린 횟수, s: 연속으로 맞힌 횟수, t: 마지막으로 푼 시각(ms) }
+// 구글 로그인 사용자는 Firestore(users/{uid})에, 게스트는 이 브라우저(localStorage)에 저장합니다.
+const GUEST_FLAG_KEY = 'hanzi_guest';
+const GUEST_RECORD_KEY = 'hanzi_guest_record';
+const REVIEW_GRADUATE_STREAK = 2; // 연속으로 이만큼 맞히면 오답 노트에서 빠짐
+const REVIEW_MAX_QUESTIONS = 20;
+const RECORD_SAVE_DELAY = 2000;
 
-function checkLogin() {
-  const savedUsername = localStorage.getItem('hanzi_username');
-  const isGuest = localStorage.getItem('hanzi_guest');
+let userRecord = normalizeRecord(null);
+let recordOwner = null; // { type: 'guest' } 또는 { type: 'google', uid, name }
+let recordSaveBlocked = false; // 저장된 기록을 불러오지 못했을 때 덮어쓰지 않도록 저장을 막음
+let recordSaveTimer = null;
 
-  if (savedUsername) {
-    welcomeMessage.textContent = `환영합니다 ${savedUsername}님!`;
-    showScreen('start');
-  } else if (isGuest) {
-    welcomeMessage.textContent = '환영합니다 게스트님!';
-    showScreen('start');
+const btnReview = document.getElementById('btn-review');
+const reviewCount = document.getElementById('review-count');
+const recordSummary = document.getElementById('record-summary');
+
+function normalizeRecord(data) {
+  return {
+    words: (data && data.words) || {},
+    sentences: (data && data.sentences) || {},
+    updatedAt: (data && data.updatedAt) || 0,
+  };
+}
+
+function recordAnswer(kind, level, id, isCorrect) {
+  if (!recordOwner) return;
+  const key = `${level}|${id}`;
+  const entry = userRecord[kind][key] || { c: 0, w: 0, s: 0, t: 0 };
+  if (isCorrect) {
+    entry.c++;
+    entry.s++;
   } else {
-    showScreen('login');
+    entry.w++;
+    entry.s = 0;
   }
+  entry.t = Date.now();
+  userRecord[kind][key] = entry;
+  scheduleRecordSave();
 }
 
-// 구글 JWT 토큰 디코딩 함수
-function decodeJwtResponse(token) {
-  let base64Url = token.split('.')[1];
-  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
-  return JSON.parse(jsonPayload);
+function scheduleRecordSave() {
+  clearTimeout(recordSaveTimer);
+  recordSaveTimer = setTimeout(saveRecordNow, RECORD_SAVE_DELAY);
 }
 
-// 구글 로그인 성공 콜백
-window.handleCredentialResponse = function(response) {
-  const responsePayload = decodeJwtResponse(response.credential);
-  const username = responsePayload.name; // 구글 계정 이름
-  
-  localStorage.setItem('hanzi_username', username);
-  localStorage.removeItem('hanzi_guest');
-  checkLogin();
-};
+// 예약된 저장이 있으면 바로 저장
+function flushRecordSave() {
+  if (!recordSaveTimer) return Promise.resolve();
+  clearTimeout(recordSaveTimer);
+  return saveRecordNow();
+}
 
-// 구글 로그인 버튼 초기화
-// GIS 스크립트는 async 로 로드되므로, 준비될 때까지 잠시 재시도합니다.
-// file:// 이거나 오프라인이라 로드에 실패하면 게스트 로그인만 사용할 수 있게 안내합니다.
-function initGoogleSignIn(retriesLeft = 50) {
-  const googleBtn = document.getElementById("google-login-btn");
+async function saveRecordNow() {
+  recordSaveTimer = null;
+  if (!recordOwner) return;
+  userRecord.updatedAt = Date.now();
 
-  if (location.protocol === 'file:') {
-    googleBtn.textContent = '구글 로그인은 로컬 서버(http://)에서 실행해야 사용할 수 있습니다.';
-    googleBtn.classList.add('google-btn-unavailable');
-    return;
-  }
-
-  if (!(window.google && google.accounts && google.accounts.id)) {
-    if (retriesLeft > 0) {
-      setTimeout(() => initGoogleSignIn(retriesLeft - 1), 100);
-    } else {
-      googleBtn.textContent = '구글 로그인을 불러오지 못했습니다. 게스트로 시작해 주세요.';
-      googleBtn.classList.add('google-btn-unavailable');
+  if (recordOwner.type === 'guest') {
+    try {
+      localStorage.setItem(GUEST_RECORD_KEY, JSON.stringify(userRecord));
+    } catch (error) {
+      console.error('게스트 기록 저장 실패:', error);
     }
     return;
   }
 
+  if (recordSaveBlocked || !window.hanziFirebase) return;
   try {
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse
-    });
-    google.accounts.id.renderButton(googleBtn, { theme: "outline", size: "large", width: 280 });
+    await window.hanziFirebase.saveRecord(recordOwner.uid, { ...userRecord, name: recordOwner.name });
   } catch (error) {
-    console.error('구글 로그인 초기화 실패:', error);
-    googleBtn.textContent = '구글 로그인을 불러오지 못했습니다. 게스트로 시작해 주세요.';
-    googleBtn.classList.add('google-btn-unavailable');
+    console.error('학습 기록 저장 실패:', error);
+    showToast('학습 기록을 저장하지 못했습니다 😢');
   }
 }
 
-window.addEventListener('load', () => initGoogleSignIn());
-
-btnLoginGuest.addEventListener('click', () => {
-  localStorage.setItem('hanzi_guest', 'true');
-  localStorage.removeItem('hanzi_username');
-  checkLogin();
+// 탭을 닫거나 다른 앱으로 넘어갈 때 저장
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushRecordSave();
 });
 
-btnLogout.addEventListener('click', () => {
-  // 구글 계정으로 로그인했다면 자동 로그인(auto select)을 해제
-  if (localStorage.getItem('hanzi_username') && window.google && google.accounts && google.accounts.id) {
-    google.accounts.id.disableAutoSelect();
+function readGuestRecord() {
+  try {
+    return JSON.parse(localStorage.getItem(GUEST_RECORD_KEY));
+  } catch (error) {
+    return null;
   }
-  localStorage.removeItem('hanzi_username');
-  localStorage.removeItem('hanzi_guest');
+}
+
+function getLevelStats(kind, level) {
+  const prefix = `${level}|`;
+  let learned = 0;
+  let correct = 0;
+  let wrong = 0;
+  Object.entries(userRecord[kind]).forEach(([key, entry]) => {
+    if (!key.startsWith(prefix)) return;
+    learned++;
+    correct += entry.c;
+    wrong += entry.w;
+  });
+  const source = kind === 'words' ? wordsByLevel : sentencesByLevel;
+  return {
+    learned: learned,
+    total: (source[level] || []).length,
+    accuracy: correct + wrong > 0 ? Math.round((correct / (correct + wrong)) * 100) : null,
+  };
+}
+
+// 오답 노트: 틀린 적이 있고 아직 연속으로 충분히 맞히지 못한 단어
+function getReviewItems() {
+  return Object.entries(userRecord.words)
+    .filter(([, entry]) => entry.w > 0 && entry.s < REVIEW_GRADUATE_STREAK)
+    .map(([key, entry]) => {
+      const sep = key.indexOf('|');
+      const level = Number(key.slice(0, sep));
+      const hanzi = key.slice(sep + 1);
+      const word = (wordsByLevel[level] || []).find((w) => w.hanzi === hanzi);
+      return word ? { level: level, word: word, entry: entry } : null;
+    })
+    .filter(Boolean);
+}
+
+function renderRecordSummary() {
+  let correct = 0;
+  let wrong = 0;
+  [userRecord.words, userRecord.sentences].forEach((group) => {
+    Object.values(group).forEach((entry) => {
+      correct += entry.c;
+      wrong += entry.w;
+    });
+  });
+  const solved = correct + wrong;
+  recordSummary.textContent = solved > 0
+    ? `지금까지 ${solved}문제를 풀었어요 · 정답률 ${Math.round((correct / solved) * 100)}%`
+    : '첫 학습을 시작해 보세요!';
+
+  const reviewTotal = getReviewItems().length;
+  reviewCount.textContent = reviewTotal;
+  btnReview.disabled = reviewTotal === 0;
+  btnReview.title = reviewTotal === 0 ? '틀린 단어가 생기면 여기서 복습할 수 있어요' : '';
+}
+
+function renderLevelProgress() {
+  const kind = currentMode === 'sentence' ? 'sentences' : 'words';
+  document.querySelectorAll('.difficulty-card').forEach((card) => {
+    let progress = card.querySelector('.difficulty-progress');
+    if (!progress) {
+      progress = document.createElement('span');
+      progress.className = 'difficulty-progress';
+      card.appendChild(progress);
+    }
+    const stats = getLevelStats(kind, parseInt(card.dataset.level));
+    progress.textContent = stats.learned === 0
+      ? '아직 학습 기록 없음'
+      : `학습 ${Math.min(stats.learned, stats.total)}/${stats.total} · 정답률 ${stats.accuracy}%`;
+    progress.classList.toggle('has-record', stats.learned > 0);
+  });
+}
+
+function startReviewQuiz() {
+  // 많이 틀린 단어부터 골라서 섞어 출제
+  const items = getReviewItems()
+    .sort((a, b) => b.entry.w - a.entry.w || a.entry.t - b.entry.t)
+    .slice(0, REVIEW_MAX_QUESTIONS);
+  if (items.length === 0) {
+    showToast('복습할 단어가 없어요! 🎉');
+    showScreen('start');
+    return;
+  }
+  currentMode = 'word';
+  isReviewQuiz = true;
+  startWordQuiz(items[0].level, shuffle(items).map((item) => generateQuestion(item.word, item.level)));
+}
+
+btnReview.addEventListener('click', startReviewQuiz);
+
+// ========================================
+// Login & Initial state
+// ========================================
+const btnLoginGoogle = document.getElementById('btn-login-google');
+const loginStatus = document.getElementById('login-status');
+let firebaseSettled = false;
+
+function setLoginStatus(message) {
+  loginStatus.textContent = message;
+}
+
+function enterStartScreen(name) {
+  welcomeMessage.textContent = `환영합니다 ${name}님!`;
+  showScreen('start');
+}
+
+function enterAsGuest() {
+  flushRecordSave();
+  recordOwner = { type: 'guest' };
+  recordSaveBlocked = false;
+  userRecord = normalizeRecord(readGuestRecord());
+  enterStartScreen('게스트');
+}
+
+async function enterAsGoogleUser(user) {
+  flushRecordSave();
+  recordOwner = { type: 'google', uid: user.uid, name: user.name };
+  userRecord = normalizeRecord(null);
+  recordSaveBlocked = true;
+  setLoginStatus('학습 기록을 불러오는 중...');
+
+  let loadFailed = false;
+  try {
+    userRecord = normalizeRecord(await window.hanziFirebase.loadRecord(user.uid));
+    recordSaveBlocked = false;
+  } catch (error) {
+    console.error('학습 기록 불러오기 실패:', error);
+    loadFailed = true;
+  }
+
+  // 불러오는 사이에 로그아웃했다면 화면을 바꾸지 않음
+  if (!recordOwner || recordOwner.uid !== user.uid) return;
+  setLoginStatus('');
+  enterStartScreen(user.name);
+  if (loadFailed) showToast('학습 기록을 불러오지 못해서 이번 학습은 저장되지 않아요.');
+}
+
+function markGoogleLoginUnavailable(message) {
+  firebaseSettled = true;
+  btnLoginGoogle.disabled = true;
+  btnLoginGoogle.textContent = 'Google 로그인 사용 불가';
+  setLoginStatus(message);
+}
+
+// firebase.js 에서 호출: 로그인 상태가 바뀔 때 (페이지 처음 열 때도 한 번 호출됨)
+window.onHanziAuthChanged = function (user) {
+  firebaseSettled = true;
+  btnLoginGoogle.disabled = false;
+  btnLoginGoogle.textContent = 'Google 계정으로 로그인';
+
+  if (user) {
+    if (recordOwner && recordOwner.type === 'google' && recordOwner.uid === user.uid) return;
+    localStorage.removeItem(GUEST_FLAG_KEY);
+    enterAsGoogleUser(user);
+  } else if (recordOwner && recordOwner.type === 'google') {
+    // 다른 탭에서 로그아웃한 경우
+    recordOwner = null;
+    userRecord = normalizeRecord(null);
+    showScreen('login');
+  }
+};
+
+// firebase.js 에서 호출: 설정 누락, 네트워크 오류 등으로 Firebase 를 쓸 수 없을 때
+window.onHanziFirebaseUnavailable = function () {
+  markGoogleLoginUnavailable('구글 로그인을 불러오지 못했습니다. 게스트로 시작해 주세요.');
+};
+
+btnLoginGoogle.addEventListener('click', async () => {
+  if (!window.hanziFirebase) return;
+  btnLoginGoogle.disabled = true;
+  setLoginStatus('');
+  try {
+    // 성공하면 onHanziAuthChanged 가 화면을 전환함
+    await window.hanziFirebase.signIn();
+  } catch (error) {
+    if (error.code === 'auth/unauthorized-domain') {
+      setLoginStatus(`이 주소(${location.hostname})가 Firebase 승인된 도메인에 등록되어 있지 않습니다.`);
+    } else if (error.code === 'auth/popup-blocked') {
+      setLoginStatus('팝업이 차단되었습니다. 팝업을 허용한 뒤 다시 시도해 주세요.');
+    } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+      console.error('로그인 실패:', error);
+      setLoginStatus('로그인에 실패했습니다. 다시 시도해 주세요.');
+    }
+  } finally {
+    btnLoginGoogle.disabled = false;
+  }
+});
+
+btnLoginGuest.addEventListener('click', () => {
+  localStorage.setItem(GUEST_FLAG_KEY, 'true');
+  enterAsGuest();
+});
+
+btnLogout.addEventListener('click', async () => {
+  await flushRecordSave();
+  const wasGoogleUser = recordOwner && recordOwner.type === 'google';
+  recordOwner = null;
+  userRecord = normalizeRecord(null);
+  localStorage.removeItem(GUEST_FLAG_KEY);
   welcomeMessage.textContent = '';
-  checkLogin();
+  setLoginStatus('');
+  showScreen('login');
+
+  if (wasGoogleUser && window.hanziFirebase) {
+    try {
+      await window.hanziFirebase.signOut();
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+  }
 });
 
 // 시작 시 로그인 체크
-checkLogin();
+localStorage.removeItem('hanzi_username'); // 이전 버전(GIS 로그인)에서 남은 값 정리
+if (localStorage.getItem(GUEST_FLAG_KEY)) {
+  enterAsGuest();
+} else {
+  showScreen('login');
+}
+
+if (location.protocol === 'file:') {
+  // file:// 에서는 모듈 스크립트(firebase.js)를 불러올 수 없음
+  markGoogleLoginUnavailable('구글 로그인은 로컬 서버(http://)나 배포된 주소에서만 사용할 수 있습니다.');
+} else {
+  setTimeout(() => {
+    if (!firebaseSettled) {
+      markGoogleLoginUnavailable('구글 로그인을 불러오지 못했습니다. 게스트로 시작해 주세요.');
+    }
+  }, 15000);
+}
 
 // ========================================
 // Background Music Logic
