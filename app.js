@@ -115,7 +115,6 @@ const sentencesByLevel = {
 // ========================================
 let currentMode = 'word'; // 'word' 또는 'sentence'
 let isReviewQuiz = false; // 오답 노트 복습 중인지 여부
-let isWordbookQuiz = false; // 나의 단어장 퀴즈 중인지 여부
 let currentPlanDay = null; // 학습 플랜 퀴즈 중이면 일차 번호, 아니면 null
 let isPlanRetryRound = false; // 학습 플랜에서 틀린 문제만 다시 푸는 중인지 여부
 let currentLevel = 1;
@@ -488,7 +487,6 @@ function generateQuestion(word, level) {
 btnModeWord.addEventListener('click', () => {
   currentMode = 'word';
   isReviewQuiz = false;
-  isWordbookQuiz = false;
   currentPlanDay = null;
   showScreen('difficulty');
 });
@@ -496,7 +494,6 @@ btnModeWord.addEventListener('click', () => {
 btnModeSentence.addEventListener('click', () => {
   currentMode = 'sentence';
   isReviewQuiz = false;
-  isWordbookQuiz = false;
   currentPlanDay = null;
   showScreen('difficulty');
 });
@@ -610,9 +607,7 @@ function startWordQuiz(level, retryQuestions) {
   wrongQuestions = [];
 
   // Update subtitle
-  if (isWordbookQuiz) {
-    levelSubtitle.textContent = '나의 단어장';
-  } else if (isReviewQuiz) {
+  if (isReviewQuiz) {
     levelSubtitle.textContent = '오답 노트 복습';
   } else if (currentPlanDay !== null) {
     levelSubtitle.textContent = `HSK ${level}급 · ${currentPlanDay}일차`;
@@ -1178,8 +1173,6 @@ function showResult() {
 btnRestart.addEventListener('click', () => {
   if (currentPlanDay !== null) {
     startPlanQuiz(currentPlanDay);
-  } else if (isWordbookQuiz) {
-    startWordbookQuiz();
   } else if (isReviewQuiz) {
     startReviewQuiz();
   } else {
@@ -1452,7 +1445,6 @@ function startReviewQuiz() {
   }
   currentMode = 'word';
   isReviewQuiz = true;
-  isWordbookQuiz = false;
   currentPlanDay = null;
   startWordQuiz(items[0].level, shuffle(items).map((item) => generateQuestion(item.word, item.level)));
 }
@@ -1581,7 +1573,6 @@ function movePlanDay(delta) {
 function startPlanQuiz(day) {
   currentMode = 'word';
   isReviewQuiz = false;
-  isWordbookQuiz = false;
   isPlanRetryRound = false;
   currentPlanDay = day;
   const questions = shuffle(getPlanDayWords(currentLevel, day)).map((word) => generateQuestion(word, currentLevel));
@@ -1594,18 +1585,10 @@ function hidePlanResult() {
 }
 
 function updatePlanResult(pct) {
-  if (isWordbookQuiz) {
-    // 단어장 퀴즈는 완료 판정 없이 단어장으로 돌아가는 버튼만 보여 줌
-    resultPlanMessage.style.display = 'none';
-    btnToPlan.textContent = '나의 단어장으로 ⭐';
-    btnToPlan.style.display = '';
-    return;
-  }
   if (currentPlanDay === null) {
     hidePlanResult();
     return;
   }
-  btnToPlan.textContent = '학습 플랜으로 📅';
   const level = currentLevel;
   const day = currentPlanDay;
   let message;
@@ -1637,13 +1620,7 @@ btnPlanPrev.addEventListener('click', () => movePlanDay(-1));
 btnPlanNext.addEventListener('click', () => movePlanDay(1));
 btnPlanStart.addEventListener('click', () => startPlanQuiz(planViewDay));
 btnPlanBack.addEventListener('click', () => showScreen('difficulty'));
-btnToPlan.addEventListener('click', () => {
-  if (isWordbookQuiz) {
-    openWordbook();
-  } else {
-    openPlan(currentLevel);
-  }
-});
+btnToPlan.addEventListener('click', () => openPlan(currentLevel));
 
 // 키보드 ← → 로 일차 이동
 document.addEventListener('keydown', (e) => {
@@ -1655,15 +1632,15 @@ document.addEventListener('keydown', (e) => {
 // ========================================
 // 나의 단어장
 // ========================================
-// 단어 학습 중 ☆ 버튼으로 저장한 단어를 모아 따로 공부합니다.
+// 단어 학습 중 ☆ 버튼으로 저장한 단어를 노트 모양 화면에 모아, 퀴즈 없이 단어와 뜻을 공부합니다.
 // 저장 형식: userRecord.wordbook = { "급수|한자": 저장한 시각(ms) }
-const WORDBOOK_QUIZ_MAX = 30;
 
 const btnWordbook = document.getElementById('btn-wordbook');
 const wordbookSubtitle = document.getElementById('wordbook-subtitle');
 const wordbookList = document.getElementById('wordbook-list');
 const wordbookEmpty = document.getElementById('wordbook-empty');
-const btnWordbookQuiz = document.getElementById('btn-wordbook-quiz');
+const wordbookHideMeaning = document.getElementById('wordbook-hide-meaning');
+const wordbookHint = document.getElementById('wordbook-hint');
 const btnWordbookBack = document.getElementById('btn-wordbook-back');
 const btnSaveWord = document.getElementById('btn-save-word');
 
@@ -1707,8 +1684,8 @@ function setStarButton(btn, saved) {
   btn.title = saved ? '단어장에서 빼기' : '단어장에 저장';
 }
 
-// 학습 플랜·단어장 목록의 단어 한 줄 (누르면 발음, ☆ 로 단어장 저장)
-function createWordRow(word, level, options = {}) {
+// 학습 플랜 목록의 단어 한 줄 (누르면 발음, ☆ 로 단어장 저장)
+function createWordRow(word, level) {
   const li = document.createElement('li');
   li.className = 'plan-word';
   li.title = '발음 듣기';
@@ -1719,12 +1696,6 @@ function createWordRow(word, level, options = {}) {
   const pinyin = document.createElement('span');
   pinyin.className = 'plan-word-pinyin';
   pinyin.textContent = word.pinyin;
-  if (options.showLevel) {
-    const badge = document.createElement('small');
-    badge.className = 'plan-word-level';
-    badge.textContent = `${level}급`;
-    pinyin.appendChild(badge);
-  }
   const meaning = document.createElement('span');
   meaning.className = 'plan-word-meaning';
   meaning.textContent = word.meaning;
@@ -1734,9 +1705,7 @@ function createWordRow(word, level, options = {}) {
   setStarButton(star, isInWordbook(level, word.hanzi));
   star.addEventListener('click', (e) => {
     e.stopPropagation(); // 발음 재생과 구분
-    const saved = toggleWordbook(level, word.hanzi);
-    setStarButton(star, saved);
-    if (options.onToggle) options.onToggle(saved);
+    setStarButton(star, toggleWordbook(level, word.hanzi));
   });
 
   li.append(hanzi, pinyin, meaning, star);
@@ -1758,19 +1727,61 @@ btnSaveWord.addEventListener('click', () => {
   updateSaveWordButton(q.level, q.hanzi);
 });
 
+// 노트의 단어 한 줄: 한자(왼쪽 크게) / 병음·급수 / 뜻(손글씨체) / ★
+// 누르면 발음을 들려주고, '뜻 가리기' 중이면 그 단어의 뜻을 보여 줌
+function createNotebookRow(word, level) {
+  const li = document.createElement('li');
+  li.className = 'notebook-word';
+
+  const hanzi = document.createElement('span');
+  hanzi.className = 'nb-hanzi';
+  hanzi.textContent = word.hanzi;
+
+  const pinyin = document.createElement('span');
+  pinyin.className = 'nb-pinyin';
+  pinyin.textContent = word.pinyin;
+  const badge = document.createElement('small');
+  badge.className = 'plan-word-level';
+  badge.textContent = `${level}급`;
+  pinyin.appendChild(badge);
+
+  const meaning = document.createElement('span');
+  meaning.className = 'nb-meaning';
+  meaning.textContent = word.meaning;
+
+  const star = document.createElement('button');
+  star.className = 'plan-word-star';
+  setStarButton(star, true);
+  star.addEventListener('click', (e) => {
+    e.stopPropagation(); // 발음 재생과 구분
+    toggleWordbook(level, word.hanzi);
+    renderWordbook();
+  });
+
+  li.append(hanzi, pinyin, meaning, star);
+  li.addEventListener('click', () => {
+    speakHanzi(word.hanzi);
+    if (wordbookHideMeaning.checked) li.classList.toggle('revealed');
+  });
+  return li;
+}
+
+function updateWordbookHint() {
+  wordbookHint.textContent = wordbookHideMeaning.checked
+    ? '단어를 누르면 뜻이 보여요'
+    : '단어를 누르면 발음 · ★ 누르면 빼기';
+}
+
 function renderWordbook() {
   const items = getWordbookItems();
-  wordbookSubtitle.textContent = `저장한 단어 ${items.length}개`;
+  wordbookSubtitle.textContent = `${items.length}개`;
   wordbookList.innerHTML = '';
   items.forEach((item) => {
-    // 단어장에서 ★ 를 눌러 빼면 목록을 다시 그림
-    wordbookList.appendChild(createWordRow(item.word, item.level, { showLevel: true, onToggle: renderWordbook }));
+    wordbookList.appendChild(createNotebookRow(item.word, item.level));
   });
+  wordbookList.classList.toggle('hide-meaning', wordbookHideMeaning.checked);
   wordbookEmpty.style.display = items.length === 0 ? '' : 'none';
-  btnWordbookQuiz.style.display = items.length === 0 ? 'none' : '';
-  btnWordbookQuiz.textContent = items.length > WORDBOOK_QUIZ_MAX
-    ? `단어장 퀴즈 풀기 (랜덤 ${WORDBOOK_QUIZ_MAX}개) 📝`
-    : `단어장 퀴즈 풀기 (${items.length}개) 📝`;
+  updateWordbookHint();
 }
 
 function openWordbook() {
@@ -1778,21 +1789,14 @@ function openWordbook() {
   showScreen('wordbook');
 }
 
-function startWordbookQuiz() {
-  const items = shuffle(getWordbookItems()).slice(0, WORDBOOK_QUIZ_MAX);
-  if (items.length === 0) {
-    openWordbook();
-    return;
-  }
-  currentMode = 'word';
-  isReviewQuiz = false;
-  isWordbookQuiz = true;
-  currentPlanDay = null;
-  startWordQuiz(items[0].level, items.map((item) => generateQuestion(item.word, item.level)));
-}
+// 뜻 가리기: 켜면 모든 뜻을 가리고, 단어를 하나씩 눌러 확인
+wordbookHideMeaning.addEventListener('change', () => {
+  wordbookList.querySelectorAll('.revealed').forEach((li) => li.classList.remove('revealed'));
+  wordbookList.classList.toggle('hide-meaning', wordbookHideMeaning.checked);
+  updateWordbookHint();
+});
 
 btnWordbook.addEventListener('click', openWordbook);
-btnWordbookQuiz.addEventListener('click', startWordbookQuiz);
 btnWordbookBack.addEventListener('click', () => showScreen('start'));
 
 // ========================================
@@ -2121,8 +2125,6 @@ function handleBackButton() {
     // 퀴즈 중이거나 결과 화면이면, 시작했던 곳으로 돌아감
     if (currentPlanDay !== null) {
       openPlan(currentLevel);
-    } else if (isWordbookQuiz) {
-      openWordbook();
     } else {
       showScreen('start');
     }

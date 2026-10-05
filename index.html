@@ -7,7 +7,7 @@
   <title>中文学习 - HSK 1~6급</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -174,17 +174,27 @@
       <button class="btn-back" id="btn-plan-back">← 뒤로</button>
     </div>
 
-    <!-- ===== Wordbook Screen (나의 단어장) ===== -->
+    <!-- ===== Wordbook Screen (나의 단어장: 노트 모양, 퀴즈 없이 단어와 뜻 공부) ===== -->
     <div class="wordbook-screen" id="wordbook-screen" style="display:none;">
-      <h2 class="plan-title">⭐ 나의 단어장</h2>
-      <p class="plan-subtitle" id="wordbook-subtitle">저장한 단어 0개</p>
-      <div class="plan-day-card wordbook-card">
-        <p class="plan-day-hint">단어를 눌러 발음을 들어 보세요 · ★를 누르면 단어장에서 빠져요</p>
-        <ul class="plan-word-list" id="wordbook-list">
-          <!-- Saved words dynamically inserted here -->
-        </ul>
-        <p class="wordbook-empty" id="wordbook-empty">아직 저장한 단어가 없어요.<br>단어 학습 중 ☆ 버튼을 눌러 단어를 모아 보세요!</p>
-        <button class="btn-start-quiz" id="btn-wordbook-quiz">단어장 퀴즈 풀기 📝</button>
+      <div class="notebook">
+        <div class="notebook-rings" aria-hidden="true"></div>
+        <div class="notebook-page">
+          <div class="notebook-header">
+            <h2 class="notebook-title">나의 단어장</h2>
+            <span class="notebook-count" id="wordbook-subtitle">0개</span>
+          </div>
+          <div class="notebook-tools">
+            <label class="notebook-toggle">
+              <input type="checkbox" id="wordbook-hide-meaning">
+              <span>뜻 가리기</span>
+            </label>
+            <span class="notebook-hint" id="wordbook-hint">단어를 누르면 발음 · ★ 누르면 빼기</span>
+          </div>
+          <ol class="notebook-list" id="wordbook-list">
+            <!-- Saved words dynamically inserted here -->
+          </ol>
+          <p class="wordbook-empty" id="wordbook-empty">아직 저장한 단어가 없어요.<br>단어 학습 중 ☆ 버튼을 눌러 단어를 모아 보세요!</p>
+        </div>
       </div>
       <button class="btn-back" id="btn-wordbook-back">← 뒤로</button>
     </div>

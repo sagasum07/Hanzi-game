@@ -1848,15 +1848,187 @@ header h1, .header-titles h1 {
   animation: fadeInScale 0.5s ease;
 }
 
-.wordbook-card {
+/* 노트 모양: 위쪽 스프링 고리 + 줄 노트 종이 + 왼쪽 빨간 여백 선 */
+.notebook {
+  --paper: #FFFEF8;
+  --rule: #C9DCEB;
+  --margin-line: #F0A8A0;
+  --ring: #A8998C;
+  position: relative;
   width: 100%;
+  padding-top: 14px;
+}
+
+.notebook-rings {
+  position: absolute;
+  top: 0;
+  left: 28px;
+  right: 28px;
+  height: 30px;
+  z-index: 2;
+  /* 고리(테두리만 있는 둥근 링)를 일정 간격으로 반복 */
+  background: radial-gradient(circle at 50% 55%, transparent 0 5px, var(--ring) 5px 7.5px, transparent 8px) 0 0 / 36px 30px repeat-x;
+  pointer-events: none;
+}
+
+.notebook-page {
+  position: relative;
+  padding: 30px 16px 22px 58px;
+  border: 1px solid var(--border);
+  border-radius: 8px 8px 16px 16px;
+  background:
+    linear-gradient(90deg, transparent 44px, var(--margin-line) 44px, var(--margin-line) 46px, transparent 46px),
+    var(--paper);
+  box-shadow:
+    0 6px 24px var(--bg-card-shadow),
+    4px 4px 0 -1px #F4EDE3,
+    4px 4px 0 0 var(--border);
+}
+
+/* 고리가 끼워지는 종이 구멍 */
+.notebook-page::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 28px;
+  right: 28px;
+  height: 12px;
+  background: radial-gradient(circle at 50% 50%, var(--bg-primary) 0 4.5px, transparent 5px) 0 0 / 36px 12px repeat-x;
+}
+
+.notebook-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--rule);
+}
+
+.notebook-title {
+  font-family: 'Nanum Pen Script', 'Noto Sans KR', cursive;
+  font-size: 2.1rem;
+  font-weight: 400;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.notebook-count {
+  font-family: 'Nanum Pen Script', 'Noto Sans KR', cursive;
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+}
+
+.notebook-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.notebook-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.notebook-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.notebook-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.notebook-list {
+  list-style: none;
+  counter-reset: nb;
+}
+
+/* 단어 한 줄: 윗줄에 한자·병음·급수, 아랫줄에 뜻 (긴 단어도 뜻이 좁아지지 않도록) */
+.notebook-word {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "hanzi pinyin star"
+    "meaning meaning star";
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 2px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  counter-increment: nb;
+}
+
+/* 왼쪽 여백에 손글씨 번호 */
+.notebook-word::before {
+  content: counter(nb);
+  position: absolute;
+  left: -46px;
+  width: 36px;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 1.3rem;
+  color: #D9776C;
+}
+
+.nb-hanzi {
+  grid-area: hanzi;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.nb-pinyin {
+  grid-area: pinyin;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.nb-meaning {
+  grid-area: meaning;
+  justify-self: start;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-family: 'Nanum Pen Script', 'Noto Sans KR', cursive;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  color: #3B4A6B;
+}
+
+.notebook-word .plan-word-star {
+  grid-area: star;
+}
+
+/* 뜻 가리기: 마스킹 테이프를 붙인 것처럼 가리고, 누른 단어만 보여 줌 */
+.notebook-list.hide-meaning .notebook-word:not(.revealed) .nb-meaning {
+  min-width: 5em;
+  color: transparent;
+  background: repeating-linear-gradient(-45deg, #F6E3C4 0 8px, #F1D9B2 8px 16px);
 }
 
 .wordbook-empty {
   padding: 32px 8px;
   text-align: center;
-  font-size: 0.95rem;
-  line-height: 1.7;
+  font-family: 'Nanum Pen Script', 'Noto Sans KR', cursive;
+  font-size: 1.4rem;
+  line-height: 1.5;
   color: var(--text-secondary);
 }
 
