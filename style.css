@@ -1945,7 +1945,35 @@ header h1, .header-titles h1 {
   accent-color: var(--accent);
 }
 
+/* 정렬: 최신순 / 급수순 */
+.notebook-sort {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-primary);
+}
+
+.sort-btn {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.sort-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
 .notebook-hint {
+  flex-basis: 100%;
   font-size: 0.75rem;
   color: var(--text-muted);
 }
@@ -2021,6 +2049,64 @@ header h1, .header-titles h1 {
   min-width: 5em;
   color: transparent;
   background: repeating-linear-gradient(-45deg, #F6E3C4 0 8px, #F1D9B2 8px 16px);
+}
+
+/* 쪽 넘기기 */
+.notebook-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding-top: 14px;
+}
+
+.pager-btn {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--accent);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.pager-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.pager-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pager-text {
+  min-width: 70px;
+  text-align: center;
+  font-family: 'Nanum Pen Script', 'Noto Sans KR', cursive;
+  font-size: 1.4rem;
+  color: var(--text-secondary);
+}
+
+.notebook-list.turn-next {
+  animation: pageInNext 0.28s ease;
+}
+
+.notebook-list.turn-prev {
+  animation: pageInPrev 0.28s ease;
+}
+
+@keyframes pageInNext {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes pageInPrev {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: none; }
 }
 
 .wordbook-empty {

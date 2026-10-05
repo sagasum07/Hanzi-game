@@ -188,14 +188,24 @@
               <input type="checkbox" id="wordbook-hide-meaning">
               <span>뜻 가리기</span>
             </label>
+            <div class="notebook-sort" role="group" aria-label="단어 정렬">
+              <button class="sort-btn active" data-sort="recent" aria-pressed="true">최신순</button>
+              <button class="sort-btn" data-sort="level" aria-pressed="false">급수순</button>
+            </div>
             <span class="notebook-hint" id="wordbook-hint">단어를 누르면 발음 · ★ 누르면 빼기</span>
           </div>
           <ol class="notebook-list" id="wordbook-list">
             <!-- Saved words dynamically inserted here -->
           </ol>
           <p class="wordbook-empty" id="wordbook-empty">아직 저장한 단어가 없어요.<br>단어 학습 중 ☆ 버튼을 눌러 단어를 모아 보세요!</p>
+          <div class="notebook-pager" id="wordbook-pager">
+            <button class="pager-btn" id="btn-wordbook-prev" aria-label="이전 쪽">‹</button>
+            <span class="pager-text" id="wordbook-page-text">1 / 1 쪽</span>
+            <button class="pager-btn" id="btn-wordbook-next" aria-label="다음 쪽">›</button>
+          </div>
         </div>
       </div>
+      <button class="btn-start-quiz" id="btn-wordbook-quiz">🎲 랜덤 퀴즈</button>
       <button class="btn-back" id="btn-wordbook-back">← 뒤로</button>
     </div>
 
