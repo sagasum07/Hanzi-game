@@ -688,6 +688,8 @@ function handleAnswer(selectedBtn, selected, answer) {
   const isCorrect = selected === answer;
   const q = shuffledQuiz[currentIndex];
   recordAnswer('words', q.level, q.hanzi, isCorrect);
+  // 오답 노트 복습에서 맞힌 단어는 바로 오답 노트에서 뺌
+  if (isReviewQuiz && isCorrect) graduateReviewWord(q.level, q.hanzi);
 
   // Update score
   if (isCorrect) {
@@ -1263,7 +1265,7 @@ function showToast(message) {
 // 구글 로그인 사용자는 Firestore(users/{uid})에, 게스트는 이 브라우저(localStorage)에 저장합니다.
 const GUEST_FLAG_KEY = 'hanzi_guest';
 const GUEST_RECORD_KEY = 'hanzi_guest_record';
-const REVIEW_GRADUATE_STREAK = 2; // 연속으로 이만큼 맞히면 오답 노트에서 빠짐
+const REVIEW_GRADUATE_STREAK = 2; // 일반 퀴즈에서 연속으로 이만큼 맞히면 오답 노트에서 빠짐 (복습에서는 한 번만 맞혀도 빠짐)
 const REVIEW_MAX_QUESTIONS = 20;
 const RECORD_SAVE_DELAY = 2000;
 
@@ -1300,6 +1302,14 @@ function recordAnswer(kind, level, id, isCorrect) {
   }
   entry.t = Date.now();
   userRecord[kind][key] = entry;
+  scheduleRecordSave();
+}
+
+// 오답 노트에서 빼기: 연속 정답 수를 졸업 기준까지 올림 (나중에 다시 틀리면 0 이 되어 다시 들어옴)
+function graduateReviewWord(level, hanzi) {
+  const entry = userRecord.words[`${level}|${hanzi}`];
+  if (!entry) return;
+  entry.s = Math.max(entry.s, REVIEW_GRADUATE_STREAK);
   scheduleRecordSave();
 }
 
