@@ -137,6 +137,33 @@
       <button class="btn-back" id="btn-back-to-difficulty">← 뒤로</button>
     </div>
 
+    <!-- ===== Study Plan Screen (HSK 1~4급 단어 학습 플랜) ===== -->
+    <div class="plan-screen" id="plan-screen" style="display:none;">
+      <h2 class="plan-title" id="plan-title">HSK 1급 학습 플랜</h2>
+      <p class="plan-subtitle" id="plan-subtitle">2주 플랜 · 0/14일 완료</p>
+      <div class="plan-progress-bar">
+        <div class="plan-progress-fill" id="plan-progress-fill"></div>
+      </div>
+
+      <div class="plan-day-wrap">
+        <button class="plan-arrow" id="btn-plan-prev" aria-label="이전 학습일차">‹</button>
+        <div class="plan-day-card" id="plan-day-card">
+          <div class="plan-day-header">
+            <span class="plan-day-title" id="plan-day-title">1일차</span>
+            <span class="plan-day-status" id="plan-day-status"></span>
+          </div>
+          <p class="plan-day-hint" id="plan-day-hint">단어를 눌러 발음을 들어 보세요</p>
+          <ul class="plan-word-list" id="plan-word-list">
+            <!-- Day words dynamically inserted here -->
+          </ul>
+          <button class="btn-start-quiz" id="btn-plan-start">오늘의 퀴즈 시작 🚀</button>
+        </div>
+        <button class="plan-arrow" id="btn-plan-next" aria-label="다음 학습일차">›</button>
+      </div>
+
+      <button class="btn-back" id="btn-plan-back">← 뒤로</button>
+    </div>
+
     <!-- ===== Quiz Screen ===== -->
     <div id="quiz-screen" style="display:none;">
       <!-- Header -->
@@ -204,6 +231,7 @@
           <span class="stat-label">정답률</span>
         </div>
       </div>
+      <p class="result-plan-message" id="result-plan-message" style="display:none;"></p>
       <!-- Retry Wrong Questions Prompt -->
       <div class="retry-prompt" id="retry-prompt" style="display:none;">
         <p class="retry-text">틀린 문제를 다시 풀어보시겠습니까?</p>
@@ -215,6 +243,7 @@
 
       <div class="result-buttons" id="result-buttons-wrap">
         <button class="btn-restart" id="btn-restart">다시 도전하기 🔄</button>
+        <button class="btn-restart" id="btn-to-plan" style="display:none;">학습 플랜으로 📅</button>
         <button class="btn-home" id="btn-home">처음으로 🏠</button>
       </div>
     </div>

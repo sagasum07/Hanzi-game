@@ -115,6 +115,8 @@ const sentencesByLevel = {
 // ========================================
 let currentMode = 'word'; // 'word' 또는 'sentence'
 let isReviewQuiz = false; // 오답 노트 복습 중인지 여부
+let currentPlanDay = null; // 학습 플랜 퀴즈 중이면 일차 번호, 아니면 null
+let isPlanRetryRound = false; // 학습 플랜에서 틀린 문제만 다시 푸는 중인지 여부
 let currentLevel = 1;
 let currentIndex = 0;
 let correctCount = 0;
@@ -139,6 +141,7 @@ const btnLogout = document.getElementById('btn-logout');
 const startScreen = document.getElementById('start-screen');
 const difficultyScreen = document.getElementById('difficulty-screen');
 const countScreen = document.getElementById('count-screen');
+const planScreen = document.getElementById('plan-screen');
 const quizScreen = document.getElementById('quiz-screen');
 const sentenceScreen = document.getElementById('sentence-screen'); // New
 const btnModeWord = document.getElementById('btn-mode-word'); // New
@@ -204,6 +207,7 @@ function showScreen(screenName) {
   startScreen.style.display = 'none';
   difficultyScreen.style.display = 'none';
   countScreen.style.display = 'none';
+  planScreen.style.display = 'none';
   quizScreen.style.display = 'none';
   sentenceScreen.style.display = 'none';
   resultScreen.style.display = 'none';
@@ -221,6 +225,9 @@ function showScreen(screenName) {
     feedbackSection.style.display = '';
   } else if (screenName === 'count') {
     countScreen.style.display = '';
+    feedbackSection.style.display = '';
+  } else if (screenName === 'plan') {
+    planScreen.style.display = '';
     feedbackSection.style.display = '';
   } else if (screenName === 'quiz') {
     quizScreen.style.display = '';
@@ -458,12 +465,14 @@ function generateQuestion(word, level) {
 btnModeWord.addEventListener('click', () => {
   currentMode = 'word';
   isReviewQuiz = false;
+  currentPlanDay = null;
   showScreen('difficulty');
 });
 
 btnModeSentence.addEventListener('click', () => {
   currentMode = 'sentence';
   isReviewQuiz = false;
+  currentPlanDay = null;
   showScreen('difficulty');
 });
 
@@ -492,6 +501,11 @@ if (btnSentenceHome) {
 document.querySelectorAll('.difficulty-card').forEach((card) => {
   card.addEventListener('click', () => {
     currentLevel = parseInt(card.dataset.level);
+    // HSK 1~4급 단어 학습은 일차별 학습 플랜으로 진행
+    if (currentMode === 'word' && PLAN_DAYS[currentLevel]) {
+      openPlan(currentLevel);
+      return;
+    }
     // Reset slider to 10
     countSlider.value = 10;
     countNumber.textContent = 10;
@@ -545,6 +559,7 @@ btnBackToDifficulty.addEventListener('click', () => {
 // Start Quiz Button (from count screen)
 // ========================================
 btnStartQuiz.addEventListener('click', () => {
+  currentPlanDay = null;
   startQuiz(currentLevel);
 });
 
@@ -570,7 +585,13 @@ function startWordQuiz(level, retryQuestions) {
   wrongQuestions = [];
 
   // Update subtitle
-  levelSubtitle.textContent = isReviewQuiz ? '오답 노트 복습' : `HSK ${level}급 한자 퀴즈`;
+  if (isReviewQuiz) {
+    levelSubtitle.textContent = '오답 노트 복습';
+  } else if (currentPlanDay !== null) {
+    levelSubtitle.textContent = `HSK ${level}급 · ${currentPlanDay}일차`;
+  } else {
+    levelSubtitle.textContent = `HSK ${level}급 한자 퀴즈`;
+  }
 
   // Generate quiz or use retry questions
   if (retryQuestions && retryQuestions.length > 0) {
@@ -1045,6 +1066,7 @@ btnSkip.addEventListener('click', () => {
 });
 
 function showSentenceResult() {
+  hidePlanResult();
   flushRecordSave();
   sentenceProgressFill.style.width = '100%';
   sentenceCard.style.display = 'none';
@@ -1080,6 +1102,9 @@ function showSentenceResult() {
 // Show result screen
 // ========================================
 function showResult() {
+  const total = shuffledQuiz.length;
+  const pct = Math.round((correctCount / total) * 100);
+  updatePlanResult(pct);
   flushRecordSave();
 
   // Fill progress bar to 100%
@@ -1088,9 +1113,6 @@ function showResult() {
   quizCard.style.display = 'none';
   progressWrapper.style.display = 'none';
   resultScreen.style.display = '';
-
-  const total = shuffledQuiz.length;
-  const pct = Math.round((correctCount / total) * 100);
 
   finalCorrect.textContent = correctCount;
   finalWrong.textContent = wrongCount;
@@ -1124,7 +1146,9 @@ function showResult() {
 // Restart (same level)
 // ========================================
 btnRestart.addEventListener('click', () => {
-  if (isReviewQuiz) {
+  if (currentPlanDay !== null) {
+    startPlanQuiz(currentPlanDay);
+  } else if (isReviewQuiz) {
     startReviewQuiz();
   } else {
     startQuiz(currentLevel);
@@ -1143,6 +1167,7 @@ btnHome.addEventListener('click', () => {
 // ========================================
 document.getElementById('btn-retry-yes').addEventListener('click', () => {
   if (currentMode === 'word') {
+    if (currentPlanDay !== null) isPlanRetryRound = true;
     const retryList = [...wrongQuestions];
     startWordQuiz(currentLevel, retryList);
   } else {
@@ -1225,6 +1250,7 @@ function normalizeRecord(data) {
   return {
     words: (data && data.words) || {},
     sentences: (data && data.sentences) || {},
+    plans: (data && data.plans) || {}, // { 급수: { 일차: { score: 최고 정답률, t: 완료 시각 } } }
     updatedAt: (data && data.updatedAt) || 0,
   };
 }
@@ -1355,7 +1381,14 @@ function renderLevelProgress() {
       progress.className = 'difficulty-progress';
       card.appendChild(progress);
     }
-    const stats = getLevelStats(kind, parseInt(card.dataset.level));
+    const level = parseInt(card.dataset.level);
+    const stats = getLevelStats(kind, level);
+    if (kind === 'words' && PLAN_DAYS[level]) {
+      const done = getPlanCompletedCount(level);
+      progress.textContent = `📅 ${PLAN_LABELS[level]} 플랜 · ${done}/${PLAN_DAYS[level]}일 완료`;
+      progress.classList.toggle('has-record', done > 0);
+      return;
+    }
     progress.textContent = stats.learned === 0
       ? '아직 학습 기록 없음'
       : `학습 ${Math.min(stats.learned, stats.total)}/${stats.total} · 정답률 ${stats.accuracy}%`;
@@ -1375,10 +1408,205 @@ function startReviewQuiz() {
   }
   currentMode = 'word';
   isReviewQuiz = true;
+  currentPlanDay = null;
   startWordQuiz(items[0].level, shuffle(items).map((item) => generateQuestion(item.word, item.level)));
 }
 
 btnReview.addEventListener('click', startReviewQuiz);
+
+// ========================================
+// 단어 학습 플랜 (HSK 1~4급)
+// ========================================
+// 각 급수의 단어를 일차별로 고르게 나눠서 하루씩 학습합니다.
+// 그날 퀴즈에서 PLAN_PASS_PERCENT% 이상 맞히면 완료되고, 이전 일차를 완료해야 다음 일차로 넘어갈 수 있습니다.
+const PLAN_DAYS = { 1: 14, 2: 14, 3: 30, 4: 60 };
+const PLAN_LABELS = { 1: '2주', 2: '2주', 3: '한 달', 4: '두 달' };
+const PLAN_PASS_PERCENT = 80;
+
+const planTitle = document.getElementById('plan-title');
+const planSubtitle = document.getElementById('plan-subtitle');
+const planProgressFill = document.getElementById('plan-progress-fill');
+const planDayCard = document.getElementById('plan-day-card');
+const planDayTitle = document.getElementById('plan-day-title');
+const planDayStatus = document.getElementById('plan-day-status');
+const planWordList = document.getElementById('plan-word-list');
+const btnPlanPrev = document.getElementById('btn-plan-prev');
+const btnPlanNext = document.getElementById('btn-plan-next');
+const btnPlanStart = document.getElementById('btn-plan-start');
+const btnPlanBack = document.getElementById('btn-plan-back');
+const btnToPlan = document.getElementById('btn-to-plan');
+const resultPlanMessage = document.getElementById('result-plan-message');
+
+let planViewDay = 1; // 플랜 화면에서 보고 있는 일차
+
+function getPlanDayWords(level, day) {
+  const words = wordsByLevel[level];
+  const days = PLAN_DAYS[level];
+  const start = Math.floor(((day - 1) * words.length) / days);
+  const end = Math.floor((day * words.length) / days);
+  return words.slice(start, end);
+}
+
+function getPlanDayRecord(level, day) {
+  const plan = userRecord.plans[level];
+  return plan ? plan[day] : undefined;
+}
+
+function isPlanDayCompleted(level, day) {
+  return Boolean(getPlanDayRecord(level, day));
+}
+
+function isPlanDayUnlocked(level, day) {
+  return day === 1 || isPlanDayCompleted(level, day - 1);
+}
+
+function getPlanCompletedCount(level) {
+  let count = 0;
+  for (let day = 1; day <= PLAN_DAYS[level]; day++) {
+    if (isPlanDayCompleted(level, day)) count++;
+  }
+  return count;
+}
+
+// 아직 완료하지 않은 첫 일차 (모두 완료했으면 마지막 일차)
+function getCurrentPlanDay(level) {
+  for (let day = 1; day <= PLAN_DAYS[level]; day++) {
+    if (!isPlanDayCompleted(level, day)) return day;
+  }
+  return PLAN_DAYS[level];
+}
+
+function completePlanDay(level, day, pct) {
+  if (!userRecord.plans[level]) userRecord.plans[level] = {};
+  const prev = userRecord.plans[level][day];
+  userRecord.plans[level][day] = { score: Math.max(pct, prev ? prev.score : 0), t: Date.now() };
+  scheduleRecordSave();
+}
+
+function openPlan(level) {
+  currentLevel = level;
+  planViewDay = getCurrentPlanDay(level);
+  renderPlan();
+  showScreen('plan');
+}
+
+function renderPlan() {
+  const level = currentLevel;
+  const days = PLAN_DAYS[level];
+  const day = planViewDay;
+  const done = getPlanCompletedCount(level);
+  const dayRecord = getPlanDayRecord(level, day);
+
+  planTitle.textContent = `HSK ${level}급 학습 플랜`;
+  planSubtitle.textContent = `${PLAN_LABELS[level]} 플랜 · ${done}/${days}일 완료`;
+  planProgressFill.style.width = `${(done / days) * 100}%`;
+
+  planDayTitle.textContent = `${day}일차`;
+  planDayStatus.textContent = dayRecord ? `완료 ✅ 최고 ${dayRecord.score}%` : '학습할 차례 📖';
+  planDayStatus.classList.toggle('done', Boolean(dayRecord));
+
+  planWordList.innerHTML = '';
+  getPlanDayWords(level, day).forEach((word) => {
+    const li = document.createElement('li');
+    li.className = 'plan-word';
+    li.title = '발음 듣기';
+
+    const hanzi = document.createElement('span');
+    hanzi.className = 'plan-word-hanzi';
+    hanzi.textContent = word.hanzi;
+    const pinyin = document.createElement('span');
+    pinyin.className = 'plan-word-pinyin';
+    pinyin.textContent = word.pinyin;
+    const meaning = document.createElement('span');
+    meaning.className = 'plan-word-meaning';
+    meaning.textContent = word.meaning;
+
+    li.append(hanzi, pinyin, meaning);
+    li.addEventListener('click', () => speakHanzi(word.hanzi));
+    planWordList.appendChild(li);
+  });
+
+  btnPlanStart.textContent = dayRecord ? '복습 퀴즈 다시 풀기 🔄' : '오늘의 퀴즈 시작 🚀';
+
+  btnPlanPrev.disabled = day === 1;
+  btnPlanNext.disabled = day === days;
+  // 다음 일차가 잠겨 있으면 자물쇠 모양으로 표시 (누르면 안내 메시지)
+  btnPlanNext.classList.toggle('locked', day < days && !isPlanDayUnlocked(level, day + 1));
+  btnPlanNext.textContent = btnPlanNext.classList.contains('locked') ? '🔒' : '›';
+}
+
+function movePlanDay(delta) {
+  const target = planViewDay + delta;
+  if (target < 1 || target > PLAN_DAYS[currentLevel]) return;
+  if (!isPlanDayUnlocked(currentLevel, target)) {
+    showToast(`${planViewDay}일차를 완료해야 다음 일차로 넘어갈 수 있어요 🔒`);
+    planDayCard.classList.remove('shake');
+    void planDayCard.offsetWidth; // trigger reflow
+    planDayCard.classList.add('shake');
+    return;
+  }
+  planViewDay = target;
+  renderPlan();
+}
+
+function startPlanQuiz(day) {
+  currentMode = 'word';
+  isReviewQuiz = false;
+  isPlanRetryRound = false;
+  currentPlanDay = day;
+  const questions = shuffle(getPlanDayWords(currentLevel, day)).map((word) => generateQuestion(word, currentLevel));
+  startWordQuiz(currentLevel, questions);
+}
+
+function hidePlanResult() {
+  resultPlanMessage.style.display = 'none';
+  btnToPlan.style.display = 'none';
+}
+
+function updatePlanResult(pct) {
+  if (currentPlanDay === null) {
+    hidePlanResult();
+    return;
+  }
+  const level = currentLevel;
+  const day = currentPlanDay;
+  let message;
+  let passed = false;
+
+  if (isPlanRetryRound) {
+    // 틀린 문제만 다시 푼 경우는 일차 완료 판정에 넣지 않음
+    message = isPlanDayCompleted(level, day)
+      ? `${day}일차는 이미 완료했어요 ✅`
+      : `틀린 문제 복습을 마쳤어요. ${day}일차 퀴즈에서 ${PLAN_PASS_PERCENT}% 이상 맞히면 완료돼요.`;
+    passed = isPlanDayCompleted(level, day);
+  } else if (pct >= PLAN_PASS_PERCENT) {
+    completePlanDay(level, day, pct);
+    passed = true;
+    message = day < PLAN_DAYS[level]
+      ? `🎉 ${day}일차 완료! ${day + 1}일차가 열렸어요.`
+      : `🏆 HSK ${level}급 ${PLAN_LABELS[level]} 학습 플랜을 모두 마쳤어요!`;
+  } else {
+    message = `${PLAN_PASS_PERCENT}% 이상 맞혀야 ${day}일차가 완료돼요. 다시 도전해 보세요!`;
+  }
+
+  resultPlanMessage.textContent = message;
+  resultPlanMessage.classList.toggle('passed', passed);
+  resultPlanMessage.style.display = '';
+  btnToPlan.style.display = '';
+}
+
+btnPlanPrev.addEventListener('click', () => movePlanDay(-1));
+btnPlanNext.addEventListener('click', () => movePlanDay(1));
+btnPlanStart.addEventListener('click', () => startPlanQuiz(planViewDay));
+btnPlanBack.addEventListener('click', () => showScreen('difficulty'));
+btnToPlan.addEventListener('click', () => openPlan(currentLevel));
+
+// 키보드 ← → 로 일차 이동
+document.addEventListener('keydown', (e) => {
+  if (planScreen.style.display === 'none') return;
+  if (e.key === 'ArrowLeft') movePlanDay(-1);
+  if (e.key === 'ArrowRight') movePlanDay(1);
+});
 
 // ========================================
 // Login & Initial state
