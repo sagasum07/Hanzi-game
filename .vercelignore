@@ -8,3 +8,6 @@ scripts
 capacitor.config.json
 www
 store
+firebase.json
+.firebaserc
+tests

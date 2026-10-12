@@ -144,6 +144,9 @@ const difficultyScreen = document.getElementById('difficulty-screen');
 const countScreen = document.getElementById('count-screen');
 const planScreen = document.getElementById('plan-screen');
 const wordbookScreen = document.getElementById('wordbook-screen');
+const nicknameScreen = document.getElementById('nickname-screen');
+const settingsScreen = document.getElementById('settings-screen');
+const friendsScreen = document.getElementById('friends-screen');
 const quizScreen = document.getElementById('quiz-screen');
 const sentenceScreen = document.getElementById('sentence-screen'); // New
 const btnModeWord = document.getElementById('btn-mode-word'); // New
@@ -211,6 +214,9 @@ function showScreen(screenName) {
   countScreen.style.display = 'none';
   planScreen.style.display = 'none';
   wordbookScreen.style.display = 'none';
+  nicknameScreen.style.display = 'none';
+  settingsScreen.style.display = 'none';
+  friendsScreen.style.display = 'none';
   quizScreen.style.display = 'none';
   sentenceScreen.style.display = 'none';
   resultScreen.style.display = 'none';
@@ -222,6 +228,7 @@ function showScreen(screenName) {
     startScreen.style.display = '';
     feedbackSection.style.display = '';
     renderRecordSummary();
+    refreshFriendRequestBadge();
   } else if (screenName === 'difficulty') {
     difficultyScreen.style.display = '';
     renderLevelProgress();
@@ -235,6 +242,16 @@ function showScreen(screenName) {
   } else if (screenName === 'wordbook') {
     wordbookScreen.style.display = '';
     feedbackSection.style.display = '';
+  } else if (screenName === 'nickname') {
+    nicknameScreen.style.display = '';
+    feedbackSection.style.display = 'none';
+  } else if (screenName === 'friends') {
+    friendsScreen.style.display = '';
+    feedbackSection.style.display = 'none';
+  } else if (screenName === 'settings') {
+    settingsScreen.style.display = '';
+    feedbackSection.style.display = 'none';
+    renderSettings();
   } else if (screenName === 'quiz') {
     quizScreen.style.display = '';
     feedbackSection.style.display = '';
@@ -381,11 +398,17 @@ function createSentenceWordSpan(wordText) {
 // 안드로이드 앱(Capacitor) 안에서 실행 중인지 여부
 const isNativeApp = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 
+// 설정의 발음 속도 (느리게/보통/빠르게)에 곱하는 배율
+const SPEECH_SPEED_FACTORS = { slow: 0.8, normal: 1, fast: 1.25 };
+let speechSpeedFactor = 1;
+
 // 글자 수에 따라 발음 속도를 동적으로 조절
 function getSpeechRate(text) {
-  if (text.length === 1) return 0.75; // 1글자는 덜 늘어지도록 조금 빠르게
-  if (text.length === 2) return 0.65; // 2글자는 중간 속도
-  return 0.6; // 3글자 이상은 천천히 또렷하게
+  let rate;
+  if (text.length === 1) rate = 0.75; // 1글자는 덜 늘어지도록 조금 빠르게
+  else if (text.length === 2) rate = 0.65; // 2글자는 중간 속도
+  else rate = 0.6; // 3글자 이상은 천천히 또렷하게
+  return rate * speechSpeedFactor;
 }
 
 function speakHanzi(text) {
@@ -653,6 +676,8 @@ function showQuestion() {
   // Display hanzi
   hanziChar.textContent = q.hanzi;
   hanziPinyin.textContent = q.pinyin;
+  // 설정에서 병음 보기를 끄면 가려 두고, 누르거나 답을 고르면 보여 줌
+  hanziPinyin.classList.toggle('pinyin-hidden', !userSettings.showPinyin);
   updateSaveWordButton(q.level, q.hanzi);
 
   // Shuffle choices for this question
@@ -686,6 +711,7 @@ function handleAnswer(selectedBtn, selected, answer) {
   answered = true;
 
   const isCorrect = selected === answer;
+  hanziPinyin.classList.remove('pinyin-hidden');
   const q = shuffledQuiz[currentIndex];
   recordAnswer('words', q.level, q.hanzi, isCorrect);
   // 오답 노트 복습에서 맞힌 단어는 바로 오답 노트에서 뺌
@@ -1942,6 +1968,15 @@ function setLoginStatus(message) {
   loginStatus.textContent = message;
 }
 
+// 구글 로그인 사용자의 공개 프로필 { nickname, userCode } (닉네임을 정하기 전에는 null)
+let userProfile = null;
+
+// 화면에 보여 줄 이름: 구글 사용자는 닉네임(없으면 구글 이름), 게스트는 '게스트'
+function getDisplayName() {
+  if (!recordOwner || recordOwner.type !== 'google') return '게스트';
+  return (userProfile && userProfile.nickname) || recordOwner.name;
+}
+
 function enterStartScreen(name) {
   welcomeMessage.textContent = `환영합니다 ${name}님!`;
   btnDeleteAccount.textContent = recordOwner && recordOwner.type === 'google' ? '계정 삭제' : '학습 기록 삭제';
@@ -1960,12 +1995,18 @@ async function enterAsGoogleUser(user) {
   flushRecordSave();
   recordOwner = { type: 'google', uid: user.uid, name: user.name };
   userRecord = normalizeRecord(null);
+  userProfile = null;
   recordSaveBlocked = true;
   setLoginStatus('학습 기록을 불러오는 중...');
 
   let loadFailed = false;
   try {
-    userRecord = normalizeRecord(await window.hanziFirebase.loadRecord(user.uid));
+    const [record, profile] = await Promise.all([
+      window.hanziFirebase.loadRecord(user.uid),
+      window.hanziFirebase.getMyProfile(),
+    ]);
+    userRecord = normalizeRecord(record);
+    userProfile = profile;
     recordSaveBlocked = false;
   } catch (error) {
     console.error('학습 기록 불러오기 실패:', error);
@@ -1975,7 +2016,12 @@ async function enterAsGoogleUser(user) {
   // 불러오는 사이에 로그아웃했다면 화면을 바꾸지 않음
   if (!recordOwner || recordOwner.uid !== user.uid) return;
   setLoginStatus('');
-  enterStartScreen(user.name);
+  if (!loadFailed && !userProfile) {
+    // 처음 로그인한 사용자: 닉네임부터 정함 (기록을 못 불러온 경우엔 저장할 수 없으니 건너뜀)
+    openNicknameSetup();
+    return;
+  }
+  enterStartScreen(getDisplayName());
   if (loadFailed) showToast('학습 기록을 불러오지 못해서 이번 학습은 저장되지 않아요.');
 }
 
@@ -2040,6 +2086,7 @@ btnLogout.addEventListener('click', async () => {
   const wasGoogleUser = recordOwner && recordOwner.type === 'google';
   recordOwner = null;
   userRecord = normalizeRecord(null);
+  userProfile = null;
   localStorage.removeItem(GUEST_FLAG_KEY);
   welcomeMessage.textContent = '';
   setLoginStatus('');
@@ -2082,6 +2129,7 @@ btnDeleteAccount.addEventListener('click', async () => {
     await window.hanziFirebase.deleteAccount();
     recordOwner = null;
     userRecord = normalizeRecord(null);
+    userProfile = null;
     welcomeMessage.textContent = '';
     showScreen('login');
     setLoginStatus('계정과 학습 기록을 모두 삭제했습니다.');
@@ -2215,6 +2263,7 @@ volumeSlider.addEventListener('input', (e) => {
   applyVolume();
   updateVolumeIcon();
   keepVolumeOpen();
+  saveSoundSettings();
 });
 
 btnVolume.addEventListener('click', () => {
@@ -2235,6 +2284,7 @@ btnVolume.addEventListener('click', () => {
   applyVolume();
   updateVolumeIcon();
   if (compactVolumeQuery.matches) keepVolumeOpen();
+  saveSoundSettings();
 });
 
 // 바깥을 누르면 접기
@@ -2263,7 +2313,7 @@ function handleBackButton() {
     }
   } else if (isShown(countScreen) || isShown(planScreen)) {
     showScreen('difficulty');
-  } else if (isShown(difficultyScreen) || isShown(wordbookScreen)) {
+  } else if (isShown(difficultyScreen) || isShown(wordbookScreen) || isShown(settingsScreen) || isShown(friendsScreen)) {
     showScreen('start');
   } else {
     window.Capacitor.nativePromise('App', 'exitApp');
@@ -2273,3 +2323,460 @@ function handleBackButton() {
 if (isNativeApp) {
   window.Capacitor.nativeCallback('App', 'addListener', { eventName: 'backButton' }, handleBackButton);
 }
+
+// ========================================
+// 닉네임 · 설정
+// ========================================
+// 닉네임은 학습 기록과 함께 계정에 저장되고(앱·웹 공통),
+// 소리·발음·병음 설정은 기기마다 따로 저장됩니다(localStorage).
+const SETTINGS_KEY = 'hanzi_settings';
+const NICKNAME_MIN = 2;
+const NICKNAME_MAX = 12;
+const NICKNAME_PATTERN = /^[0-9A-Za-z가-힣一-鿿 _-]+$/;
+
+const userSettings = { musicOn: true, volume: DEFAULT_VOLUME, speechSpeed: 'normal', showPinyin: true };
+try {
+  const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
+  if (typeof saved.musicOn === 'boolean') userSettings.musicOn = saved.musicOn;
+  if (typeof saved.volume === 'number' && saved.volume > 0 && saved.volume <= 1) userSettings.volume = saved.volume;
+  if (SPEECH_SPEED_FACTORS[saved.speechSpeed]) userSettings.speechSpeed = saved.speechSpeed;
+  if (typeof saved.showPinyin === 'boolean') userSettings.showPinyin = saved.showPinyin;
+} catch (error) {
+  // 저장소를 쓸 수 없으면 기본값 사용
+}
+
+function saveSettings() {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(userSettings));
+  } catch (error) {
+    // 기억하지 못해도 이번 사용에는 적용됨
+  }
+}
+
+// 음량 조절(플로팅 버튼·설정 화면 어느 쪽에서 바꿔도) 결과를 저장하고 설정 화면에 반영
+function saveSoundSettings() {
+  userSettings.musicOn = !isMuted;
+  if (!isMuted && currentVolume > 0) userSettings.volume = currentVolume;
+  saveSettings();
+  if (isShown(settingsScreen)) renderSettings();
+}
+
+// 저장된 설정을 시작할 때 적용
+speechSpeedFactor = SPEECH_SPEED_FACTORS[userSettings.speechSpeed];
+currentVolume = userSettings.volume;
+isMuted = !userSettings.musicOn;
+volumeSlider.value = isMuted ? 0 : currentVolume;
+applyVolume();
+updateVolumeIcon();
+
+// 병음을 가려 둔 경우 눌러서 확인
+hanziPinyin.addEventListener('click', () => hanziPinyin.classList.remove('pinyin-hidden'));
+
+function validateNickname(raw) {
+  const value = raw.trim().replace(/\s+/g, ' ');
+  if (value.length < NICKNAME_MIN) return { error: `${NICKNAME_MIN}자 이상 입력해 주세요.` };
+  if (value.length > NICKNAME_MAX) return { error: `${NICKNAME_MAX}자 이하로 입력해 주세요.` };
+  if (!NICKNAME_PATTERN.test(value)) return { error: '한글·영문·숫자·한자와 띄어쓰기, _, - 만 쓸 수 있어요.' };
+  return { value: value };
+}
+
+// 닉네임 저장: 서버에서 중복을 확인하고, 처음이면 고유 번호(@8자리)도 발급
+// 성공하면 true, 실패하면 errorEl 에 이유를 보여 주고 false
+async function saveNickname(nickname, errorEl) {
+  try {
+    userProfile = await window.hanziFirebase.saveProfile(nickname);
+    return true;
+  } catch (error) {
+    console.error('닉네임 저장 실패:', error);
+    showNicknameMessage(errorEl, error.code === 'nickname-taken'
+      ? '이미 사용 중인 닉네임이에요. 다른 닉네임을 써 주세요.'
+      : '닉네임을 저장하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요.', false);
+    return false;
+  }
+}
+
+function showNicknameMessage(el, message, ok) {
+  el.textContent = message;
+  el.classList.toggle('ok', Boolean(ok));
+}
+
+// "중복 확인" 버튼
+async function checkNicknameAvailability(input, messageEl) {
+  const result = validateNickname(input.value);
+  if (result.error) {
+    showNicknameMessage(messageEl, result.error, false);
+    return;
+  }
+  input.value = result.value;
+  showNicknameMessage(messageEl, '확인하는 중...', true);
+  try {
+    const available = await window.hanziFirebase.isNicknameAvailable(result.value);
+    showNicknameMessage(messageEl, available ? '✓ 사용할 수 있는 닉네임이에요.' : '이미 사용 중인 닉네임이에요.', available);
+  } catch (error) {
+    console.error('닉네임 확인 실패:', error);
+    showNicknameMessage(messageEl, '확인하지 못했어요. 인터넷 연결을 확인해 주세요.', false);
+  }
+}
+
+async function copyUserCode() {
+  if (!userProfile) return;
+  const code = `@${userProfile.userCode}`;
+  try {
+    await navigator.clipboard.writeText(code);
+    showToast(`고유 번호 ${code} 를 복사했어요 📋`);
+  } catch (error) {
+    showToast(`내 고유 번호: ${code}`);
+  }
+}
+
+// --- 처음 로그인했을 때 닉네임 정하기 ---
+const nicknameForm = document.getElementById('nickname-form');
+const nicknameInput = document.getElementById('nickname-input');
+const nicknameError = document.getElementById('nickname-error');
+
+function openNicknameSetup() {
+  nicknameInput.value = '';
+  showNicknameMessage(nicknameError, '', false);
+  showScreen('nickname');
+  nicknameInput.focus();
+}
+
+document.getElementById('btn-check-nickname').addEventListener('click', () => {
+  checkNicknameAvailability(nicknameInput, nicknameError);
+});
+
+nicknameForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!recordOwner || recordOwner.type !== 'google') return;
+  const result = validateNickname(nicknameInput.value);
+  if (result.error) {
+    showNicknameMessage(nicknameError, result.error, false);
+    return;
+  }
+  const saveBtn = document.getElementById('btn-nickname-save');
+  saveBtn.disabled = true;
+  const saved = await saveNickname(result.value, nicknameError);
+  saveBtn.disabled = false;
+  if (!saved) return;
+  enterStartScreen(getDisplayName());
+  showToast(`반가워요, ${userProfile.nickname}님! 내 고유 번호는 @${userProfile.userCode} 예요 👋`);
+});
+
+// --- 설정 화면 ---
+const btnSettings = document.getElementById('btn-settings');
+const btnSettingsBack = document.getElementById('btn-settings-back');
+const settingsProfileGoogle = document.getElementById('settings-profile-google');
+const settingsProfileGuest = document.getElementById('settings-profile-guest');
+const settingsNicknameForm = document.getElementById('settings-nickname-form');
+const settingsNicknameInput = document.getElementById('settings-nickname-input');
+const settingsNicknameError = document.getElementById('settings-nickname-error');
+const settingsMusic = document.getElementById('settings-music');
+const settingsVolume = document.getElementById('settings-volume');
+const settingsPinyin = document.getElementById('settings-pinyin');
+const settingsAccountStatus = document.getElementById('settings-account-status');
+const btnPreviewSpeech = document.getElementById('btn-preview-speech');
+const speedSegments = document.querySelectorAll('.segment[data-speed]');
+const settingsUserCode = document.getElementById('settings-user-code');
+
+function renderSettings() {
+  const isGoogle = Boolean(recordOwner && recordOwner.type === 'google');
+  settingsProfileGoogle.style.display = isGoogle ? '' : 'none';
+  settingsProfileGuest.style.display = isGoogle ? 'none' : '';
+  if (isGoogle && document.activeElement !== settingsNicknameInput) {
+    settingsNicknameInput.value = getDisplayName();
+  }
+  settingsUserCode.textContent = userProfile ? `@${userProfile.userCode} 📋` : '닉네임을 정하면 생겨요';
+
+  settingsMusic.checked = !isMuted;
+  settingsVolume.value = currentVolume || DEFAULT_VOLUME;
+  settingsVolume.disabled = isMuted;
+  speedSegments.forEach((btn) => {
+    const active = btn.dataset.speed === userSettings.speechSpeed;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', String(active));
+  });
+  settingsPinyin.checked = userSettings.showPinyin;
+
+  settingsAccountStatus.textContent = isGoogle
+    ? `${getDisplayName()}님, Google 계정으로 로그인되어 있어요.`
+    : '게스트로 이용 중이에요. 학습 기록은 이 기기에만 저장돼요.';
+  btnDeleteAccount.textContent = isGoogle ? '계정 삭제' : '학습 기록 삭제';
+}
+
+btnSettings.addEventListener('click', () => {
+  showNicknameMessage(settingsNicknameError, '', false);
+  showScreen('settings');
+});
+settingsUserCode.addEventListener('click', copyUserCode);
+document.getElementById('btn-settings-check-nickname').addEventListener('click', () => {
+  checkNicknameAvailability(settingsNicknameInput, settingsNicknameError);
+});
+btnSettingsBack.addEventListener('click', () => showScreen('start'));
+
+settingsNicknameForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!recordOwner || recordOwner.type !== 'google') return;
+  const result = validateNickname(settingsNicknameInput.value);
+  if (result.error) {
+    showNicknameMessage(settingsNicknameError, result.error, false);
+    return;
+  }
+  showNicknameMessage(settingsNicknameError, '', false);
+  if (userProfile && result.value === userProfile.nickname) return;
+  if (!(await saveNickname(result.value, settingsNicknameError))) return;
+  settingsNicknameInput.blur();
+  welcomeMessage.textContent = `환영합니다 ${getDisplayName()}님!`;
+  renderSettings();
+  showToast('닉네임을 바꿨어요 ✏️');
+});
+
+settingsMusic.addEventListener('change', () => {
+  isMuted = !settingsMusic.checked;
+  if (!isMuted && currentVolume === 0) currentVolume = DEFAULT_VOLUME;
+  volumeSlider.value = isMuted ? 0 : currentVolume;
+  applyVolume();
+  updateVolumeIcon();
+  if (!isMuted) playBgm();
+  saveSoundSettings();
+});
+
+settingsVolume.addEventListener('input', () => {
+  currentVolume = parseFloat(settingsVolume.value);
+  isMuted = false;
+  volumeSlider.value = currentVolume;
+  applyVolume();
+  updateVolumeIcon();
+  saveSoundSettings();
+});
+
+speedSegments.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    userSettings.speechSpeed = btn.dataset.speed;
+    speechSpeedFactor = SPEECH_SPEED_FACTORS[userSettings.speechSpeed];
+    saveSettings();
+    renderSettings();
+    speakHanzi('你好'); // 바꾼 속도로 바로 들려줌
+  });
+});
+
+btnPreviewSpeech.addEventListener('click', () => speakHanzi('你好'));
+
+settingsPinyin.addEventListener('change', () => {
+  userSettings.showPinyin = settingsPinyin.checked;
+  saveSettings();
+});
+
+// ========================================
+// 친구
+// ========================================
+// 구글 로그인 + 닉네임이 있는 사용자끼리 고유 번호(@8자리)나 닉네임으로 찾아 친구 요청 → 수락
+const btnFriends = document.getElementById('btn-friends');
+const friendRequestCount = document.getElementById('friend-request-count');
+const friendsGuest = document.getElementById('friends-guest');
+const friendsContent = document.getElementById('friends-content');
+const friendsLoading = document.getElementById('friends-loading');
+const myAvatar = document.getElementById('my-avatar');
+const myNickname = document.getElementById('my-nickname');
+const myUserCode = document.getElementById('my-user-code');
+const friendSearchForm = document.getElementById('friend-search-form');
+const friendSearchInput = document.getElementById('friend-search-input');
+const friendSearchResult = document.getElementById('friend-search-result');
+const incomingSection = document.getElementById('incoming-section');
+const outgoingSection = document.getElementById('outgoing-section');
+const incomingList = document.getElementById('incoming-list');
+const outgoingList = document.getElementById('outgoing-list');
+const friendList = document.getElementById('friend-list');
+const friendCount = document.getElementById('friend-count');
+const friendEmpty = document.getElementById('friend-empty');
+
+let friendData = { incoming: [], outgoing: [], friends: [] };
+
+function canUseFriends() {
+  return Boolean(recordOwner && recordOwner.type === 'google' && userProfile && window.hanziFirebase);
+}
+
+// 시작 화면의 친구 버튼에 받은 요청 수 표시
+// (앱 시작 직후 이 파일 아래쪽이 실행되기 전에도 불릴 수 있어 요소를 직접 찾음)
+async function refreshFriendRequestBadge() {
+  const badge = document.getElementById('friend-request-count');
+  if (!canUseFriends()) {
+    badge.style.display = 'none';
+    return;
+  }
+  try {
+    const count = await window.hanziFirebase.countIncomingRequests();
+    badge.textContent = count;
+    badge.style.display = count > 0 ? '' : 'none';
+  } catch (error) {
+    console.warn('친구 요청 수 확인 실패:', error);
+  }
+}
+
+// 친구 한 명: 아바타(닉네임 첫 글자) + 닉네임 + @고유번호 + 버튼들
+function createFriendItem(person, actions) {
+  const li = document.createElement('li');
+  li.className = 'friend-item';
+
+  const avatar = document.createElement('span');
+  avatar.className = 'friend-avatar';
+  avatar.textContent = Array.from(person.nickname)[0];
+
+  const names = document.createElement('div');
+  names.className = 'friend-names';
+  const nickname = document.createElement('span');
+  nickname.className = 'friend-nickname';
+  nickname.textContent = person.nickname;
+  const code = document.createElement('span');
+  code.className = 'friend-code';
+  code.textContent = `@${person.userCode}`;
+  names.append(nickname, code);
+
+  const buttons = document.createElement('div');
+  buttons.className = 'friend-actions';
+  actions.forEach(({ label, kind, onClick }) => {
+    const btn = document.createElement('button');
+    btn.className = `friend-btn ${kind || ''}`;
+    btn.textContent = label;
+    btn.addEventListener('click', async () => {
+      buttons.querySelectorAll('button').forEach((b) => { b.disabled = true; });
+      try {
+        await onClick();
+      } catch (error) {
+        console.error('친구 작업 실패:', error);
+        showToast('처리하지 못했어요. 잠시 후 다시 시도해 주세요.');
+        buttons.querySelectorAll('button').forEach((b) => { b.disabled = false; });
+      }
+    });
+    buttons.appendChild(btn);
+  });
+
+  li.append(avatar, names, buttons);
+  return li;
+}
+
+function renderFriends() {
+  const { incoming, outgoing, friends } = friendData;
+
+  incomingSection.style.display = incoming.length ? '' : 'none';
+  incomingList.replaceChildren(...incoming.map((p) => createFriendItem(p, [
+    { label: '수락', kind: 'primary', onClick: async () => {
+      await window.hanziFirebase.acceptFriendRequest(p.uid);
+      showToast(`${p.nickname}님과 친구가 되었어요 🎉`);
+      await loadFriends();
+    } },
+    { label: '거절', onClick: async () => {
+      await window.hanziFirebase.declineFriendRequest(p.uid);
+      await loadFriends();
+    } },
+  ])));
+
+  outgoingSection.style.display = outgoing.length ? '' : 'none';
+  outgoingList.replaceChildren(...outgoing.map((p) => createFriendItem(p, [
+    { label: '요청 취소', onClick: async () => {
+      await window.hanziFirebase.cancelFriendRequest(p.uid);
+      await loadFriends();
+    } },
+  ])));
+
+  friendCount.textContent = friends.length ? `${friends.length}명` : '';
+  friendEmpty.style.display = friends.length ? 'none' : '';
+  friendList.replaceChildren(...friends.map((p) => createFriendItem(p, [
+    { label: '삭제', kind: 'danger', onClick: async () => {
+      if (!confirm(`${p.nickname}님을 친구에서 삭제할까요?`)) return;
+      await window.hanziFirebase.removeFriend(p.uid);
+      await loadFriends();
+    } },
+  ])));
+
+  friendRequestCount.textContent = incoming.length;
+  friendRequestCount.style.display = incoming.length ? '' : 'none';
+}
+
+async function loadFriends() {
+  friendsLoading.style.display = '';
+  try {
+    friendData = await window.hanziFirebase.getFriendData();
+    renderFriends();
+  } catch (error) {
+    console.error('친구 목록 불러오기 실패:', error);
+    showToast('친구 목록을 불러오지 못했어요.');
+  } finally {
+    friendsLoading.style.display = 'none';
+  }
+}
+
+function openFriends() {
+  const usable = canUseFriends();
+  friendsGuest.style.display = usable ? 'none' : '';
+  friendsContent.style.display = usable ? '' : 'none';
+  friendSearchResult.replaceChildren();
+  friendSearchInput.value = '';
+  showScreen('friends');
+  if (!usable) return;
+
+  myAvatar.textContent = Array.from(userProfile.nickname)[0];
+  myNickname.textContent = userProfile.nickname;
+  myUserCode.textContent = `@${userProfile.userCode} 📋`;
+  loadFriends();
+}
+
+function showSearchMessage(message) {
+  const p = document.createElement('p');
+  p.className = 'settings-note';
+  p.textContent = message;
+  friendSearchResult.replaceChildren(p);
+}
+
+friendSearchForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const text = friendSearchInput.value.trim();
+  if (!text) return;
+  showSearchMessage('찾는 중...');
+  let person;
+  try {
+    person = await window.hanziFirebase.findUser(text);
+  } catch (error) {
+    console.error('친구 찾기 실패:', error);
+    showSearchMessage('찾지 못했어요. 인터넷 연결을 확인해 주세요.');
+    return;
+  }
+  if (!person) {
+    showSearchMessage('그런 사용자를 찾을 수 없어요. 고유 번호 8자리나 닉네임을 정확히 입력해 주세요.');
+    return;
+  }
+  if (person.uid === recordOwner.uid) {
+    showSearchMessage('내 계정이에요 😊');
+    return;
+  }
+
+  const isFriend = friendData.friends.some((f) => f.uid === person.uid);
+  const sent = friendData.outgoing.some((f) => f.uid === person.uid);
+  const actions = isFriend || sent ? [] : [{ label: '친구 요청', kind: 'primary', onClick: async () => {
+    const result = await window.hanziFirebase.sendFriendRequest(person.uid);
+    const messages = {
+      sent: `${person.nickname}님에게 친구 요청을 보냈어요 📨`,
+      accepted: `${person.nickname}님과 친구가 되었어요 🎉`,
+      'already-sent': '이미 친구 요청을 보냈어요.',
+      'already-friends': '이미 친구예요.',
+    };
+    showToast(messages[result]);
+    friendSearchResult.replaceChildren();
+    friendSearchInput.value = '';
+    await loadFriends();
+  } }];
+  const item = createFriendItem(person, actions);
+  if (isFriend || sent) {
+    const tag = document.createElement('span');
+    tag.className = 'friend-tag';
+    tag.textContent = isFriend ? '이미 친구' : '요청 보냄';
+    item.querySelector('.friend-actions').appendChild(tag);
+  }
+  const list = document.createElement('ul');
+  list.className = 'friend-list';
+  list.appendChild(item);
+  friendSearchResult.replaceChildren(list);
+});
+
+btnFriends.addEventListener('click', openFriends);
+myUserCode.addEventListener('click', copyUserCode);
+document.getElementById('btn-friends-back').addEventListener('click', () => showScreen('start'));

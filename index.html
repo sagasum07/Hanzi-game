@@ -42,6 +42,7 @@
 
     <!-- ===== Start Screen ===== -->
     <div class="start-screen" id="start-screen" style="display:none;">
+      <button class="btn-settings" id="btn-settings" aria-label="설정" title="설정">⚙️</button>
       <div class="start-decoration">
         <span class="start-hanzi-bg">中</span>
       </div>
@@ -66,16 +67,159 @@
         </button>
         <button class="btn-review btn-wordbook" id="btn-wordbook">
           <span class="review-icon">⭐</span>
-          <span class="review-text">나의 단어장</span>
+          <span class="review-text">단어장</span>
           <span class="review-count wordbook-count" id="wordbook-count">0</span>
+        </button>
+        <button class="btn-review btn-friends" id="btn-friends">
+          <span class="review-icon">👥</span>
+          <span class="review-text">친구</span>
+          <span class="review-count friend-request-count" id="friend-request-count" style="display:none;">0</span>
         </button>
       </div>
       <p class="welcome-message" id="welcome-message"></p>
       <p class="record-summary" id="record-summary"></p>
-      <button class="btn-back btn-logout" id="btn-logout">로그아웃</button>
-      <button class="btn-delete-account" id="btn-delete-account">계정 삭제</button>
-      <a class="privacy-link" href="https://hanzi-game-weld.vercel.app/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>
       <p class="start-hint">원하는 학습 모드를 선택하세요!</p>
+    </div>
+
+    <!-- ===== Nickname Screen (구글 로그인 후 처음 한 번) ===== -->
+    <div class="nickname-screen" id="nickname-screen" style="display:none;">
+      <div class="login-decoration">
+        <span class="login-hanzi-bg">名</span>
+      </div>
+      <h1 class="login-title">닉네임을 정해 주세요</h1>
+      <p class="login-subtitle">게임에서 불릴 이름이에요.<br>나중에 설정에서 바꿀 수 있어요.</p>
+      <form class="nickname-form" id="nickname-form" novalidate>
+        <div class="nickname-check-row">
+          <input class="nickname-input" id="nickname-input" type="text" maxlength="12" autocomplete="off" placeholder="2~12자 (한글·영문·숫자·한자)">
+          <button type="button" class="btn-check-nickname" id="btn-check-nickname">중복 확인</button>
+        </div>
+        <p class="nickname-error" id="nickname-error"></p>
+        <button type="submit" class="btn-start-quiz" id="btn-nickname-save">시작하기 🚀</button>
+      </form>
+    </div>
+
+    <!-- ===== Friends Screen ===== -->
+    <div class="friends-screen" id="friends-screen" style="display:none;">
+      <h2 class="plan-title">👥 친구</h2>
+
+      <section class="settings-card" id="friends-guest">
+        <p class="settings-note">친구 기능은 구글로 로그인해야 쓸 수 있어요. 로그인하면 닉네임과 고유 번호가 생기고, 친구를 찾아 추가할 수 있어요.</p>
+      </section>
+
+      <div class="friends-content" id="friends-content">
+        <section class="settings-card my-id-card">
+          <h3 class="settings-heading">내 정보</h3>
+          <div class="my-id">
+            <span class="friend-avatar" id="my-avatar">?</span>
+            <div class="friend-names">
+              <span class="friend-nickname" id="my-nickname"></span>
+              <button class="user-code" id="my-user-code" title="눌러서 복사">@00000000</button>
+            </div>
+          </div>
+          <p class="settings-note">고유 번호를 눌러 복사해서 친구에게 알려 주세요</p>
+        </section>
+
+        <section class="settings-card">
+          <h3 class="settings-heading">친구 찾기</h3>
+          <form class="settings-nickname-row" id="friend-search-form" novalidate>
+            <input class="nickname-input" id="friend-search-input" type="text" maxlength="12" autocomplete="off" placeholder="@고유번호 또는 닉네임">
+            <button type="submit" class="btn-settings-save">찾기</button>
+          </form>
+          <div class="friend-search-result" id="friend-search-result"></div>
+        </section>
+
+        <section class="settings-card" id="incoming-section">
+          <h3 class="settings-heading">받은 친구 요청</h3>
+          <ul class="friend-list" id="incoming-list"></ul>
+        </section>
+
+        <section class="settings-card" id="outgoing-section">
+          <h3 class="settings-heading">보낸 친구 요청</h3>
+          <ul class="friend-list" id="outgoing-list"></ul>
+        </section>
+
+        <section class="settings-card">
+          <h3 class="settings-heading">내 친구 <span class="friend-count" id="friend-count"></span></h3>
+          <ul class="friend-list" id="friend-list"></ul>
+          <p class="settings-note" id="friend-empty">아직 친구가 없어요. 고유 번호나 닉네임으로 친구를 찾아보세요!</p>
+        </section>
+        <p class="settings-note friends-loading" id="friends-loading">불러오는 중...</p>
+      </div>
+
+      <button class="btn-back" id="btn-friends-back">← 뒤로</button>
+    </div>
+
+    <!-- ===== Settings Screen ===== -->
+    <div class="settings-screen" id="settings-screen" style="display:none;">
+      <h2 class="plan-title">⚙️ 설정</h2>
+
+      <section class="settings-card">
+        <h3 class="settings-heading">프로필</h3>
+        <div id="settings-profile-google">
+          <div class="settings-row">
+            <span class="settings-label">고유 번호</span>
+            <button class="user-code" id="settings-user-code" title="눌러서 복사">@00000000</button>
+          </div>
+          <label class="settings-label" for="settings-nickname-input">닉네임</label>
+          <form class="settings-nickname-row" id="settings-nickname-form" novalidate>
+            <input class="nickname-input" id="settings-nickname-input" type="text" maxlength="12" autocomplete="off" placeholder="2~12자">
+            <button type="button" class="btn-check-nickname" id="btn-settings-check-nickname">중복 확인</button>
+            <button type="submit" class="btn-settings-save">저장</button>
+          </form>
+          <p class="nickname-error" id="settings-nickname-error"></p>
+        </div>
+        <p class="settings-note" id="settings-profile-guest">게스트로 이용 중이에요. 구글로 로그인하면 닉네임을 정하고 여러 기기에서 학습 기록을 이어서 쓸 수 있어요.</p>
+      </section>
+
+      <section class="settings-card">
+        <h3 class="settings-heading">소리</h3>
+        <div class="settings-row">
+          <span class="settings-label">배경음악</span>
+          <label class="switch">
+            <input type="checkbox" id="settings-music">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">음량</span>
+          <input type="range" class="settings-range" id="settings-volume" min="0.05" max="1" step="0.05" value="0.5">
+        </div>
+        <div class="settings-row settings-row-wrap">
+          <span class="settings-label">발음 속도</span>
+          <div class="segmented" role="group" aria-label="발음 속도">
+            <button class="segment" data-speed="slow">느리게</button>
+            <button class="segment" data-speed="normal">보통</button>
+            <button class="segment" data-speed="fast">빠르게</button>
+          </div>
+          <button class="btn-preview-speech" id="btn-preview-speech" aria-label="발음 미리 듣기">🔈 你好</button>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <h3 class="settings-heading">학습</h3>
+        <div class="settings-row">
+          <div>
+            <span class="settings-label">단어 퀴즈에서 병음 보기</span>
+            <p class="settings-note">끄면 병음이 가려지고, 눌러서 확인할 수 있어요</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="settings-pinyin">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="settings-card">
+        <h3 class="settings-heading">계정</h3>
+        <p class="settings-note" id="settings-account-status"></p>
+        <div class="settings-account-buttons">
+          <button class="btn-back btn-logout" id="btn-logout">로그아웃</button>
+          <button class="btn-delete-account" id="btn-delete-account">계정 삭제</button>
+        </div>
+        <a class="privacy-link" href="https://hanzi-game-weld.vercel.app/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>
+      </section>
+
+      <button class="btn-back" id="btn-settings-back">← 뒤로</button>
     </div>
 
     <!-- ===== Difficulty Selection Screen ===== -->
