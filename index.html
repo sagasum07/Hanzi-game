@@ -3,8 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="HSK 1~6급 중국어 단어와 문장을 재미있게 학습하는 퀴즈 게임">
-  <title>中文学习 - HSK 1~6급</title>
+  <meta name="description" content="HSK 1~6급 중국어 단어 약 5,000개와 작문 문장을 일차별 학습 플랜, 퀴즈, 오답 노트, 나의 단어장으로 무료로 공부하는 중국어 학습 게임">
+  <title>中文学习 - HSK 1~6급 중국어 단어 학습 게임</title>
+  <link rel="canonical" href="https://www.zhongwenxuexi-app.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="中文学习">
+  <meta property="og:title" content="中文学习 - HSK 1~6급 중국어 단어 학습 게임">
+  <meta property="og:description" content="HSK 단어 5,000개를 일차별 플랜과 퀴즈로 매일 조금씩. 웹과 안드로이드 앱에서 무료로 공부하세요.">
+  <meta property="og:url" content="https://www.zhongwenxuexi-app.com/">
+  <meta property="og:image" content="https://www.zhongwenxuexi-app.com/og-image.png">
+  <link rel="icon" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"中文学习","alternateName":"중국어 학습 게임","url":"https://www.zhongwenxuexi-app.com/","description":"HSK 1~6급 중국어 단어와 작문 문장을 일차별 학습 플랜과 퀴즈로 공부하는 무료 학습 게임","applicationCategory":"EducationalApplication","operatingSystem":"Web, Android","inLanguage":"ko","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
@@ -37,7 +47,7 @@
           게스트로 시작하기
         </button>
       </div>
-      <a class="privacy-link" href="https://hanzi-game-weld.vercel.app/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>
+      <a class="privacy-link" href="https://www.zhongwenxuexi-app.com/privacy" target="_blank" rel="noopener">개인정보처리방침</a>
     </div>
 
     <!-- ===== Start Screen ===== -->
@@ -216,7 +226,7 @@
           <button class="btn-back btn-logout" id="btn-logout">로그아웃</button>
           <button class="btn-delete-account" id="btn-delete-account">계정 삭제</button>
         </div>
-        <a class="privacy-link" href="https://hanzi-game-weld.vercel.app/privacy.html" target="_blank" rel="noopener">개인정보처리방침</a>
+        <a class="privacy-link" href="https://www.zhongwenxuexi-app.com/privacy" target="_blank" rel="noopener">개인정보처리방침</a>
       </section>
 
       <button class="btn-back" id="btn-settings-back">← 뒤로</button>
@@ -500,7 +510,23 @@
       </div>
       <div class="feedback-toast" id="feedback-toast"></div>
     </footer>
+
+    <footer class="site-info" id="site-info">
+      <p class="site-info-text">中文学习는 HSK 1~6급 중국어 단어 약 5,000개와 작문 문장을 일차별 학습 플랜, 4지선다 퀴즈, 오답 노트, 나의 단어장으로 공부하는 무료 중국어 학습 게임이에요.</p>
+      <nav class="site-info-links" aria-label="사이트 안내">
+        <a href="/words">HSK 단어 목록</a>
+        <a href="/words/hsk-1">1급</a>
+        <a href="/words/hsk-2">2급</a>
+        <a href="/words/hsk-3">3급</a>
+        <a href="/words/hsk-4">4급</a>
+        <a href="/words/hsk-5">5급</a>
+        <a href="/words/hsk-6">6급</a>
+        <a href="/about">소개</a>
+        <a href="/privacy">개인정보처리방침</a>
+      </nav>
+    </footer>
   </div>
+
 
   <script src="data.js"></script>
   <script src="data_hsk3.js"></script>

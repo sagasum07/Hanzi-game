@@ -1,0 +1,11 @@
+{
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "hanzi-game-weld.vercel.app" }],
+      "destination": "https://www.zhongwenxuexi-app.com/:path*",
+      "permanent": true
+    }
+  ]
+}

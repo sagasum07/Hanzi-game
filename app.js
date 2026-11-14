@@ -397,6 +397,8 @@ function createSentenceWordSpan(wordText) {
 // ========================================
 // 안드로이드 앱(Capacitor) 안에서 실행 중인지 여부
 const isNativeApp = Boolean(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+// 앱에서는 웹사이트용 안내(단어 목록 페이지 링크 등)를 숨김
+if (isNativeApp) document.documentElement.classList.add('native-app');
 
 // 설정의 발음 속도 (느리게/보통/빠르게)에 곱하는 배율
 const SPEECH_SPEED_FACTORS = { slow: 0.8, normal: 1, fast: 1.25 };

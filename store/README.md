@@ -8,8 +8,8 @@
 | `feature-graphic.png` | 그래픽 이미지(스토어 상단 배너) | 1024 × 500 |
 | `screenshots/01~06.png` | 휴대전화 스크린샷 | 1080 × 2160 |
 
-- 개인정보처리방침 URL: https://hanzi-game-weld.vercel.app/privacy.html
-- 계정 삭제 안내 URL: https://hanzi-game-weld.vercel.app/privacy.html (4. 보관 기간과 삭제)
+- 개인정보처리방침 URL: https://www.zhongwenxuexi-app.com/privacy
+- 계정 삭제 안내 URL: https://www.zhongwenxuexi-app.com/privacy (4. 보관 기간과 삭제)
 
 ---
 
@@ -102,7 +102,7 @@ HSK 1~6급 단어 5,000개를 일차별 플랜으로! 퀴즈·문장 작문·오
 ## 5. 앱 콘텐츠 (정책) 입력값
 
 ### 개인정보처리방침
-`https://hanzi-game-weld.vercel.app/privacy.html`
+`https://www.zhongwenxuexi-app.com/privacy`
 
 ### 광고
 광고 없음
