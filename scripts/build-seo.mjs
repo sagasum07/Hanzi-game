@@ -54,6 +54,9 @@ function page({ path, title, description, body, jsonLd }) {
   <link rel="icon" href="/favicon.png">
   <link rel="stylesheet" href="/pages.css">
   ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>` : ''}
+  <!-- adsense:start (웹사이트 전용 — 앱용 파일을 만들 때 scripts/build-web.mjs 가 자동으로 제거) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8544888666744598" crossorigin="anonymous"></script>
+  <!-- adsense:end -->
 </head>
 <body>
   <header class="site-header">
