@@ -1,7 +1,7 @@
 // ========================================
 // 게임 모드 효과음 — 소리 파일 없이 Web Audio 로 직접 합성합니다.
 // ========================================
-// app.js 다음에 불러오는 일반 스크립트입니다. (userSettings.sfxOn, currentVolume 을 씀, 배경음악과는 다른 AudioContext 사용)
+// app.js 다음에 불러오는 일반 스크립트입니다. (userSettings.sfxOn, currentVolume, audioCtx 를 씀)
 // 동양풍 느낌: 북(둥) · 징(웅~) · 오음계(궁상각치우) 종소리
 //
 // 사용: Sfx.punch(), Sfx.critical() … 소리를 낼 수 없는 환경이면 조용히 넘어갑니다.
@@ -11,26 +11,36 @@ const Sfx = (() => {
   let master = null;
   let noiseBuffer = null;
 
-  // 효과음 전용 AudioContext (배경음악과 따로 써서 효과음 문제가 배경음악에 번지지 않음)
+  // 효과음 AudioContext 는 한 번 만들어 계속 씀 (닫았다 새로 만들면 휴대폰에서 소리 장치가 끊기거나,
+  // 사용자 동작 밖에서 만든 새 장치가 '멈춤' 상태로 남아 배경음악·효과음이 모두 사라짐)
+  // 아이폰은 배경음악이 이미 쓰는 장치(audioCtx)를 같이 써서 소리 세션을 하나로 유지
+  function build() {
+    const shared = typeof audioCtx !== 'undefined' && audioCtx && audioCtx.state !== 'closed' ? audioCtx : null;
+    if (shared) {
+      ctx = shared;
+    } else {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return false;
+      ctx = new AudioCtx();
+    }
+    // 리미터: 소리가 겹쳐도 찢어지지 않게
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -6;
+    limiter.knee.value = 6;
+    limiter.ratio.value = 12;
+    limiter.attack.value = 0.003;
+    limiter.release.value = 0.15;
+    limiter.connect(ctx.destination);
+    master = ctx.createGain();
+    master.connect(limiter);
+    noiseBuffer = null;
+    return true;
+  }
+
   function getCtx() {
     if (!userSettings.sfxOn || currentVolume <= 0) return null;
     try {
-      if (!ctx || ctx.state === 'closed') {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return null;
-        ctx = new AudioCtx();
-        // 리미터: 소리가 겹쳐도 찢어지지 않게
-        const limiter = ctx.createDynamicsCompressor();
-        limiter.threshold.value = -6;
-        limiter.knee.value = 6;
-        limiter.ratio.value = 12;
-        limiter.attack.value = 0.003;
-        limiter.release.value = 0.15;
-        limiter.connect(ctx.destination);
-        master = ctx.createGain();
-        master.connect(limiter);
-        noiseBuffer = null;
-      }
+      if ((!ctx || ctx.state === 'closed') && !build()) return null;
       master.gain.value = Math.min(1, 0.25 + currentVolume * 0.85);
       if (ctx.state !== 'running') ctx.resume().catch(() => {});
       return ctx;
@@ -39,12 +49,26 @@ const Sfx = (() => {
     }
   }
 
-  // 전투마다 효과음 장치를 새로 만들어, 혹시 멈추거나 고장 난 상태가 이어지지 않게 함
+  // 화면을 누를 때(사용자 동작 중)마다 불러서 소리 장치를 깨움.
+  // 아이폰은 이때 아주 짧은 무음을 한 번 재생해야 이후 효과음이 확실히 남
+  let unlocked = false;
+  function unlock() {
+    const c = getCtx();
+    if (!c || (unlocked && c.state === 'running')) return;
+    try {
+      const src = c.createBufferSource();
+      src.buffer = c.createBuffer(1, 1, 22050);
+      src.connect(c.destination);
+      src.start(0);
+      unlocked = true;
+    } catch (error) {
+      // 무시
+    }
+  }
+
+  // 예전 이름 호환: 이제는 장치를 닫지 않고 깨우기만 함
   function reset() {
-    if (ctx) ctx.close().catch(() => {});
-    ctx = null;
-    master = null;
-    noiseBuffer = null;
+    if (ctx && ctx.state !== 'running' && ctx.state !== 'closed') ctx.resume().catch(() => {});
   }
 
   const safe = (v, min, max) => Math.min(max, Math.max(min, Number.isFinite(v) ? v : min));
@@ -126,7 +150,8 @@ const Sfx = (() => {
 
   return {
     reset,
-    // 전투 시작: 효과음 장치를 새로 만들고 북 두 번
+    unlock,
+    // 전투 시작: 북 두 번
     battleStart: (boss) => { reset(); play((c) => {
       drum(c, 0, 0.8, boss ? 80 : 100);
       drum(c, 0.22, 0.9, boss ? 70 : 90);
@@ -172,10 +197,24 @@ const Sfx = (() => {
       [0, 2, 4, 5, 7].forEach((n, i) => tone(c, PENTA[n], i * 0.11, 0.5, { type: 'triangle', gain: 0.22 }));
       tone(c, PENTA[9], 0.6, 0.9, { type: 'sine', gain: 0.18 });
     }),
-    // 패배: 낮게 내려가는 소리
+    // 쓰러짐: 털썩
+    fall: () => play((c) => {
+      drum(c, 0, 0.9, 85);
+      hiss(c, 0.02, 0.35, { gain: 0.35, freq: 700, slideTo: 150 });
+      tone(c, 220, 0, 0.5, { type: 'sawtooth', gain: 0.06, slideTo: 110 });
+    }),
+    // 패배: 낮게 가라앉는 오음계 + 무거운 징
     defeat: () => play((c) => {
-      [4, 2, 1, 0].forEach((n, i) => tone(c, PENTA[n] / 2, i * 0.18, 0.5, { type: 'triangle', gain: 0.2 }));
-      gong(c, 0.75, 0.25, 82);
+      drum(c, 0, 1, 60);
+      [4, 2, 1, 0].forEach((n, i) => tone(c, PENTA[n] / 2, 0.1 + i * 0.22, 0.6, { type: 'triangle', gain: 0.2 }));
+      tone(c, PENTA[0] / 4, 0.95, 1.6, { type: 'sine', gain: 0.3 });
+      gong(c, 0.9, 0.35, 73);
+    }),
+    // 글자가 쩍 갈라짐
+    crack: () => play((c) => {
+      hiss(c, 0, 0.16, { gain: 0.7, type: 'highpass', freq: 2500, slideTo: 600 });
+      hiss(c, 0.04, 0.1, { gain: 0.5, type: 'bandpass', freq: 1200, q: 4 });
+      tone(c, 90, 0, 0.4, { gain: 0.7, slideTo: 45 });
     }),
     // 상자: 덜컹덜컹 → 열림 → 보상 하나씩 → 레벨 업
     chestShake: () => play((c) => {
@@ -201,3 +240,13 @@ const Sfx = (() => {
     }),
   };
 })();
+
+// 휴대폰은 사용자 동작(터치) 중에만 소리 장치를 깨울 수 있어서, 화면을 누를 때마다
+// 효과음 장치를 깨우고 멈춘 배경음악도 다시 켬
+['pointerdown', 'touchend', 'click'].forEach((type) => {
+  document.addEventListener(type, () => {
+    setupAudioGraph(); // 아이폰: 배경음악 장치를 먼저 만들어 효과음도 같은 장치를 쓰게 함
+    Sfx.unlock();
+    ensureBgm();
+  }, { capture: true, passive: true });
+});

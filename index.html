@@ -591,6 +591,23 @@
           <div class="victory-sparks" id="victory-sparks" aria-hidden="true"></div>
         </div>
 
+        <!-- 패배 연출: 화면이 잿빛으로 바래고 먹물이 흘러내리며 '败'가 쩍 갈라짐 (누르면 넘어감) -->
+        <div class="battle-defeat" id="battle-defeat" style="display:none;" aria-live="assertive">
+          <div class="defeat-drip" aria-hidden="true"></div>
+          <div class="defeat-rain" aria-hidden="true"></div>
+          <div class="defeat-ash" id="defeat-ash" aria-hidden="true"></div>
+          <div class="defeat-word" aria-label="败">
+            <span class="defeat-half left" aria-hidden="true">败</span>
+            <span class="defeat-half right" aria-hidden="true">败</span>
+            <svg class="defeat-crack" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <polyline points="58,0 50,18 60,34 46,52 56,68 44,84 50,100" />
+            </svg>
+          </div>
+          <div class="defeat-pinyin">bài</div>
+          <div class="defeat-sub" id="defeat-sub">패배…</div>
+          <div class="defeat-tip" id="defeat-tip"></div>
+        </div>
+
         <!-- 틀렸을 때 정답 확인 창 (확인을 눌러야 다음 문제로) -->
         <div class="answer-reveal" id="answer-reveal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="reveal-title">
           <div class="answer-reveal-card">

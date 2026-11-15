@@ -348,6 +348,7 @@ async function startBattle(level, stageNo) {
   battleResult.style.display = 'none';
   answerReveal.style.display = 'none';
   battleVictory.style.display = 'none';
+  battleDefeat.style.display = 'none';
   rewardArea.style.display = 'none';
   resultButtons.style.display = '';
   hideChestOpen();
@@ -472,6 +473,76 @@ function playVictory(stage) {
 function hideVictory() {
   battleVictory.style.display = 'none';
 }
+
+// ---------- 패배 연출: 败 ----------
+// 몬스터가 비웃고 내 캐릭터가 쓰러진 뒤, 화면이 잿빛으로 바래고 먹물이 흘러내리며 '败'가 갈라짐
+const battleDefeat = document.getElementById('battle-defeat');
+const DEFEAT_SHOW_MS = 650; // 쓰러지는 모습을 먼저 보여 줌
+const DEFEAT_END_MS = 3600;
+const DEFEAT_TAUNTS = ['크하하! 아직 멀었다!', '그 정도 실력으론 어림없지!', '다음엔 공부 좀 하고 오너라!'];
+
+function playDefeat(current) {
+  const { stage } = current;
+  current.defeating = true;
+  stopBattleTimer();
+  setPlayerMood('hurt');
+  playerFighter.classList.add('fallen');
+  monsterFighter.classList.add('taunt');
+  bubbleKind.textContent = '';
+  bubbleText.textContent = stage.boss ? '하찮은 녀석! 썩 물러가라!' : DEFEAT_TAUNTS[Math.floor(Math.random() * DEFEAT_TAUNTS.length)];
+  bubbleText.removeAttribute('lang');
+  playerBubbleText.textContent = '으윽…';
+  playerBubbleText.lang = 'ko';
+  playerBubbleSub.textContent = '';
+  if (!reduceMotion.matches) stageEffect('shake-l', 500);
+  Sfx.fall();
+
+  const timers = [];
+  const at = (ms, fn) => timers.push(setTimeout(() => { if (battle === current && current.defeating) fn(); }, ms));
+  at(DEFEAT_SHOW_MS, () => {
+    document.getElementById('defeat-sub').textContent = stage.boss ? '두목에게 패배했어요…' : '패배했어요…';
+    document.getElementById('defeat-tip').textContent = '틀린 단어를 익히고 다시 도전!';
+    const ash = document.getElementById('defeat-ash');
+    ash.replaceChildren();
+    if (!reduceMotion.matches) {
+      for (let i = 0; i < 22; i++) {
+        const a = document.createElement('span');
+        a.style.left = `${Math.random() * 100}%`;
+        a.style.setProperty('--sway', `${(Math.random() - 0.5) * 60}px`);
+        a.style.setProperty('--d', `${1.2 + Math.random() * 1.6}s`);
+        a.style.animationDelay = `${0.3 + Math.random() * 1.4}s`;
+        const size = 3 + Math.random() * 5;
+        a.style.width = `${size}px`;
+        a.style.height = `${size}px`;
+        ash.appendChild(a);
+      }
+    }
+    battleDefeat.className = `battle-defeat${stage.boss ? ' boss' : ''}`;
+    battleDefeat.style.display = '';
+    Sfx.defeat();
+  });
+  // 글자가 쩍 갈라지는 순간
+  at(DEFEAT_SHOW_MS + 1050, () => {
+    battleDefeat.classList.add('split');
+    if (!reduceMotion.matches) stageEffect('shake-l', 350);
+    Sfx.crack();
+  });
+  at(DEFEAT_END_MS, () => endDefeat(current));
+  current.defeatTimers = timers;
+}
+
+function endDefeat(current) {
+  if (battle !== current || !current.defeating) return;
+  current.defeating = false;
+  (current.defeatTimers || []).forEach(clearTimeout);
+  battleDefeat.style.display = 'none';
+  finishBattle(false);
+}
+
+// 연출 중에 누르면 바로 결과 창으로 (쓰러지는 순간 바로 누르는 실수는 막음)
+battleDefeat.addEventListener('click', () => {
+  if (battle && battle.defeating) endDefeat(battle);
+});
 
 function renderBattleStatus() {
   battleHearts.innerHTML = uiIcon('heart').repeat(battle.hearts) + uiIcon('heart-empty').repeat(PLAYER_HEARTS - battle.hearts);
@@ -983,6 +1054,12 @@ function finishBattle(won) {
     }, 2700);
     return;
   }
+  // 졌으면 패배 연출을 먼저 보여 줌
+  if (!won && !battle.defeatShown) {
+    battle.defeatShown = true;
+    playDefeat(battle);
+    return;
+  }
   const { level, stage } = battle;
   stopBattleTimer();
   const stars = won ? battle.hearts : 0;
@@ -1006,10 +1083,7 @@ function finishBattle(won) {
     ? (stage.no >= total ? `HSK ${level}급의 모든 스테이지를 클리어했어요!` : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
     : '틀린 단어는 오답 노트에 모였어요. 다시 도전해 보세요!';
   btnBattleNext.style.display = won && stage.no < total ? '' : 'none';
-  if (!won) {
-    setPlayerMood('hurt');
-    Sfx.defeat();
-  }
+  if (!won) setPlayerMood('hurt');
   battleResult.style.display = '';
   battle.finished = true;
 }

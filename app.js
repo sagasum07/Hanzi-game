@@ -2422,6 +2422,14 @@ function applyVolume() {
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
+// 아이폰(사파리 17+): 소리 세션을 '재생' 으로 지정해서, 무음 스위치나 다른 소리 때문에
+// Web Audio(배경음악 음량 조절·효과음)가 꺼지지 않게 함
+try {
+  if (navigator.audioSession) navigator.audioSession.type = 'playback';
+} catch (error) {
+  // 지원하지 않는 브라우저는 무시
+}
+
 // 사용자 상호작용 안에서 호출해야 AudioContext 가 정상 동작함
 function setupAudioGraph() {
   if (!IS_IOS || gainNode || location.protocol === 'file:') return;
