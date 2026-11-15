@@ -5,6 +5,7 @@ import { cpSync, mkdirSync, rmSync, readFileSync, writeFileSync, existsSync } fr
 const FILES = [
   'index.html',
   'app.js',
+  'avatar.js',
   'stage-game.js',
   'style.css',
   'firebase.js',

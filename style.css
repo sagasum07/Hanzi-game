@@ -3172,170 +3172,6 @@ header h1, .header-titles h1 {
   50% { box-shadow: 0 0 0 6px rgba(107, 84, 166, 0); }
 }
 
-/* ---- 전투 ---- */
-.game-battle {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 14px 12px 18px;
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, #2E2650 0%, #4A3B7A 55%, #F7F1EA 55.2%);
-  box-shadow: 0 6px 20px rgba(46, 38, 80, 0.3);
-  overflow: hidden;
-}
-
-.game-battle.boss-battle {
-  background: linear-gradient(180deg, #3B1414 0%, #7A2E1E 55%, #F7F1EA 55.2%);
-}
-
-.game-battle.player-hit {
-  animation: screen-shake 0.4s ease;
-}
-
-.battle-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  color: #fff;
-  font-weight: 700;
-}
-
-.battle-exit {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.battle-title {
-  font-size: 0.95rem;
-}
-
-.battle-hearts {
-  font-size: 1rem;
-  letter-spacing: 1px;
-}
-
-.monster-area {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-}
-
-.monster-name {
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 700;
-  opacity: 0.9;
-}
-
-.monster-hp {
-  width: 70%;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-}
-
-.monster-hp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #E05252, #F08A5D);
-  transition: width 0.4s ease;
-}
-
-.monster {
-  font-size: 4.5rem;
-  line-height: 1.1;
-  animation: monster-bob 2.4s ease-in-out infinite;
-  user-select: none;
-}
-
-.boss-battle .monster {
-  font-size: 5.5rem;
-}
-
-.monster.appear {
-  animation: monster-appear 0.5s ease, monster-bob 2.4s ease-in-out 0.5s infinite;
-}
-
-.monster.hit {
-  animation: monster-hit 0.45s ease, monster-bob 2.4s ease-in-out 0.45s infinite;
-}
-
-.monster.defeated {
-  animation: monster-defeat 0.8s ease forwards;
-}
-
-.damage-pop {
-  position: absolute;
-  top: 38%;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #FFD54F;
-  font-weight: 900;
-  font-size: 1.3rem;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.damage-pop.show {
-  animation: damage-float 0.9s ease forwards;
-}
-
-.monster-bubble {
-  width: 100%;
-  background: #fff;
-  border-radius: 14px;
-  padding: 10px 14px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  position: relative;
-}
-
-.monster-bubble::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 8px solid transparent;
-  border-top: 0;
-  border-bottom-color: #fff;
-}
-
-.bubble-kind {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #6B54A6;
-  margin-bottom: 4px;
-}
-
-.boss-battle .bubble-kind {
-  color: #C0392B;
-}
-
-.bubble-text {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  word-break: keep-all;
-  line-height: 1.45;
-}
-
 .battle-timer {
   width: 100%;
   height: 8px;
@@ -3431,37 +3267,6 @@ header h1, .header-titles h1 {
   min-width: 40px;
 }
 
-.battle-feedback {
-  min-height: 3.2em;
-  text-align: center;
-  font-size: 0.95rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: baseline;
-  gap: 2px 8px;
-}
-
-.battle-feedback.correct strong {
-  color: var(--correct);
-}
-
-.battle-feedback.wrong strong {
-  color: var(--wrong);
-}
-
-.feedback-zh {
-  font-weight: 800;
-  font-size: 1.05rem;
-  color: var(--text-primary);
-}
-
-.feedback-py {
-  width: 100%;
-  font-size: 0.82rem;
-  color: var(--accent);
-}
-
 .battle-result {
   position: absolute;
   inset: 0;
@@ -3554,6 +3359,517 @@ header h1, .header-titles h1 {
   .monster.hit,
   .stage-node.current,
   .game-battle.player-hit {
+    animation: none;
+  }
+}
+
+/* ---- 캐릭터 만들기 (avatar.js) ---- */
+.avatar-maker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.avatar-preview {
+  width: 150px;
+  height: 200px;
+  border-radius: var(--radius);
+  background: radial-gradient(circle at 50% 40%, #F4EFFC 0%, #E4DAF5 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+}
+
+.avatar-preview .avatar-svg {
+  width: 130px;
+  height: auto;
+}
+
+.avatar-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.avatar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.avatar-group-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.avatar-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.avatar-choices.preview {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.avatar-choice {
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.avatar-choices.chip .avatar-choice {
+  flex: 1;
+  padding: 10px;
+}
+
+.avatar-choices.preview .avatar-choice {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 6px 6px;
+  font-size: 0.72rem;
+}
+
+.avatar-mini {
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  display: block;
+}
+
+.avatar-mini .avatar-svg {
+  width: 52px;
+  height: auto;
+  margin-top: 2px;
+  transform: scale(1.7);
+  transform-origin: 50% 18%;
+}
+
+.avatar-choices.swatch .avatar-choice {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--swatch);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--border);
+}
+
+.avatar-choice.selected {
+  border-color: #6B54A6;
+  background: #F4EFFC;
+  color: #6B54A6;
+}
+
+.avatar-choices.swatch .avatar-choice.selected {
+  background: var(--swatch);
+  box-shadow: 0 0 0 3px #6B54A6;
+}
+
+.avatar-maker-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.avatar-maker-buttons > * {
+  flex: 1;
+  margin: 0;
+}
+
+.my-avatar-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: 0 4px 14px var(--bg-card-shadow);
+}
+
+.my-avatar {
+  width: 56px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #F4EFFC;
+}
+
+.my-avatar .avatar-svg {
+  width: 56px;
+  height: auto;
+  transform: scale(1.5);
+  transform-origin: 50% 22%;
+}
+
+.my-avatar-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.my-avatar-info strong {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.btn-avatar-edit {
+  border: 2px solid #D9CCF0;
+  background: #F4EFFC;
+  color: #6B54A6;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+/* ---- 전투 ---- */
+.game-battle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 12px 18px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: 0 6px 20px rgba(46, 38, 80, 0.2);
+  overflow: hidden;
+}
+
+.battle-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.battle-exit {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #F4EFFC;
+  color: #6B54A6;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.battle-title {
+  font-size: 0.95rem;
+}
+
+.battle-top-spacer {
+  width: 32px;
+}
+
+/* 무대: 밤하늘 배경 + 땅 */
+.battle-stage {
+  position: relative;
+  width: 100%;
+  border-radius: 14px;
+  padding: 10px 10px 0;
+  background: linear-gradient(180deg, #2E2650 0%, #4A3B7A 68%, #6E8B4E 68.5%, #59743F 100%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.boss-battle .battle-stage {
+  background: linear-gradient(180deg, #3B1414 0%, #7A2E1E 68%, #6B5A45 68.5%, #4E412F 100%);
+}
+
+.speech {
+  position: relative;
+  background: #fff;
+  border-radius: 14px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  min-width: 0;
+}
+
+/* 몬스터 말풍선: 위쪽 전체, 꼬리는 왼쪽 아래(몬스터 쪽) */
+.monster-speech {
+  grid-column: 1 / 3;
+  text-align: left;
+}
+
+.monster-speech::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  left: 22%;
+  border: 9px solid transparent;
+  border-bottom: 0;
+  border-top-color: #fff;
+}
+
+/* 내 말풍선: 오른쪽, 꼬리는 오른쪽 아래(캐릭터 쪽) */
+.player-speech {
+  grid-column: 2 / 3;
+  text-align: center;
+  background: #FFF7D6;
+}
+
+.player-speech::after {
+  content: '';
+  position: absolute;
+  bottom: -9px;
+  right: 30%;
+  border: 9px solid transparent;
+  border-bottom: 0;
+  border-top-color: #FFF7D6;
+}
+
+.bubble-kind {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6B54A6;
+  margin-bottom: 2px;
+}
+
+.boss-battle .bubble-kind {
+  color: #C0392B;
+}
+
+.bubble-text {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  word-break: keep-all;
+  line-height: 1.4;
+}
+
+.player-bubble-text {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  word-break: keep-all;
+  line-height: 1.35;
+}
+
+.player-bubble-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+  min-height: 1em;
+}
+
+.fighters {
+  grid-column: 1 / 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 4px 6px 6px;
+}
+
+.fighter {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 44%;
+}
+
+.fighter-name {
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.fighter-hp {
+  width: 90%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.monster-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #E05252, #F08A5D);
+  transition: width 0.4s ease;
+}
+
+.fighter-hearts {
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  line-height: 8px;
+  height: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.monster {
+  font-size: 4.2rem;
+  line-height: 1.1;
+  animation: monster-bob 2.4s ease-in-out infinite;
+  user-select: none;
+  transform-origin: 50% 100%;
+}
+
+.boss-battle .monster {
+  font-size: 5rem;
+}
+
+.monster.appear {
+  animation: monster-appear 0.5s ease, monster-bob 2.4s ease-in-out 0.5s infinite;
+}
+
+.monster.hit {
+  animation: monster-hit 0.45s ease, monster-bob 2.4s ease-in-out 0.45s infinite;
+}
+
+.monster.defeated {
+  animation: monster-defeat 0.8s ease forwards;
+}
+
+.battle-avatar {
+  width: 92px;
+  height: 122px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.battle-avatar .avatar-svg {
+  width: 92px;
+  height: auto;
+  overflow: visible;
+}
+
+/* 앞쪽 팔: 어깨를 축으로 회전 */
+.avatar-svg .arm-front {
+  transform-box: view-box;
+  transform-origin: 40px 88px;
+}
+
+/* 공격: 몬스터 쪽(왼쪽)으로 달려가 주먹을 뻗고 돌아옴 */
+.player-side.attack .battle-avatar {
+  animation: player-dash 0.6s ease;
+}
+
+.player-side.attack .arm-front {
+  animation: punch 0.6s ease;
+}
+
+.player-side.critical .battle-avatar {
+  animation: player-dash-critical 0.6s ease;
+}
+
+/* 피격: 뒤로 밀려나며 빨갛게 번쩍 */
+.player-side.hurt .battle-avatar {
+  animation: player-hurt 0.55s ease;
+}
+
+/* 몬스터 공격: 오른쪽(캐릭터 쪽)으로 달려듦 */
+.monster-side.attack .monster {
+  animation: monster-lunge 0.6s ease;
+}
+
+.damage-pop {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #FFD54F;
+  font-weight: 900;
+  font-size: 1.15rem;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.damage-pop.player-pop {
+  color: #FF8A8A;
+}
+
+.damage-pop.show {
+  animation: damage-float 0.9s ease forwards;
+}
+
+/* 결과는 화면 읽기 프로그램용으로만 알려 줌 (말풍선에 이미 표시) */
+.battle-feedback {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes player-dash {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(-70%); }
+  55% { transform: translateX(-70%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes player-dash-critical {
+  0% { transform: translateX(0) scale(1); }
+  35% { transform: translateX(-85%) scale(1.12); }
+  55% { transform: translateX(-85%) scale(1.12); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes punch {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-25deg); }
+  40% { transform: rotate(95deg); }
+  60% { transform: rotate(95deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes player-hurt {
+  0% { transform: translateX(0); filter: none; }
+  20% { transform: translateX(16px) rotate(6deg); filter: brightness(1.2) sepia(1) saturate(6) hue-rotate(-40deg); }
+  45% { transform: translateX(8px) rotate(-3deg); }
+  70% { transform: translateX(12px); filter: none; }
+  100% { transform: translateX(0); }
+}
+
+@keyframes monster-lunge {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(80%) scale(1.1); }
+  55% { transform: translateX(80%) scale(1.1); }
+  100% { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .player-side.attack .battle-avatar,
+  .player-side.critical .battle-avatar,
+  .player-side.hurt .battle-avatar,
+  .monster-side.attack .monster,
+  .player-side.attack .arm-front {
     animation: none;
   }
 }

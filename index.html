@@ -468,9 +468,30 @@
 
     <!-- ===== Game Mode (stage-game.js) ===== -->
     <div class="game-screen" id="game-screen" style="display:none;">
+      <!-- 캐릭터 만들기 (avatar.js) -->
+      <div class="avatar-maker" id="avatar-maker" style="display:none;">
+        <h2 class="game-map-title">🧑‍🎤 나의 캐릭터</h2>
+        <p class="game-map-desc">몬스터와 싸울 캐릭터를 꾸며 보세요.</p>
+        <div class="avatar-preview" id="avatar-preview" aria-hidden="true"></div>
+        <div class="avatar-options" id="avatar-options"></div>
+        <div class="avatar-maker-buttons">
+          <button class="btn-restart" id="btn-avatar-random">🎲 랜덤</button>
+          <button class="btn-start-quiz" id="btn-avatar-done">완료 →</button>
+        </div>
+        <button class="btn-back" id="btn-avatar-back">← 뒤로</button>
+      </div>
+
       <!-- 스테이지 지도 -->
       <div class="game-map" id="game-map">
         <h2 class="game-map-title">⚔️ 게임 모드</h2>
+        <div class="my-avatar-card">
+          <div class="my-avatar" id="my-avatar" aria-hidden="true"></div>
+          <div class="my-avatar-info">
+            <strong id="my-avatar-name"></strong>
+            <span>맨손 격투가 👊</span>
+          </div>
+          <button class="btn-avatar-edit" id="btn-avatar-edit">✏️ 꾸미기</button>
+        </div>
         <p class="game-map-desc">스테이지를 클리어하면 다음 스테이지가 열려요.<br>6개 스테이지마다 7번째는 배운 단어를 모두 복습하는 <strong>보스 스테이지</strong>예요.</p>
         <div class="game-level-tabs" id="game-level-tabs" role="tablist"></div>
         <p class="game-map-summary" id="game-map-summary"></p>
@@ -483,16 +504,31 @@
         <div class="battle-top">
           <button class="battle-exit" id="btn-battle-exit" aria-label="스테이지 나가기">✕</button>
           <span class="battle-title" id="battle-title"></span>
-          <span class="battle-hearts" id="battle-hearts" aria-label="남은 생명"></span>
+          <span class="battle-top-spacer"></span>
         </div>
-        <div class="monster-area">
-          <div class="monster-name" id="monster-name"></div>
-          <div class="monster-hp" aria-hidden="true"><div class="monster-hp-fill" id="monster-hp-fill"></div></div>
-          <div class="monster" id="monster" aria-hidden="true">👾</div>
-          <div class="damage-pop" id="damage-pop" aria-hidden="true"></div>
-          <div class="monster-bubble" id="monster-bubble">
+        <!-- 전투 무대: 몬스터(왼쪽) ↔ 내 캐릭터(오른쪽), 말풍선으로 문제와 답을 주고받음 -->
+        <div class="battle-stage">
+          <div class="speech monster-speech" id="monster-bubble">
             <span class="bubble-kind" id="bubble-kind"></span>
             <p class="bubble-text" id="bubble-text"></p>
+          </div>
+          <div class="speech player-speech" id="player-bubble">
+            <p class="player-bubble-text" id="player-bubble-text"></p>
+            <span class="player-bubble-sub" id="player-bubble-sub"></span>
+          </div>
+          <div class="fighters">
+            <div class="fighter monster-side" id="monster-fighter">
+              <div class="fighter-name" id="monster-name"></div>
+              <div class="fighter-hp" aria-hidden="true"><div class="monster-hp-fill" id="monster-hp-fill"></div></div>
+              <div class="monster" id="monster" aria-hidden="true">👾</div>
+              <div class="damage-pop" id="damage-pop" aria-hidden="true"></div>
+            </div>
+            <div class="fighter player-side" id="player-fighter">
+              <div class="fighter-name" id="player-name"></div>
+              <div class="fighter-hearts" id="battle-hearts" aria-label="남은 생명"></div>
+              <div class="avatar battle-avatar" id="player-avatar" aria-hidden="true"></div>
+              <div class="damage-pop player-pop" id="player-pop" aria-hidden="true"></div>
+            </div>
           </div>
         </div>
         <div class="battle-timer" aria-hidden="true"><div class="battle-timer-fill" id="battle-timer-fill"></div></div>
@@ -638,6 +674,7 @@
   <script src="data_hsk5.js"></script>
   <script src="data_hsk6.js"></script>
   <script src="app.js"></script>
+  <script src="avatar.js"></script>
   <script src="stage-game.js"></script>
   <script type="module" src="firebase.js"></script>
 </body>

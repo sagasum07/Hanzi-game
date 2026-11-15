@@ -9,7 +9,9 @@
 //   - 학습 스테이지 6개 + 보스 스테이지 1개가 한 챕터예요. 보스는 그 챕터 6개 스테이지의 단어를 모두 복습합니다.
 //   - 몬스터가 한국어 뜻(또는 예문 해석)을 내면 제한 시간 안에 글자 조각으로 단어를,
 //     단어 카드로 문장을 조립해 답합니다. 맞히면 몬스터 체력이 줄고, 틀리거나 시간이 다 되면 생명이 줄어요.
-//   - 진행 기록: userRecord.game = { 급수: { cleared: 클리어한 마지막 스테이지 번호, stars: { 스테이지: 별 1~3 } } }
+//   - 진행 기록: userRecord.game = { 급수: { cleared: 클리어한 마지막 스테이지 번호, stars: { 스테이지: 별 1~3 } }, avatar: {...} }
+//   - 전투 무대: 몬스터(왼쪽)와 내 캐릭터(오른쪽, avatar.js)가 말풍선으로 문제와 답을 주고받고,
+//     맞히면 캐릭터가 달려가 주먹으로 때리고, 틀리면 몬스터에게 공격받는 모션이 나옵니다.
 
 const STAGE_WORDS = 10; // 학습 스테이지 하나에 나오는 단어 수
 const STAGES_PER_CHAPTER = 6; // 보스 전까지의 학습 스테이지 수
@@ -64,6 +66,16 @@ const battleResultStars = document.getElementById('battle-result-stars');
 const battleResultText = document.getElementById('battle-result-text');
 const btnBattleNext = document.getElementById('btn-battle-next');
 const btnBattleRetry = document.getElementById('btn-battle-retry');
+const monsterFighter = document.getElementById('monster-fighter');
+const playerFighter = document.getElementById('player-fighter');
+const playerAvatarEl = document.getElementById('player-avatar');
+const playerNameEl = document.getElementById('player-name');
+const playerPop = document.getElementById('player-pop');
+const playerBubbleText = document.getElementById('player-bubble-text');
+const playerBubbleSub = document.getElementById('player-bubble-sub');
+const myAvatarEl = document.getElementById('my-avatar');
+const myAvatarName = document.getElementById('my-avatar-name');
+const ATTACK_MS = 260; // 주먹이 닿는 시점 (CSS 애니메이션과 맞춤)
 
 let gameLevel = 1;
 let battle = null; // 진행 중인 전투 상태
@@ -150,12 +162,30 @@ function openGameMap(level) {
   stopBattleTimer();
   battle = null;
   gameBattle.style.display = 'none';
-  gameMap.style.display = '';
+  avatarMaker.style.display = 'none';
   showScreen('game');
+  // 처음 들어오면 캐릭터부터 만들기
+  if (!getAvatar()) {
+    gameMap.style.display = 'none';
+    openAvatarMaker(() => openGameMap());
+    return;
+  }
+  gameMap.style.display = '';
   renderGameMap();
 }
 
+function playerDisplayName() {
+  const name = typeof getDisplayName === 'function' ? getDisplayName() : '';
+  return name && name !== '게스트' ? name : '나';
+}
+
+function setPlayerMood(mood) {
+  playerAvatarEl.innerHTML = renderAvatar(getAvatar(), mood);
+}
+
 function renderGameMap() {
+  myAvatarEl.innerHTML = renderAvatar(getAvatar());
+  myAvatarName.textContent = playerDisplayName();
   gameLevelTabs.replaceChildren(...[1, 2, 3, 4, 5, 6].map((l) => {
     const btn = document.createElement('button');
     btn.className = 'game-level-tab' + (l === gameLevel ? ' active' : '');
@@ -247,6 +277,10 @@ async function startBattle(level, stageNo) {
   monsterName.textContent = `${monster.name}${stage.boss ? ' 👑' : ''}`;
   monsterEl.textContent = monster.icon;
   monsterEl.className = 'monster appear';
+  monsterFighter.className = 'fighter monster-side';
+  playerFighter.className = 'fighter player-side';
+  playerNameEl.textContent = playerDisplayName();
+  setPlayerMood('normal');
   showScreen('game');
   renderBattleStatus();
   nextQuestion();
@@ -312,18 +346,29 @@ function nextQuestion() {
   battle.busy = false;
   q.filled = []; // 채운 칸: 조각 인덱스
 
-  bubbleKind.textContent = q.type === 'word' ? '🔤 이 뜻의 중국어 단어를 만들어라!' : '✍️ 이 문장을 중국어로 조립해라!';
+  bubbleKind.textContent = q.type === 'word' ? '🔤 이 뜻의 중국어 단어는?' : '✍️ 이 문장을 중국어로 말해 봐!';
   bubbleText.textContent = q.prompt;
-  battleFeedback.replaceChildren();
-  battleFeedback.className = 'battle-feedback';
+  bubbleText.removeAttribute('lang');
+  battleFeedback.textContent = '';
+  setPlayerMood('normal');
   answerSlots.classList.toggle('sentence', q.type === 'sentence');
   tilePool.classList.toggle('sentence', q.type === 'sentence');
   renderTiles();
   startBattleTimer(q.seconds);
 }
 
+// 내 말풍선: 답을 고르는 동안 지금까지 조립한 말을 보여 줌
+function renderPlayerBubble() {
+  const q = battle.question;
+  const built = q.filled.map((i) => q.tiles[i]).join(q.type === 'sentence' ? ' ' : '');
+  playerBubbleText.textContent = built || '음… 🤔';
+  playerBubbleText.lang = built ? 'zh-CN' : 'ko';
+  playerBubbleSub.textContent = built ? `${q.filled.length}/${q.answer.length}` : '';
+}
+
 function renderTiles() {
   const q = battle.question;
+  if (!battle.busy) renderPlayerBubble();
   answerSlots.replaceChildren(...q.answer.map((_, i) => {
     const slot = document.createElement('button');
     slot.className = 'answer-slot';
@@ -385,37 +430,49 @@ function resolveQuestion(correct, timedOut) {
 
   const answerText = q.type === 'word' ? q.word.hanzi : q.sentence.zh;
   const answerPinyin = q.type === 'word' ? q.word.pinyin : q.sentence.pinyin;
-  const head = document.createElement('strong');
-  const zh = document.createElement('span');
-  zh.className = 'feedback-zh';
-  zh.lang = 'zh-CN';
-  zh.textContent = answerText;
-  const py = document.createElement('span');
-  py.className = 'feedback-py';
-  py.textContent = answerPinyin;
+  const current = battle;
 
   if (correct) {
     // 남은 시간이 60% 이상이면 크리티컬 (2 데미지)
     const damage = remainRatio >= 0.6 ? 2 : 1;
     battle.hp = Math.max(0, battle.hp - damage);
-    head.textContent = damage === 2 ? '⚡ 크리티컬! ' : '⚔️ 공격 성공! ';
-    battleFeedback.className = 'battle-feedback correct';
-    showDamage(damage === 2 ? `-${damage} CRITICAL` : `-${damage}`);
-    hitMonster();
+    // 내 캐릭터가 정답을 외치며 달려가 주먹으로 공격
+    playerBubbleText.textContent = `${answerText}!`;
+    playerBubbleText.lang = 'zh-CN';
+    playerBubbleSub.textContent = answerPinyin;
+    bubbleKind.textContent = damage === 2 ? '⚡ 크리티컬!' : '👊 명중!';
+    bubbleText.textContent = damage === 2 ? '크아악!!' : '으윽!';
+    battleFeedback.textContent = `정답! ${answerText} ${answerPinyin}`;
+    playMotion(playerFighter, damage === 2 ? 'attack critical' : 'attack');
+    setTimeout(() => {
+      if (battle !== current) return;
+      showDamage(damagePop, damage === 2 ? `-${damage} CRITICAL` : `-${damage}`);
+      hitMonster();
+      renderBattleStatus();
+    }, ATTACK_MS);
     if (q.type === 'word') speakHanzi(q.word.hanzi);
   } else {
     battle.hearts -= 1;
-    head.textContent = timedOut ? '⏰ 시간 초과! 정답: ' : '💥 반격을 받았어요! 정답: ';
-    battleFeedback.className = 'battle-feedback wrong';
+    // 몬스터가 정답을 알려 주며 달려들어 공격
+    playerBubbleText.textContent = timedOut ? '앗, 시간이…!' : '으악!';
+    playerBubbleText.lang = 'ko';
+    playerBubbleSub.textContent = '';
+    bubbleKind.textContent = timedOut ? '⏰ 시간 초과! 정답은' : '💥 틀렸다! 정답은';
+    bubbleText.textContent = `${answerText} (${answerPinyin})`;
+    bubbleText.lang = 'zh-CN';
+    battleFeedback.textContent = `${timedOut ? '시간 초과' : '오답'}. 정답: ${answerText} ${answerPinyin}`;
     answerSlots.classList.add('shake');
     setTimeout(() => answerSlots.classList.remove('shake'), 450);
-    gameBattle.classList.add('player-hit');
-    setTimeout(() => gameBattle.classList.remove('player-hit'), 450);
+    playMotion(monsterFighter, 'attack');
+    setTimeout(() => {
+      if (battle !== current) return;
+      setPlayerMood('hurt');
+      playMotion(playerFighter, 'hurt');
+      showDamage(playerPop, '-❤️');
+      renderBattleStatus();
+    }, ATTACK_MS);
   }
-  battleFeedback.replaceChildren(head, zh, py);
-  renderBattleStatus();
 
-  const current = battle;
   setTimeout(() => {
     if (battle !== current) return; // 그사이 나갔거나 다른 스테이지를 시작함
     if (battle.hp <= 0) finishBattle(true);
@@ -424,11 +481,22 @@ function resolveQuestion(correct, timedOut) {
   }, correct ? REVEAL_MS.correct : REVEAL_MS.wrong);
 }
 
-function showDamage(text) {
-  damagePop.textContent = text;
-  damagePop.classList.remove('show');
-  void damagePop.offsetWidth; // 애니메이션 다시 시작
-  damagePop.classList.add('show');
+function showDamage(el, text) {
+  el.textContent = text;
+  el.classList.remove('show');
+  void el.offsetWidth; // 애니메이션 다시 시작
+  el.classList.add('show');
+}
+
+// 공격·피격 모션: 클래스를 붙였다가 애니메이션이 끝나면 뗌
+function playMotion(fighter, motion) {
+  const base = fighter === playerFighter ? 'fighter player-side' : 'fighter monster-side';
+  fighter.className = base;
+  void fighter.offsetWidth;
+  fighter.className = `${base} ${motion}`;
+  setTimeout(() => {
+    if (fighter.className === `${base} ${motion}`) fighter.className = base;
+  }, 700);
 }
 
 function hitMonster() {
@@ -497,7 +565,15 @@ function finishBattle(won) {
     ? (stage.no >= total ? `HSK ${level}급의 모든 스테이지를 클리어했어요! 🏆` : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
     : '틀린 단어는 오답 노트에 모였어요. 다시 도전해 보세요!';
   btnBattleNext.style.display = won && stage.no < total ? '' : 'none';
-  if (won) monsterEl.classList.add('defeated');
+  if (won) {
+    monsterEl.classList.add('defeated');
+    setPlayerMood('win');
+    playerBubbleText.textContent = stage.boss ? '보스를 쓰러뜨렸다! 💪' : '이겼다! ✌️';
+    playerBubbleText.lang = 'ko';
+    playerBubbleSub.textContent = '';
+  } else {
+    setPlayerMood('hurt');
+  }
   battleResult.style.display = '';
   battle.finished = true;
 }
@@ -516,12 +592,27 @@ document.getElementById('btn-battle-exit').addEventListener('click', () => {
   openGameMap();
 });
 document.getElementById('btn-game-home').addEventListener('click', () => showScreen('start'));
+// 캐릭터를 아직 안 만들고 '뒤로'를 누르면 처음 화면으로
+document.getElementById('btn-avatar-back').addEventListener('click', () => {
+  if (!getAvatar()) showScreen('start');
+});
 btnGameMode.addEventListener('click', () => openGameMap());
+document.getElementById('btn-avatar-edit').addEventListener('click', () => {
+  gameMap.style.display = 'none';
+  openAvatarMaker(() => openGameMap());
+});
 
 // 안드로이드 뒤로 가기 (app.js handleBackButton 에서 호출)
 function gameHandleBack() {
-  if (gameBattle.style.display !== 'none') openGameMap();
-  else showScreen('start');
+  if (gameBattle.style.display !== 'none') {
+    openGameMap();
+  } else if (avatarMaker.style.display !== 'none') {
+    avatarMaker.style.display = 'none';
+    if (getAvatar()) openGameMap();
+    else showScreen('start');
+  } else {
+    showScreen('start');
+  }
 }
 
 // 화면을 떠나면 진행 중인 전투 타이머 정리
