@@ -347,6 +347,7 @@ async function startBattle(level, stageNo) {
   gameBattle.style.display = '';
   battleResult.style.display = 'none';
   answerReveal.style.display = 'none';
+  battleVictory.style.display = 'none';
   rewardArea.style.display = 'none';
   resultButtons.style.display = '';
   hideChestOpen();
@@ -368,8 +369,108 @@ async function startBattle(level, stageNo) {
   showScreen('game');
   renderBattleStatus();
   ensureBgm(); // 전투에 들어올 때 멈춰 있던 배경음악 다시 재생
-  Sfx.battleStart(stage.boss);
+  playIntro(stage, monster);
+}
+
+// ---------- 시작 연출: 准备 → 开始！ ----------
+const battleIntro = document.getElementById('battle-intro');
+const introWord = document.getElementById('intro-word');
+const introPinyin = document.getElementById('intro-pinyin');
+const INTRO_READY_MS = 450;
+const INTRO_GO_MS = 1500;
+const INTRO_END_MS = 2350;
+
+function playIntro(stage, monster) {
+  const current = battle;
+  battle.busy = true;
+  battle.intro = true;
+  answerSlots.replaceChildren();
+  tilePool.replaceChildren();
+  battleTimerFill.style.width = '100%';
+  bubbleKind.textContent = '';
+  bubbleText.textContent = stage.boss ? '여기까지 온 걸 후회하게 해 주마!' : '덤벼라!';
+  bubbleText.removeAttribute('lang');
+  playerBubbleText.textContent = '좋아, 간다!';
+  playerBubbleText.lang = 'ko';
+  playerBubbleSub.textContent = '';
+
+  document.getElementById('intro-stage').textContent = stage.boss
+    ? `第${hanNum(stage.chapter)}章 · 두목전`
+    : `第${hanNum(stage.chapter)}章 · 스테이지 ${stage.chapter}-${stage.pos}`;
+  document.getElementById('intro-monster').innerHTML = renderMonster(monster.art);
+  const seal = document.createElement('span');
+  seal.className = 'name-seal';
+  seal.textContent = monster.han;
+  document.getElementById('intro-name').replaceChildren(seal, monster.name);
+  introWord.textContent = '';
+  introWord.className = 'intro-word';
+  introPinyin.textContent = '';
+  battleIntro.className = `battle-intro${stage.boss ? ' boss' : ''}`;
+  battleIntro.style.display = '';
+
+  const timers = [];
+  const at = (ms, fn) => timers.push(setTimeout(() => { if (battle === current && current.intro) fn(); }, ms));
+  at(INTRO_READY_MS, () => {
+    introWord.textContent = '准备';
+    introPinyin.textContent = 'zhǔnbèi · 준비';
+    introWord.className = 'intro-word ready';
+    Sfx.battleStart(stage.boss);
+  });
+  at(INTRO_GO_MS, () => {
+    introWord.textContent = '开始！';
+    introPinyin.textContent = 'kāishǐ · 시작!';
+    introWord.className = 'intro-word go';
+    battleIntro.classList.add('go');
+    Sfx.begin();
+  });
+  at(INTRO_END_MS, () => endIntro(current));
+  current.introTimers = timers;
+}
+
+function endIntro(current) {
+  if (battle !== current || !current.intro) return;
+  current.intro = false;
+  (current.introTimers || []).forEach(clearTimeout);
+  battleIntro.classList.add('leaving');
+  setTimeout(() => {
+    if (battle === current) battleIntro.style.display = 'none';
+  }, 280);
   nextQuestion();
+}
+
+// 연출 중에 화면을 누르면 바로 시작
+battleIntro.addEventListener('click', () => {
+  if (battle && battle.intro) endIntro(battle);
+});
+
+// ---------- 클리어 연출: 胜！ ----------
+const battleVictory = document.getElementById('battle-victory');
+
+function playVictory(stage) {
+  document.getElementById('victory-sub').textContent = stage.boss ? '두목 격파!' : '스테이지 클리어!';
+  const sparks = document.getElementById('victory-sparks');
+  sparks.replaceChildren();
+  if (!reduceMotion.matches) {
+    for (let i = 0; i < 26; i++) {
+      const sp = document.createElement('span');
+      sp.className = i % 4 === 0 ? 'victory-spark coin' : 'victory-spark';
+      if (i % 4 === 0) sp.innerHTML = uiIcon('coin');
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 90 + Math.random() * 120;
+      sp.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      sp.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+      sp.style.setProperty('--d', `${0.25 + Math.random() * 0.3}s`);
+      sparks.appendChild(sp);
+    }
+  }
+  battleVictory.className = `battle-victory${stage.boss ? ' boss' : ''}`;
+  battleVictory.style.display = '';
+  if (!reduceMotion.matches) stageEffect('shake-l', 600);
+  Sfx.victory();
+}
+
+function hideVictory() {
+  battleVictory.style.display = 'none';
 }
 
 function renderBattleStatus() {
@@ -792,7 +893,7 @@ function monsterAttack(current) {
 function monsterExplode() {
   Sfx.ko();
   if (battle && battle.monsterArt) monsterEl.innerHTML = renderMonster(battle.monsterArt, 'ko');
-  setTimeout(() => Sfx.victory(), 650);
+
   const m = centerOf(monsterEl);
   monsterEl.classList.add('defeated');
   flash('rgba(244,235,221,0.9)', 500);
@@ -871,9 +972,15 @@ function finishBattle(won) {
     playerBubbleText.textContent = battle.stage.boss ? '두목을 쓰러뜨렸다!' : '이겼다!';
     playerBubbleText.lang = 'ko';
     playerBubbleSub.textContent = '';
+    // 폭발 → 胜！ 연출 → 결과 창
     setTimeout(() => {
-      if (battle === current) finishBattle(true);
-    }, 1100);
+      if (battle === current) playVictory(current.stage);
+    }, 700);
+    setTimeout(() => {
+      if (battle !== current) return;
+      hideVictory();
+      finishBattle(true);
+    }, 2700);
     return;
   }
   const { level, stage } = battle;

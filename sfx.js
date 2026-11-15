@@ -132,6 +132,12 @@ const Sfx = (() => {
       drum(c, 0.22, 0.9, boss ? 70 : 90);
       if (boss) gong(c, 0.45, 0.3, 98);
     }); },
+    // 开始！: 큰 북과 징
+    begin: () => play((c) => {
+      drum(c, 0, 1, 75);
+      hiss(c, 0, 0.12, { gain: 0.5, freq: 1600 });
+      gong(c, 0.02, 0.38, 147);
+    }),
     // 글자 조각 놓기·빼기
     tap: () => play((c) => tone(c, 1320, 0, 0.06, { type: 'triangle', gain: 0.18 })),
     untap: () => play((c) => tone(c, 880, 0, 0.06, { type: 'triangle', gain: 0.14, slideTo: 660 })),

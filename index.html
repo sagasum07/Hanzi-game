@@ -569,6 +569,28 @@
         <div class="tile-pool" id="tile-pool"></div>
         <div class="battle-feedback" id="battle-feedback" aria-live="polite"></div>
 
+        <!-- 스테이지 시작 연출: 准备 → 开始！ -->
+        <div class="battle-intro" id="battle-intro" style="display:none;">
+          <div class="intro-stage" id="intro-stage"></div>
+          <div class="intro-foe">
+            <span class="intro-monster" id="intro-monster" aria-hidden="true"></span>
+            <span class="intro-name" id="intro-name"></span>
+          </div>
+          <div class="intro-word" id="intro-word" aria-live="assertive"></div>
+          <div class="intro-pinyin" id="intro-pinyin"></div>
+          <p class="intro-skip">화면을 누르면 바로 시작해요</p>
+        </div>
+
+        <!-- 클리어 연출: 胜！ -->
+        <div class="battle-victory" id="battle-victory" style="display:none;" aria-live="assertive">
+          <div class="victory-rays" aria-hidden="true"></div>
+          <div class="victory-ink" aria-hidden="true"></div>
+          <div class="victory-word">胜！</div>
+          <div class="victory-pinyin">shèng</div>
+          <div class="victory-sub" id="victory-sub"></div>
+          <div class="victory-sparks" id="victory-sparks" aria-hidden="true"></div>
+        </div>
+
         <!-- 틀렸을 때 정답 확인 창 (확인을 눌러야 다음 문제로) -->
         <div class="answer-reveal" id="answer-reveal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="reveal-title">
           <div class="answer-reveal-card">
