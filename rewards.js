@@ -31,7 +31,7 @@ const RARITIES = [
   { id: 'legendary', name: '전설', color: '#E3A92B' },
 ];
 
-// 무기: 크리티컬 판정이 쉬워짐 (남은 시간 기준을 낮춤) / 모자: 제한 시간이 늘어남
+// 무기: 빠른 공격(데미지 ×2·×3) 판정이 쉬워짐 (남은 시간 기준을 낮춤) / 모자: 제한 시간이 늘어남
 const GEAR = [
   { id: 'stick', slot: 'weapon', rarity: 0, name: '나무 막대기', icon: '🪵', crit: 0.04 },
   { id: 'glove', slot: 'weapon', rarity: 0, name: '가죽 장갑', icon: '🥊', crit: 0.05 },
@@ -222,7 +222,7 @@ const bagPreview = document.getElementById('bag-preview');
 let onBagClose = null;
 
 function gearEffectText(g) {
-  return g.slot === 'weapon' ? `크리티컬 판정 +${Math.round(g.crit * 100)}%` : `제한 시간 +${g.time}초`;
+  return g.slot === 'weapon' ? `빠른 공격 판정 +${Math.round(g.crit * 100)}%` : `제한 시간 +${g.time}초`;
 }
 
 function openBag(onClose) {

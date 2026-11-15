@@ -6183,3 +6183,51 @@ header h1, .header-titles h1 {
   aspect-ratio: auto;
   border-radius: 0;
 }
+
+/* ---- 빠를수록 큰 데미지: 향 타이머 눈금과 단계별 색 ---- */
+.battle-timer {
+  position: relative;
+}
+
+.timer-mark {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(31, 26, 23, 0.55);
+  pointer-events: none;
+}
+
+.timer-mark b {
+  position: absolute;
+  bottom: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.62rem;
+  font-weight: 900;
+  color: #8E241D;
+  white-space: nowrap;
+}
+
+.game-screen .battle-timer-fill[data-tier="3"] {
+  background: linear-gradient(90deg, #9C7A2E, #E8CF8A);
+}
+
+.game-screen .battle-timer-fill[data-tier="2"] {
+  background: linear-gradient(90deg, #2C5E50, #5E9C8E);
+}
+
+.game-screen .battle-timer-fill.danger {
+  background: linear-gradient(90deg, var(--cinnabar-dark), var(--cinnabar));
+}
+
+.game-battle .battle-timer {
+  margin-top: 10px;
+}
+
+@media (min-width: 720px) {
+  .game-wide .timer-mark b {
+    font-size: 0.75rem;
+  }
+}

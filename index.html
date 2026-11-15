@@ -549,7 +549,12 @@
           <!-- 타격 효과(불꽃·충격파·글자·섬광)를 그리는 층 -->
           <div class="fx-layer" id="fx-layer" aria-hidden="true"></div>
         </div>
-        <div class="battle-timer" aria-hidden="true"><div class="battle-timer-fill" id="battle-timer-fill"></div></div>
+        <!-- 향 타이머: 눈금 앞에서 맞히면 데미지 ×3 / ×2 -->
+        <div class="battle-timer" aria-hidden="true">
+          <div class="battle-timer-fill" id="battle-timer-fill"></div>
+          <span class="timer-mark" id="timer-mark-3"><b>×3</b></span>
+          <span class="timer-mark" id="timer-mark-2"><b>×2</b></span>
+        </div>
         <div class="answer-slots" id="answer-slots"></div>
         <div class="tile-pool" id="tile-pool"></div>
         <div class="battle-feedback" id="battle-feedback" aria-live="polite"></div>

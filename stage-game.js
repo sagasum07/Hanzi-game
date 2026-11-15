@@ -16,7 +16,20 @@
 const STAGE_WORDS = 10; // 학습 스테이지 하나에 나오는 단어 수
 const STAGES_PER_CHAPTER = 6; // 보스 전까지의 학습 스테이지 수
 const PLAYER_HEARTS = 3;
-const MONSTER_HP = { normal: 12, boss: 20 }; // 크리티컬(2)을 섞어 학습 스테이지는 문제 8~12개쯤
+// 몬스터 체력: 빨리 풀수록 데미지가 커서(1~3) 금방 이기고,
+// 천천히 풀면 그 스테이지의 단어·문장을 더 여러 번 풀며 체력을 깎게 됨 (학습 스테이지 약 7~20문제)
+const MONSTER_HP = { normal: 20, boss: 32 };
+// 남은 시간 비율에 따른 데미지 단계 (무기를 장착하면 기준이 낮아짐)
+const SPEED_TIERS = [
+  { min: 0.75, damage: 3, kind: '⚡ 会心一击! 번개 같은 답!', cry: '크아아악!!' },
+  { min: 0.45, damage: 2, kind: '💨 빠른 공격!', cry: '크윽!' },
+  { min: 0, damage: 1, kind: '👊 명중!', cry: '으윽!' },
+];
+
+function speedTier(remainRatio) {
+  const bonus = critBonus();
+  return SPEED_TIERS.find((t) => t.min === 0 || remainRatio >= t.min - bonus);
+}
 // 문장 조립 문제가 나올 확률: 챕터마다 1~3번째 스테이지는 단어 문제만,
 // 4번째부터 조금씩 늘어나고 두목전에서 가장 많이 나옴 (단어를 먼저 익힌 뒤 문장으로)
 const SENTENCE_RATE_BY_POS = { 1: 0, 2: 0, 3: 0, 4: 0.15, 5: 0.25, 6: 0.35 };
@@ -501,18 +514,18 @@ function resolveQuestion(correct, timedOut) {
   const current = battle;
 
   if (correct) {
-    // 남은 시간이 60% 이상이면 크리티컬 (2 데미지)
-    // 장착한 무기만큼 크리티컬 기준이 낮아짐
-    const damage = remainRatio >= 0.6 - critBonus() ? 2 : 1;
+    // 빨리 풀수록 큰 데미지: 남은 시간 75% 이상 3, 45% 이상 2, 그 밖에는 1
+    const tier = speedTier(remainRatio);
+    const damage = tier.damage;
     battle.hp = Math.max(0, battle.hp - damage);
     // 내 캐릭터가 정답을 외치며 달려가 주먹으로 공격
     playerBubbleText.textContent = /[。！？!?]$/.test(answerText) ? answerText : `${answerText}!`;
     playerBubbleText.lang = 'zh-CN';
     playerBubbleSub.textContent = answerPinyin;
-    bubbleKind.textContent = damage === 2 ? '⚡ 크리티컬!' : '👊 명중!';
-    bubbleText.textContent = damage === 2 ? '크아악!!' : '으윽!';
-    battleFeedback.textContent = `정답! ${answerText} ${answerPinyin}`;
-    if (damage === 2) criticalAttack(current, damage);
+    bubbleKind.textContent = tier.kind;
+    bubbleText.textContent = tier.cry;
+    battleFeedback.textContent = `정답! ${answerText} ${answerPinyin}. 데미지 ${damage}`;
+    if (damage === 3) criticalAttack(current, damage);
     else normalAttack(current, damage);
     if (q.type === 'word') speakHanzi(q.word.hanzi);
   } else {
@@ -678,20 +691,22 @@ function afterimages() {
   });
 }
 
+// 일반(1)·빠른(2) 공격: 빠른 공격은 더 세게 맞고 화면도 더 흔들림
 function normalAttack(current, damage) {
+  const fast = damage >= 2;
   playMotion(playerFighter, 'attack');
   if (!reduceMotion.matches) afterimages();
   setTimeout(() => {
     if (battle !== current) return;
     const m = centerOf(monsterEl);
-    hitStop(90);
-    hitMonster(false);
+    hitStop(fast ? 120 : 90);
+    hitMonster(fast);
     if (!reduceMotion.matches) {
-      impactBurst(m.x, m.y);
-      stageEffect('shake-s', 350);
+      impactBurst(m.x, m.y, fast ? { word: '快!' } : {});
+      stageEffect(fast ? 'shake-m' : 'shake-s', fast ? 400 : 350);
     }
-    flash('rgba(244,235,221,0.6)', 250);
-    showDamage(damagePop, `-${damage}`);
+    flash(fast ? 'rgba(201,161,74,0.45)' : 'rgba(244,235,221,0.6)', 250);
+    showDamage(damagePop, fast ? `-${damage} 빠름!` : `-${damage}`);
     renderBattleStatus();
   }, ATTACK_MS);
 }
@@ -718,7 +733,7 @@ function criticalAttack(current, damage) {
       }
       if (last) {
         flash('rgba(201,161,74,0.65)', 420);
-        showDamage(damagePop, `-${damage} CRITICAL`);
+        showDamage(damagePop, `-${damage} 会心!`);
         renderBattleStatus();
       }
     }, ms);
@@ -760,6 +775,15 @@ function monsterExplode() {
 }
 
 // ---------- 제한 시간 ----------
+// 데미지 단계 눈금 위치 (남은 시간 비율 = 향 길이). 무기 보너스만큼 왼쪽으로 내려감
+function placeTimerMarks() {
+  const bonus = critBonus();
+  [3, 2].forEach((dmg) => {
+    const t = SPEED_TIERS.find((x) => x.damage === dmg);
+    document.getElementById(`timer-mark-${dmg}`).style.left = `${Math.max(0, t.min - bonus) * 100}%`;
+  });
+}
+
 function startBattleTimer(seconds) {
   stopBattleTimer();
   const total = seconds * 1000;
@@ -767,11 +791,15 @@ function startBattleTimer(seconds) {
   battle.timer = { total, startAt, id: 0 };
   battleTimerFill.style.width = '100%';
   battleTimerFill.classList.remove('danger');
+  placeTimerMarks();
   const tick = () => {
     if (!battle || !battle.timer) return;
     const left = Math.max(0, total - (performance.now() - startAt));
-    battleTimerFill.style.width = `${(left / total) * 100}%`;
-    battleTimerFill.classList.toggle('danger', left / total < 0.3);
+    const ratio = left / total;
+    battleTimerFill.style.width = `${ratio * 100}%`;
+    battleTimerFill.classList.toggle('danger', ratio < 0.3);
+    // 지금 맞히면 들어갈 데미지 단계를 색으로 보여 줌
+    battleTimerFill.dataset.tier = String(speedTier(ratio).damage);
     if (left <= 0) {
       battle.timer = null;
       resolveQuestion(false, true);
