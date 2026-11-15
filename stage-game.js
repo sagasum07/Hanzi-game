@@ -73,11 +73,16 @@ const playerNameEl = document.getElementById('player-name');
 const playerPop = document.getElementById('player-pop');
 const playerBubbleText = document.getElementById('player-bubble-text');
 const playerBubbleSub = document.getElementById('player-bubble-sub');
-const myAvatarEl = document.getElementById('my-avatar');
+const myAvatarEl = document.getElementById('game-my-avatar');
 const myAvatarName = document.getElementById('my-avatar-name');
 const ATTACK_MS = 260; // 주먹이 닿는 시점 (CSS 애니메이션과 맞춤)
 const REVEAL_DELAY_MS = 900; // 오답 모션이 끝난 뒤 정답 확인 창을 띄우는 시점
 const appContainer = document.querySelector('.app-container');
+const battleStage = document.querySelector('.battle-stage');
+const fightersEl = document.querySelector('.fighters');
+const fxLayer = document.getElementById('fx-layer');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const CRIT_HITS_MS = [260, 400, 540]; // 크리티컬 연타가 닿는 시점
 const answerReveal = document.getElementById('answer-reveal');
 const revealTitle = document.getElementById('reveal-title');
 const revealZh = document.getElementById('reveal-zh');
@@ -189,12 +194,25 @@ function playerDisplayName() {
 }
 
 function setPlayerMood(mood) {
-  playerAvatarEl.innerHTML = renderAvatar(getAvatar(), mood);
+  playerAvatarEl.innerHTML = renderAvatar(getAvatar(), mood, gamePlayer().equip);
+}
+
+// 지도 위 내 캐릭터 카드: 레벨·경험치·코인·장비
+function renderPlayerCard() {
+  const p = gamePlayer();
+  const info = levelInfo(p.exp);
+  myAvatarEl.innerHTML = renderAvatar(getAvatar(), 'normal', p.equip);
+  myAvatarName.textContent = playerDisplayName();
+  document.getElementById('player-level').textContent = `Lv.${info.level}`;
+  document.getElementById('exp-bar-fill').style.width = `${(info.exp / info.need) * 100}%`;
+  document.getElementById('exp-text').textContent = `${info.exp.toLocaleString()} / ${info.need.toLocaleString()} EXP`;
+  document.getElementById('coin-text').textContent = p.coins.toLocaleString();
+  const eq = equippedGear();
+  document.getElementById('player-gear').textContent = `${eq.weapon ? `${eq.weapon.icon} ${eq.weapon.name}` : '👊 맨손'}${eq.hat ? ` · ${eq.hat.icon} ${eq.hat.name}` : ''}`;
 }
 
 function renderGameMap() {
-  myAvatarEl.innerHTML = renderAvatar(getAvatar());
-  myAvatarName.textContent = playerDisplayName();
+  renderPlayerCard();
   gameLevelTabs.replaceChildren(...[1, 2, 3, 4, 5, 6].map((l) => {
     const btn = document.createElement('button');
     btn.className = 'game-level-tab' + (l === gameLevel ? ' active' : '');
@@ -282,6 +300,10 @@ async function startBattle(level, stageNo) {
   gameBattle.style.display = '';
   battleResult.style.display = 'none';
   answerReveal.style.display = 'none';
+  rewardArea.style.display = 'none';
+  resultButtons.style.display = '';
+  fxLayer.replaceChildren();
+  battleStage.className = 'battle-stage';
   gameBattle.classList.toggle('boss-battle', stage.boss);
   battleTitle.textContent = stage.boss ? `챕터 ${stage.chapter} 보스` : `스테이지 ${stage.chapter}-${stage.pos}`;
   monsterName.textContent = `${monster.name}${stage.boss ? ' 👑' : ''}`;
@@ -327,7 +349,7 @@ function wordQuestion(word) {
     prompt: word.meaning,
     answer,
     tiles: shuffle([...answer, ...pool.slice(0, need)]),
-    seconds: 8 + answer.length * 4,
+    seconds: 8 + answer.length * 4 + timeBonus(), // 모자를 쓰면 제한 시간이 늘어남
   };
 }
 
@@ -343,7 +365,7 @@ function sentenceQuestion(word, sentence) {
     prompt: sentence.ko,
     answer: sentence.tiles,
     tiles: shuffle([...sentence.tiles, ...traps]),
-    seconds: Math.min(32, 8 + sentence.tiles.length * 3),
+    seconds: Math.min(32, 8 + sentence.tiles.length * 3) + timeBonus(),
   };
 }
 
@@ -445,7 +467,8 @@ function resolveQuestion(correct, timedOut) {
 
   if (correct) {
     // 남은 시간이 60% 이상이면 크리티컬 (2 데미지)
-    const damage = remainRatio >= 0.6 ? 2 : 1;
+    // 장착한 무기만큼 크리티컬 기준이 낮아짐
+    const damage = remainRatio >= 0.6 - critBonus() ? 2 : 1;
     battle.hp = Math.max(0, battle.hp - damage);
     // 내 캐릭터가 정답을 외치며 달려가 주먹으로 공격
     playerBubbleText.textContent = `${answerText}!`;
@@ -454,13 +477,8 @@ function resolveQuestion(correct, timedOut) {
     bubbleKind.textContent = damage === 2 ? '⚡ 크리티컬!' : '👊 명중!';
     bubbleText.textContent = damage === 2 ? '크아악!!' : '으윽!';
     battleFeedback.textContent = `정답! ${answerText} ${answerPinyin}`;
-    playMotion(playerFighter, damage === 2 ? 'attack critical' : 'attack');
-    setTimeout(() => {
-      if (battle !== current) return;
-      showDamage(damagePop, damage === 2 ? `-${damage} CRITICAL` : `-${damage}`);
-      hitMonster();
-      renderBattleStatus();
-    }, ATTACK_MS);
+    if (damage === 2) criticalAttack(current, damage);
+    else normalAttack(current, damage);
     if (q.type === 'word') speakHanzi(q.word.hanzi);
   } else {
     battle.hearts -= 1;
@@ -474,14 +492,7 @@ function resolveQuestion(correct, timedOut) {
     battleFeedback.textContent = `${timedOut ? '시간 초과' : '오답'}. 정답: ${answerText} ${answerPinyin}`;
     answerSlots.classList.add('shake');
     setTimeout(() => answerSlots.classList.remove('shake'), 450);
-    playMotion(monsterFighter, 'attack');
-    setTimeout(() => {
-      if (battle !== current) return;
-      setPlayerMood('hurt');
-      playMotion(playerFighter, 'hurt');
-      showDamage(playerPop, '-❤️');
-      renderBattleStatus();
-    }, ATTACK_MS);
+    monsterAttack(current);
     // 틀리면 정답 확인 창을 띄우고, 사용자가 확인을 눌러야 다음으로 넘어감
     setTimeout(() => {
       if (battle !== current) return;
@@ -552,10 +563,164 @@ function playMotion(fighter, motion) {
   }, 700);
 }
 
-function hitMonster() {
-  monsterEl.classList.remove('appear', 'hit');
+function hitMonster(strong) {
+  monsterEl.classList.remove('appear', 'hit', 'hit-strong');
   void monsterEl.offsetWidth;
-  monsterEl.classList.add('hit');
+  monsterEl.classList.add(strong ? 'hit-strong' : 'hit');
+}
+
+// ---------- 타격 연출 ----------
+// 무대(.battle-stage) 위의 효과 층에 불꽃·충격파·글자·섬광을 잠깐 그렸다가 지웁니다.
+function centerOf(el) {
+  const stage = battleStage.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  return { x: r.left + r.width / 2 - stage.left, y: r.top + r.height / 2 - stage.top, w: r.width };
+}
+
+function spawnFx(className, x, y, life = 900, setup) {
+  const el = document.createElement('div');
+  el.className = `fx ${className}`;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  if (setup) setup(el);
+  fxLayer.appendChild(el);
+  setTimeout(() => el.remove(), life);
+  return el;
+}
+
+function stageEffect(className, ms) {
+  battleStage.classList.remove(className);
+  void battleStage.offsetWidth;
+  battleStage.classList.add(className);
+  setTimeout(() => battleStage.classList.remove(className), ms);
+}
+
+// 타격 순간 모든 움직임을 잠깐 멈춰 묵직한 손맛을 줌
+function hitStop(ms) {
+  battleStage.classList.add('hitstop');
+  setTimeout(() => battleStage.classList.remove('hitstop'), ms);
+}
+
+function flash(color, ms = 350) {
+  spawnFx('fx-flash', 0, 0, ms, (el) => el.style.setProperty('--flash', color));
+}
+
+const IMPACT_WORDS = ['퍽!', '쾅!', '빡!', '팍!'];
+const SPARK_COLORS = ['#FFE066', '#FFFFFF', '#FFB347', '#FF7A45'];
+
+function impactBurst(x, y, { big = false, word } = {}) {
+  spawnFx(big ? 'fx-impact big' : 'fx-impact', x, y, 500);
+  spawnFx('fx-ring', x, y, 600, (el) => big && el.classList.add('big'));
+  const sparks = big ? 16 : 10;
+  for (let i = 0; i < sparks; i++) {
+    const angle = (Math.PI * 2 * i) / sparks + Math.random() * 0.4;
+    const dist = (big ? 90 : 60) + Math.random() * 40;
+    spawnFx('fx-spark', x, y, 650, (el) => {
+      el.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+      el.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+      el.style.setProperty('--c', SPARK_COLORS[i % SPARK_COLORS.length]);
+      el.style.setProperty('--s', `${(big ? 8 : 6) + Math.random() * 5}px`);
+    });
+  }
+  spawnFx(big ? 'fx-word big' : 'fx-word', x + (Math.random() * 30 - 15), y - 30, 800, (el) => {
+    el.textContent = word || IMPACT_WORDS[Math.floor(Math.random() * IMPACT_WORDS.length)];
+    el.style.setProperty('--r', `${Math.random() * 24 - 12}deg`);
+  });
+}
+
+// 달려가는 동안 남는 잔상
+function afterimages() {
+  const avatar = centerOf(playerAvatarEl);
+  [60, 120, 180].forEach((delay, i) => {
+    setTimeout(() => {
+      spawnFx('fx-ghost', avatar.x, avatar.y, 380, (el) => {
+        el.innerHTML = playerAvatarEl.innerHTML;
+        el.style.width = `${avatar.w}px`;
+        el.style.setProperty('--gx', `${-(i + 1) * 0.22 * avatar.w}px`);
+      });
+    }, delay);
+  });
+}
+
+function normalAttack(current, damage) {
+  playMotion(playerFighter, 'attack');
+  if (!reduceMotion.matches) afterimages();
+  setTimeout(() => {
+    if (battle !== current) return;
+    const m = centerOf(monsterEl);
+    hitStop(90);
+    hitMonster(false);
+    if (!reduceMotion.matches) {
+      impactBurst(m.x, m.y);
+      stageEffect('shake-s', 350);
+    }
+    flash('rgba(255,255,255,0.55)', 250);
+    showDamage(damagePop, `-${damage}`);
+    renderBattleStatus();
+  }, ATTACK_MS);
+}
+
+// 크리티컬: 화면이 확대되고 "CRITICAL" 배너와 함께 3연타, 마지막 한 방에 큰 충격파
+function criticalAttack(current, damage) {
+  playMotion(playerFighter, 'attack critical');
+  if (!reduceMotion.matches) {
+    afterimages();
+    stageEffect('crit-zoom', 900);
+    const stage = battleStage.getBoundingClientRect();
+    spawnFx('fx-banner', stage.width / 2, stage.height * 0.42, 1000, (el) => { el.textContent = 'CRITICAL!!'; });
+  }
+  CRIT_HITS_MS.forEach((ms, i) => {
+    setTimeout(() => {
+      if (battle !== current) return;
+      const m = centerOf(monsterEl);
+      const last = i === CRIT_HITS_MS.length - 1;
+      hitStop(last ? 140 : 60);
+      hitMonster(last);
+      if (!reduceMotion.matches) {
+        impactBurst(m.x + (last ? 0 : (i ? 18 : -18)), m.y + (last ? 0 : (i ? -14 : 12)), last ? { big: true, word: '콰광!!' } : {});
+        stageEffect(last ? 'shake-l' : 'shake-s', last ? 500 : 250);
+      }
+      if (last) {
+        flash('rgba(255,214,79,0.7)', 420);
+        showDamage(damagePop, `-${damage} CRITICAL`);
+        renderBattleStatus();
+      }
+    }, ms);
+  });
+}
+
+// 몬스터 공격: 달려들어 할퀴기 → 붉은 섬광, 하트가 깨짐
+function monsterAttack(current) {
+  playMotion(monsterFighter, 'attack');
+  setTimeout(() => {
+    if (battle !== current) return;
+    const p = centerOf(playerAvatarEl);
+    hitStop(80);
+    setPlayerMood('hurt');
+    playMotion(playerFighter, 'hurt');
+    if (!reduceMotion.matches) {
+      [-26, 0, 26].forEach((offset, i) => {
+        setTimeout(() => spawnFx('fx-slash', p.x + offset, p.y - 6, 450), i * 50);
+      });
+      stageEffect('shake-m', 420);
+      spawnFx('fx-heartbreak', p.x, p.y - 40, 900, (el) => { el.textContent = '💔'; });
+    }
+    flash('rgba(224,82,82,0.55)', 380);
+    showDamage(playerPop, '-❤️');
+    renderBattleStatus();
+  }, ATTACK_MS);
+}
+
+// 마지막 일격: 몬스터가 폭발하며 사라짐
+function monsterExplode() {
+  const m = centerOf(monsterEl);
+  monsterEl.classList.add('defeated');
+  flash('rgba(255,255,255,0.85)', 500);
+  if (reduceMotion.matches) return;
+  stageEffect('shake-l', 600);
+  impactBurst(m.x, m.y, { big: true, word: 'K.O.!' });
+  spawnFx('fx-explosion', m.x, m.y, 900, (el) => { el.textContent = '💥'; });
+  setTimeout(() => impactBurst(m.x - 20, m.y + 10, { big: false, word: '' }), 150);
 }
 
 // ---------- 제한 시간 ----------
@@ -604,11 +769,32 @@ document.addEventListener('visibilitychange', () => {
 
 // ---------- 결과 ----------
 function finishBattle(won) {
+  // 이겼으면 몬스터 폭발 연출을 먼저 보여 주고 결과 창을 띄움
+  if (won && !battle.exploded) {
+    battle.exploded = true;
+    const current = battle;
+    monsterExplode();
+    setPlayerMood('win');
+    playerBubbleText.textContent = battle.stage.boss ? '보스를 쓰러뜨렸다! 💪' : '이겼다! ✌️';
+    playerBubbleText.lang = 'ko';
+    playerBubbleSub.textContent = '';
+    setTimeout(() => {
+      if (battle === current) finishBattle(true);
+    }, 1100);
+    return;
+  }
   const { level, stage } = battle;
   stopBattleTimer();
   const stars = won ? battle.hearts : 0;
   const total = levelStages(level).length;
-  if (won) saveStageClear(level, stage.no, stars);
+  const replay = stage.no <= gameProgress(level).cleared; // 이미 클리어했던 스테이지
+  if (won) {
+    saveStageClear(level, stage.no, stars);
+    showRewards(makeStageRewards(level, stage, stars, replay), replay);
+  } else {
+    rewardArea.style.display = 'none';
+    resultButtons.style.display = '';
+  }
   flushRecordSave();
 
   battleResultIcon.textContent = won ? (stage.boss ? '👑' : '🎉') : '💀';
@@ -618,18 +804,93 @@ function finishBattle(won) {
     ? (stage.no >= total ? `HSK ${level}급의 모든 스테이지를 클리어했어요! 🏆` : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
     : '틀린 단어는 오답 노트에 모였어요. 다시 도전해 보세요!';
   btnBattleNext.style.display = won && stage.no < total ? '' : 'none';
-  if (won) {
-    monsterEl.classList.add('defeated');
-    setPlayerMood('win');
-    playerBubbleText.textContent = stage.boss ? '보스를 쓰러뜨렸다! 💪' : '이겼다! ✌️';
-    playerBubbleText.lang = 'ko';
-    playerBubbleSub.textContent = '';
-  } else {
-    setPlayerMood('hurt');
-  }
+  if (!won) setPlayerMood('hurt');
   battleResult.style.display = '';
   battle.finished = true;
 }
+
+// ---------- 클리어 보상 ----------
+const rewardArea = document.getElementById('reward-area');
+const rewardBase = document.getElementById('reward-base');
+const chestBox = document.getElementById('chest-box');
+const chestArt = document.getElementById('chest-art');
+const chestName = document.getElementById('chest-name');
+const chestHint = document.getElementById('chest-hint');
+const chestItems = document.getElementById('chest-items');
+const levelUpEl = document.getElementById('level-up');
+const resultButtons = document.getElementById('battle-result-buttons');
+let pendingRewards = null;
+
+function showRewards(rewards, replay) {
+  pendingRewards = rewards;
+  rewardArea.style.display = '';
+  rewardBase.textContent = `+${rewards.base.exp} EXP · 🪙 +${rewards.base.coins}${replay ? ' (다시 클리어)' : ''}`;
+  chestArt.innerHTML = renderChest(rewards.tier);
+  chestName.textContent = rewards.chest.name;
+  chestName.style.color = CHESTS[rewards.tier].id === 'worn' ? '' : shade(CHESTS[rewards.tier].color, 0.15);
+  chestHint.textContent = '눌러서 열기!';
+  chestBox.className = `chest-box tier-${rewards.chest.id} waiting`;
+  chestBox.disabled = false;
+  chestItems.replaceChildren();
+  levelUpEl.style.display = 'none';
+  resultButtons.style.display = 'none'; // 상자를 열어야 다음으로
+}
+
+function rewardCard(item, index) {
+  const card = document.createElement('div');
+  card.className = `reward-card ${item.type}`;
+  card.style.animationDelay = `${0.15 + index * 0.25}s`;
+  const icon = document.createElement('span');
+  icon.className = 'reward-icon';
+  const label = document.createElement('span');
+  label.className = 'reward-label';
+  if (item.type === 'exp') {
+    icon.textContent = '✨';
+    label.textContent = `+${item.amount} EXP`;
+  } else if (item.type === 'coins') {
+    icon.textContent = '🪙';
+    label.textContent = `+${item.amount} 코인`;
+  } else {
+    const g = item.gear;
+    card.style.setProperty('--rarity', RARITIES[g.rarity].color);
+    icon.textContent = g.icon;
+    const name = document.createElement('strong');
+    name.textContent = g.name;
+    const sub = document.createElement('small');
+    sub.textContent = item.duplicate
+      ? `이미 가진 장비 → 🪙 +${item.duplicate}`
+      : `${RARITIES[g.rarity].name} ${g.slot === 'weapon' ? '무기' : '모자'} · ${gearEffectText(g)}${item.isNew ? ' · NEW!' : ''}`;
+    label.append(name, sub);
+  }
+  card.append(icon, label);
+  return card;
+}
+
+chestBox.addEventListener('click', () => {
+  if (!pendingRewards || chestBox.disabled) return;
+  const rewards = pendingRewards;
+  pendingRewards = null;
+  chestBox.disabled = true;
+  chestHint.textContent = '';
+  chestBox.className = `chest-box tier-${rewards.chest.id} opening`;
+  // 흔들흔들 → 뚜껑이 열리며 빛 → 보상이 하나씩 튀어나옴
+  setTimeout(() => {
+    const result = applyRewards(rewards);
+    chestArt.innerHTML = renderChest(rewards.tier, true);
+    chestBox.className = `chest-box tier-${rewards.chest.id} opened`;
+    chestItems.replaceChildren(...rewards.contents.map(rewardCard));
+    const delay = 0.15 + rewards.contents.length * 0.25;
+    setTimeout(() => {
+      if (result.levelUp) {
+        levelUpEl.textContent = `🎉 레벨 업! Lv.${result.level}`;
+        levelUpEl.style.display = '';
+      }
+      resultButtons.style.display = '';
+      resultButtons.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      flushRecordSave();
+    }, delay * 1000 + 200);
+  }, 900);
+});
 
 btnBattleNext.addEventListener('click', () => {
   if (!battle) return;
@@ -650,6 +911,7 @@ document.getElementById('btn-avatar-back').addEventListener('click', () => {
   if (!getAvatar()) showScreen('start');
 });
 btnGameMode.addEventListener('click', () => openGameMap());
+document.getElementById('btn-bag').addEventListener('click', () => openBag(() => renderPlayerCard()));
 document.getElementById('btn-avatar-edit').addEventListener('click', () => {
   gameMap.style.display = 'none';
   openAvatarMaker(() => openGameMap());
@@ -657,7 +919,9 @@ document.getElementById('btn-avatar-edit').addEventListener('click', () => {
 
 // 안드로이드 뒤로 가기 (app.js handleBackButton 에서 호출)
 function gameHandleBack() {
-  if (gameBattle.style.display !== 'none') {
+  if (bagModal.style.display !== 'none') {
+    document.getElementById('btn-bag-close').click();
+  } else if (gameBattle.style.display !== 'none') {
     openGameMap();
   } else if (avatarMaker.style.display !== 'none') {
     avatarMaker.style.display = 'none';

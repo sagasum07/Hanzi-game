@@ -481,16 +481,32 @@
         <button class="btn-back" id="btn-avatar-back">← 뒤로</button>
       </div>
 
+      <!-- 가방: 상자에서 얻은 장비 장착 (rewards.js) -->
+      <div class="game-modal" id="bag-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="bag-title">
+        <div class="game-modal-card">
+          <h3 class="game-modal-title" id="bag-title">🎒 가방</h3>
+          <div class="bag-preview" id="bag-preview" aria-hidden="true"></div>
+          <p class="bag-stats" id="bag-stats"></p>
+          <div class="bag-list" id="bag-list"></div>
+          <button class="btn-start-quiz" id="btn-bag-close">닫기</button>
+        </div>
+      </div>
+
       <!-- 스테이지 지도 -->
       <div class="game-map" id="game-map">
         <h2 class="game-map-title">⚔️ 게임 모드</h2>
         <div class="my-avatar-card">
-          <div class="my-avatar" id="my-avatar" aria-hidden="true"></div>
+          <div class="my-avatar" id="game-my-avatar" aria-hidden="true"></div>
           <div class="my-avatar-info">
-            <strong id="my-avatar-name"></strong>
-            <span>맨손 격투가 👊</span>
+            <strong><span class="player-level" id="player-level">Lv.1</span> <span id="my-avatar-name"></span></strong>
+            <div class="exp-bar" aria-hidden="true"><div class="exp-bar-fill" id="exp-bar-fill"></div></div>
+            <span class="player-stats"><span id="exp-text">0 / 100 EXP</span> · 🪙 <span id="coin-text">0</span></span>
+            <span class="player-gear" id="player-gear"></span>
           </div>
-          <button class="btn-avatar-edit" id="btn-avatar-edit">✏️ 꾸미기</button>
+          <div class="my-avatar-buttons">
+            <button class="btn-avatar-edit" id="btn-avatar-edit">✏️ 꾸미기</button>
+            <button class="btn-avatar-edit" id="btn-bag">🎒 가방</button>
+          </div>
         </div>
         <p class="game-map-desc">스테이지를 클리어하면 다음 스테이지가 열려요.<br>6개 스테이지마다 7번째는 배운 단어를 모두 복습하는 <strong>보스 스테이지</strong>예요.</p>
         <div class="game-level-tabs" id="game-level-tabs" role="tablist"></div>
@@ -530,6 +546,8 @@
               <div class="damage-pop player-pop" id="player-pop" aria-hidden="true"></div>
             </div>
           </div>
+          <!-- 타격 효과(불꽃·충격파·글자·섬광)를 그리는 층 -->
+          <div class="fx-layer" id="fx-layer" aria-hidden="true"></div>
         </div>
         <div class="battle-timer" aria-hidden="true"><div class="battle-timer-fill" id="battle-timer-fill"></div></div>
         <div class="answer-slots" id="answer-slots"></div>
@@ -558,7 +576,18 @@
             <h2 class="battle-result-title" id="battle-result-title"></h2>
             <div class="battle-result-stars" id="battle-result-stars"></div>
             <p class="battle-result-text" id="battle-result-text"></p>
-            <div class="battle-result-buttons">
+            <!-- 클리어 보상: 기본 경험치·코인 + 보상 상자 -->
+            <div class="reward-area" id="reward-area" style="display:none;">
+              <div class="reward-base" id="reward-base"></div>
+              <button class="chest-box" id="chest-box" aria-label="보상 상자 열기">
+                <span class="chest-art" id="chest-art"></span>
+                <span class="chest-name" id="chest-name"></span>
+                <span class="chest-hint" id="chest-hint">눌러서 열기!</span>
+              </button>
+              <div class="chest-items" id="chest-items"></div>
+              <p class="level-up" id="level-up" style="display:none;"></p>
+            </div>
+            <div class="battle-result-buttons" id="battle-result-buttons">
               <button class="btn-start-quiz" id="btn-battle-next">다음 스테이지 →</button>
               <button class="btn-restart" id="btn-battle-retry">다시 도전 🔄</button>
               <button class="btn-home" id="btn-battle-map">스테이지 목록</button>
@@ -691,6 +720,7 @@
   <script src="data_hsk6.js"></script>
   <script src="app.js"></script>
   <script src="avatar.js"></script>
+  <script src="rewards.js"></script>
   <script src="stage-game.js"></script>
   <script type="module" src="firebase.js"></script>
 </body>

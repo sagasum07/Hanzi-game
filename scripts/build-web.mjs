@@ -6,6 +6,7 @@ const FILES = [
   'index.html',
   'app.js',
   'avatar.js',
+  'rewards.js',
   'stage-game.js',
   'style.css',
   'firebase.js',

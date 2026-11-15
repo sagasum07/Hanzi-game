@@ -5,6 +5,7 @@
 // 저장 위치: userRecord.game.avatar (계정·게스트 기록과 함께 저장)
 // renderAvatar(avatar, mood) 는 고정된 도형만으로 만든 SVG 문자열을 돌려줍니다 (사용자 입력이 들어가지 않음).
 //   mood: 'normal' | 'hurt' | 'win'
+// renderAvatar(avatar, mood, equip) 의 equip = { weapon: 장비 id, hat: 장비 id } 이면 무기는 주먹에, 모자는 머리에 그립니다.
 
 const AVATAR_OPTIONS = {
   gender: [
@@ -172,7 +173,53 @@ function faceParts(face, mood) {
   }
 }
 
-function renderAvatar(avatarIn, mood = 'normal') {
+// 무기: 앞쪽 팔(주먹 위치 31,115)에서 아래로 뻗게 그림 → 주먹을 휘두르면 몬스터 쪽을 향함
+// [주먹 아래에 깔리는 부분, 주먹 위에 덮는 부분]
+function weaponParts(id) {
+  switch (id) {
+    case 'stick':
+      return ['<rect x="28.5" y="110" width="5" height="30" rx="2" fill="#8B5A2B" stroke="#5C3A1A" stroke-width="1"/>', ''];
+    case 'glove':
+      return ['', '<circle cx="31" cy="115" r="9.5" fill="#D9363E" stroke="#8E1F25" stroke-width="2"/><path d="M25 112 h12" stroke="#fff" stroke-width="2" opacity="0.7"/>'];
+    case 'woodsword':
+      return ['<rect x="28" y="118" width="6" height="32" rx="2" fill="#D9B47A" stroke="#9C7A45" stroke-width="1"/><rect x="23" y="116" width="16" height="4" rx="2" fill="#8B5A2B"/>', ''];
+    case 'knuckle':
+      return ['', '<rect x="23.5" y="110" width="15" height="7" rx="3" fill="#B0B6BC" stroke="#5F6368" stroke-width="1.5"/><path d="M26 110 l1 -4 1 4 M31 110 l1 -4 1 4 M36 110 l1 -4 1 4" stroke="#5F6368" stroke-width="1.5" fill="#B0B6BC"/>'];
+    case 'brush':
+      return ['<rect x="29" y="108" width="4.5" height="30" rx="2" fill="#C9A15B" stroke="#8B6A2B" stroke-width="1"/><path d="M27.5 137 Q31.2 156 35 137 Z" fill="#2B2321"/>', ''];
+    case 'bronzesword':
+      return ['<path d="M28 119 L34 119 L33 152 L31 156 L29 152 Z" fill="#D49A5A" stroke="#8E5A2B" stroke-width="1"/><rect x="22" y="116" width="18" height="4.5" rx="2" fill="#8E5A2B"/>', ''];
+    case 'goldbrush':
+      return ['<rect x="29" y="106" width="4.5" height="32" rx="2" fill="#F2C230" stroke="#B8860B" stroke-width="1"/><path d="M27.5 137 Q31.2 157 35 137 Z" fill="#2B2321"/><circle cx="31.2" cy="147" r="5" fill="#FFE066" opacity="0.45"/>', ''];
+    case 'dragonbrush':
+      return ['<rect x="28.5" y="104" width="5.5" height="34" rx="2.5" fill="#C0392B" stroke="#7A1F16" stroke-width="1"/><path d="M28.5 112 h5.5 M28.5 122 h5.5 M28.5 132 h5.5" stroke="#F2C230" stroke-width="2"/><path d="M27 137 Q31.2 160 35.5 137 Z" fill="#2B2321"/><circle cx="31.2" cy="148" r="8" fill="#FF6B3D" opacity="0.4"/>', ''];
+    default:
+      return ['', ''];
+  }
+}
+
+function hatPart(id) {
+  switch (id) {
+    case 'straw':
+      return '<path d="M40 28 Q41 8 60 8 Q79 8 80 28 Z" fill="#E8C872" stroke="#B8954A" stroke-width="1.5"/><rect x="40" y="22" width="40" height="5" fill="#C0392B"/><ellipse cx="60" cy="28" rx="40" ry="7" fill="#EED38A" stroke="#B8954A" stroke-width="1.5"/>';
+    case 'cap':
+      return '<path d="M33 31 Q35 7 60 7 Q85 7 87 31 Z" fill="#4A90D9" stroke="#2F6BB0" stroke-width="1.5"/><ellipse cx="33" cy="31" rx="17" ry="5" fill="#2F6BB0"/><circle cx="60" cy="8" r="3" fill="#2F6BB0"/>';
+    case 'band':
+      return '<rect x="30" y="32" width="60" height="8" rx="3" fill="#E05252" stroke="#A93636" stroke-width="1"/><path d="M89 34 L102 28 L99 38 Z M89 37 L101 44 L94 46 Z" fill="#E05252"/><circle cx="60" cy="36" r="3" fill="#fff"/>';
+    case 'gradcap':
+      return '<rect x="40" y="18" width="40" height="12" rx="3" fill="#2B2B33"/><path d="M24 18 L60 6 L96 18 L60 30 Z" fill="#3A3A44" stroke="#1E1E24" stroke-width="1.5"/><path d="M60 18 L92 21 L92 34" stroke="#F2C230" stroke-width="2" fill="none"/><circle cx="92" cy="36" r="3" fill="#F2C230"/>';
+    case 'scholar':
+      return '<rect x="46" y="2" width="28" height="24" rx="5" fill="rgba(30,30,36,0.9)"/><ellipse cx="60" cy="26" rx="46" ry="6.5" fill="rgba(30,30,36,0.82)"/><path d="M34 28 Q30 60 44 74 M86 28 Q90 60 76 74" stroke="#2B2B33" stroke-width="1.2" fill="none"/>';
+    case 'crown':
+      return '<path d="M35 28 L37 6 L48 18 L60 0 L72 18 L83 6 L85 28 Z" fill="#F2C230" stroke="#B8860B" stroke-width="2" stroke-linejoin="round"/><circle cx="60" cy="20" r="3.5" fill="#E05252"/><circle cx="46" cy="23" r="2.5" fill="#4A90D9"/><circle cx="74" cy="23" r="2.5" fill="#3DAA6D"/>';
+    default:
+      return '';
+  }
+}
+
+function renderAvatar(avatarIn, mood = 'normal', equip = null) {
+  const [weaponUnder, weaponOver] = weaponParts(equip && equip.weapon);
+  const hat = hatPart(equip && equip.hat);
   const a = validAvatar(avatarIn) || DEFAULT_AVATAR;
   const skin = a.skin;
   const skinDark = shade(skin, 0.12);
@@ -185,7 +232,7 @@ function renderAvatar(avatarIn, mood = 'normal') {
   const collar = a.gender === 'f'
     ? `<path d="M52 84 Q60 92 68 84" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`
     : `<path d="M53 83 L60 92 L67 83" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/>`;
-  return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="avatar-svg">
+  return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="avatar-svg" overflow="visible">
   <ellipse cx="60" cy="152" rx="30" ry="5" fill="rgba(0,0,0,0.18)"/>
   ${hairBack(a.hair, a.hairColor)}
   ${legs}
@@ -198,7 +245,8 @@ function renderAvatar(avatarIn, mood = 'normal') {
   <ellipse cx="32" cy="54" rx="4" ry="6" fill="${skin}"/><ellipse cx="88" cy="54" rx="4" ry="6" fill="${skin}"/>
   ${faceParts(a.face, mood)}
   ${hairFront(a.hair, a.hairColor)}
-  <g class="arm-front"><path d="M40 88 Q29 99 31 113" fill="none" stroke="${cloth}" stroke-width="10" stroke-linecap="round"/><circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/></g>
+  ${hat}
+  <g class="arm-front"><path d="M40 88 Q29 99 31 113" fill="none" stroke="${cloth}" stroke-width="10" stroke-linecap="round"/>${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
 </svg>`;
 }
 
