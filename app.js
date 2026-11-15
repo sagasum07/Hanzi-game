@@ -163,7 +163,7 @@ const settingsScreen = document.getElementById('settings-screen');
 const friendsScreen = document.getElementById('friends-screen');
 const quizScreen = document.getElementById('quiz-screen');
 const sentenceScreen = document.getElementById('sentence-screen'); // New
-const gameScreen = document.getElementById('game-screen'); // 게임 모드 (game.js)
+const gameScreen = document.getElementById('game-screen'); // 게임 모드 (stage-game.js)
 const btnModeWord = document.getElementById('btn-mode-word'); // New
 const btnModeSentence = document.getElementById('btn-mode-sentence'); // New
 const btnBackToStart = document.getElementById('btn-back-to-start');
@@ -2532,7 +2532,7 @@ function isShown(el) {
 
 function handleBackButton() {
   if (isShown(gameScreen)) {
-    gameHandleBack(); // game.js: 전투 중이면 스테이지 목록으로, 목록이면 처음 화면으로
+    gameHandleBack(); // stage-game.js: 전투 중이면 스테이지 목록으로, 목록이면 처음 화면으로
   } else if (isShown(quizScreen) || isShown(sentenceScreen)) {
     // 퀴즈 중이거나 결과 화면이면, 시작했던 곳으로 돌아감
     if (currentPlanDay !== null) {
