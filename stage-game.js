@@ -307,12 +307,12 @@ const TUTORIAL_STEPS = [
   },
   {
     title: '장비로 더 강해지기',
-    text: '<b>무기</b>는 빠른 공격(×2·×3)을 더 쉽게, <b>모자</b>는 제한 시간을 늘려 줘요. 지도 위 <b>가방</b>에서 장착하고, <b>꾸미기</b>로 캐릭터를 바꿀 수 있어요. 이 안내는 지도의 ‘게임 방법 보기’로 다시 볼 수 있어요.',
+    text: '<b>무기</b>는 빠른 공격(×2·×3)을 쉽게, <b>모자·투구</b>는 제한 시간을, <b>갑옷</b>은 공격을 막을 확률을, <b>바지</b>는 보상을 늘려 줘요. 지도 위 <b>가방</b>에서 장착하고, <b>꾸미기</b>로 캐릭터를 바꿀 수 있어요. 이 안내는 지도의 ‘게임 방법 보기’로 다시 볼 수 있어요.',
     art: () => `
       <div class="tut-gear">
-        <span class="tut-gear-item">${renderGearIcon('dragonbrush')}<em>무기</em></span>
-        <span class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', { weapon: 'goldbrush', hat: 'scholar' })}</span>
-        <span class="tut-gear-item">${renderGearIcon('scholar')}<em>모자</em></span>
+        <span class="tut-gear-col"><span class="tut-gear-item">${renderGearIcon('glaive')}<em>무기</em></span><span class="tut-gear-item">${renderGearIcon('generalhelm')}<em>투구</em></span></span>
+        <span class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', { weapon: 'glaive', hat: 'generalhelm', armor: 'lamellar', pants: 'warriorpants' })}</span>
+        <span class="tut-gear-col"><span class="tut-gear-item">${renderGearIcon('lamellar')}<em>갑옷</em></span><span class="tut-gear-item">${renderGearIcon('warriorpants')}<em>바지</em></span></span>
       </div>`,
   },
 ];
@@ -446,7 +446,10 @@ function renderPlayerCard() {
   document.querySelector('.my-avatar-card .coin-mark').innerHTML = uiIcon('coin');
   const eq = equippedGear();
   // 장비 이름은 고정 목록에서 온 문자열이라 그림과 함께 HTML 로 넣어도 안전함
-  document.getElementById('player-gear').innerHTML = `${eq.weapon ? `${renderGearIcon(eq.weapon.id)} ${eq.weapon.name}` : '맨손'}${eq.hat ? ` · ${renderGearIcon(eq.hat.id)} ${eq.hat.name}` : ''}`;
+  const worn = GEAR_SLOTS.map((slot) => eq[slot.id]).filter(Boolean);
+  document.getElementById('player-gear').innerHTML = worn.length
+    ? worn.map((g) => `<span class="worn-gear">${renderGearIcon(g.id)}${g.name}</span>`).join('')
+    : '맨손';
 }
 
 function renderGameMap() {
@@ -928,9 +931,11 @@ function resolveQuestion(correct, timedOut) {
     else normalAttack(current, damage);
     if (q.type === 'word') speakHanzi(q.word.hanzi);
   } else {
-    battle.hearts -= 1;
+    // 갑옷: 일정 확률로 몬스터의 공격을 막아 하트를 지킴 (정답 확인 창은 그대로 보여 줌)
+    const guarded = Math.random() < guardChance();
+    if (!guarded) battle.hearts -= 1;
     // 몬스터가 정답을 알려 주며 달려들어 공격
-    playerBubbleText.textContent = timedOut ? '앗, 시간이…!' : '으악!';
+    playerBubbleText.textContent = guarded ? '갑옷으로 막았다!' : timedOut ? '앗, 시간이…!' : '으악!';
     playerBubbleText.lang = 'ko';
     playerBubbleSub.textContent = '';
     bubbleKind.textContent = timedOut ? '시간 초과! 정답은' : '틀렸다! 정답은';
@@ -939,7 +944,7 @@ function resolveQuestion(correct, timedOut) {
     battleFeedback.textContent = `${timedOut ? '시간 초과' : '오답'}. 정답: ${answerText} ${answerPinyin}`;
     answerSlots.classList.add('shake');
     setTimeout(() => answerSlots.classList.remove('shake'), 450);
-    monsterAttack(current);
+    monsterAttack(current, guarded);
     // 틀리면 정답 확인 창을 띄우고, 사용자가 확인을 눌러야 다음으로 넘어감
     setTimeout(() => {
       if (battle !== current) return;
@@ -1189,11 +1194,28 @@ function criticalAttack(current, damage) {
 }
 
 // 몬스터 공격: 달려들어 할퀴기 → 붉은 섬광, 하트가 깨짐
-function monsterAttack(current) {
+function monsterAttack(current, guarded = false) {
   playMotion(monsterFighter, 'attack');
   Sfx.whoosh(false);
   setTimeout(() => {
     if (battle !== current) return;
+    if (guarded) {
+      // 갑옷이 공격을 튕겨 냄: 금빛 방패 + 쨍 소리, 하트는 그대로
+      Sfx.guard();
+      const p = centerOf(playerAvatarEl);
+      hitStop(60);
+      playMotion(playerFighter, 'guard');
+      if (!reduceMotion.matches) {
+        spawnFx('fx-guard', p.x - 18, p.y - 4, 750, (el) => {
+          el.innerHTML = '<svg viewBox="0 0 60 70" aria-hidden="true"><path d="M30 4 L54 13 Q54 48 30 66 Q6 48 6 13 Z" fill="rgba(242,194,48,0.35)" stroke="#F2C230" stroke-width="4" stroke-linejoin="round"/><path d="M30 14 L44 20 Q44 44 30 56 Q16 44 16 20 Z" fill="none" stroke="#FFF6E6" stroke-width="2" opacity="0.8"/><text x="30" y="44" text-anchor="middle" font-size="20" fill="#8E241D" font-family="serif">守</text></svg>';
+        });
+        stageEffect('shake-l', 250);
+      }
+      flash('rgba(242,194,48,0.45)', 300);
+      showDamage(playerPop, '막기!');
+      renderBattleStatus();
+      return;
+    }
     Sfx.claw();
     const p = centerOf(playerAvatarEl);
     hitStop(80);

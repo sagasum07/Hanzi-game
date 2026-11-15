@@ -7717,3 +7717,130 @@ header h1, .header-titles h1 {
   .game-wide .ex-why ul,
   .game-wide .ex-note p { font-size: 0.92rem; }
 }
+
+/* ---- 갑옷 막기 ---- */
+.fx-guard {
+  width: 64px;
+  height: 74px;
+  transform: translate(-50%, -50%) scale(0.3);
+  animation: guard-pop 0.75s cubic-bezier(0.2, 1.5, 0.4, 1) forwards;
+  filter: drop-shadow(0 0 10px rgba(242, 194, 48, 0.9));
+}
+
+.fx-guard svg {
+  width: 100%;
+  height: 100%;
+}
+
+.player-side.guard .battle-avatar {
+  animation: player-guard 0.45s ease;
+}
+
+@keyframes guard-pop {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  30% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  70% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.25); opacity: 0; }
+}
+
+@keyframes player-guard {
+  0%, 100% { transform: none; }
+  30% { transform: translateX(8px) scale(0.97); }
+}
+
+/* 지도 카드: 착용 장비 목록 */
+.worn-gear {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.worn-gear .gear-icon {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+/* 가방: 장착 칸 4개 */
+.bag-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  width: 100%;
+  font-weight: 400;
+}
+
+.bag-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  border: 1.5px dashed rgba(107, 94, 82, 0.4);
+  background: rgba(255, 255, 255, 0.4);
+  text-align: left;
+  min-width: 0;
+}
+
+.bag-slot.on {
+  border: 1.5px solid var(--rarity);
+  background: #FFF9EE;
+}
+
+.bag-slot-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(31, 26, 23, 0.06);
+}
+
+.bag-slot-icon .gear-icon {
+  width: 26px;
+  height: 26px;
+}
+
+.bag-slot-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.78rem;
+  color: var(--ink, #1F1A17);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bag-slot-text small {
+  font-size: 0.65rem;
+  color: var(--ink-soft, #6B5E52);
+}
+
+.bag-slot-head {
+  margin: 6px 0 0;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.85rem;
+  color: var(--cinnabar, #B8332A);
+  border-bottom: 1px solid rgba(201, 161, 74, 0.5);
+  padding-bottom: 2px;
+}
+
+/* 튜토리얼: 장비 4종 */
+.tut-gear-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tut-gear-col .tut-gear-item svg {
+  width: 40px;
+  height: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-guard,
+  .player-side.guard .battle-avatar { animation: none; }
+}

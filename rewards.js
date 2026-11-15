@@ -31,7 +31,18 @@ const RARITIES = [
   { id: 'legendary', name: '전설', color: '#E3A92B' },
 ];
 
-// 무기: 빠른 공격(데미지 ×2·×3) 판정이 쉬워짐 (남은 시간 기준을 낮춤) / 모자: 제한 시간이 늘어남
+// 장비 칸 4개
+//   무기: 빠른 공격(데미지 ×2·×3) 판정이 쉬워짐 (남은 시간 기준을 낮춤)
+//   머리(모자·투구): 제한 시간이 늘어남
+//   갑옷: 틀려도 일정 확률로 공격을 막아 하트를 지킴
+//   바지: 클리어 보상(경험치·코인)이 늘어남
+const GEAR_SLOTS = [
+  { id: 'weapon', name: '무기', empty: '맨손' },
+  { id: 'hat', name: '머리', empty: '맨머리' },
+  { id: 'armor', name: '갑옷', empty: '도포만' },
+  { id: 'pants', name: '바지', empty: '기본 바지' },
+];
+const SLOT_NAME = { weapon: '무기', hat: '모자', helmet: '투구', armor: '갑옷', pants: '바지' };
 const GEAR = [
   { id: 'stick', slot: 'weapon', rarity: 0, name: '나무 막대기', crit: 0.04 },
   { id: 'glove', slot: 'weapon', rarity: 0, name: '가죽 장갑', crit: 0.05 },
@@ -41,12 +52,33 @@ const GEAR = [
   { id: 'bronzesword', slot: 'weapon', rarity: 2, name: '청동검', crit: 0.13 },
   { id: 'goldbrush', slot: 'weapon', rarity: 3, name: '황금 붓', crit: 0.17 },
   { id: 'dragonbrush', slot: 'weapon', rarity: 4, name: '용의 붓', crit: 0.22 },
+  { id: 'dagger', slot: 'weapon', rarity: 1, name: '비수', crit: 0.08 },
+  { id: 'spear', slot: 'weapon', rarity: 2, name: '장창', crit: 0.13 },
+  { id: 'glaive', slot: 'weapon', rarity: 3, name: '청룡언월도', crit: 0.18 },
+  { id: 'jadesword', slot: 'weapon', rarity: 4, name: '옥룡검', crit: 0.23 },
   { id: 'straw', slot: 'hat', rarity: 0, name: '밀짚모자', time: 1 },
   { id: 'cap', slot: 'hat', rarity: 0, name: '야구 모자', time: 1 },
   { id: 'band', slot: 'hat', rarity: 1, name: '무사 머리띠', time: 1.5 },
   { id: 'gradcap', slot: 'hat', rarity: 2, name: '학사모', time: 2 },
   { id: 'scholar', slot: 'hat', rarity: 3, name: '선비 갓', time: 3 },
   { id: 'crown', slot: 'hat', rarity: 4, name: '황금 왕관', time: 4 },
+  // 투구 (머리 칸)
+  { id: 'leatherhelm', slot: 'hat', kind: 'helmet', rarity: 1, name: '가죽 투구', time: 1.5 },
+  { id: 'ironhelm', slot: 'hat', kind: 'helmet', rarity: 2, name: '철 투구', time: 2 },
+  { id: 'generalhelm', slot: 'hat', kind: 'helmet', rarity: 3, name: '장군 투구', time: 3 },
+  { id: 'dragonhelm', slot: 'hat', kind: 'helmet', rarity: 4, name: '용린 투구', time: 4 },
+  // 갑옷
+  { id: 'paddedarmor', slot: 'armor', rarity: 0, name: '누비 갑옷', guard: 0.08 },
+  { id: 'leatherarmor', slot: 'armor', rarity: 1, name: '가죽 갑옷', guard: 0.12 },
+  { id: 'scalearmor', slot: 'armor', rarity: 2, name: '비늘 갑옷', guard: 0.16 },
+  { id: 'lamellar', slot: 'armor', rarity: 3, name: '장수 찰갑', guard: 0.2 },
+  { id: 'goldarmor', slot: 'armor', rarity: 4, name: '황금 용갑', guard: 0.25 },
+  // 바지
+  { id: 'cottonpants', slot: 'pants', rarity: 0, name: '무명 바지', bonus: 0.05 },
+  { id: 'trainpants', slot: 'pants', rarity: 1, name: '수련 바지', bonus: 0.08 },
+  { id: 'warriorpants', slot: 'pants', rarity: 2, name: '무사 바지', bonus: 0.12 },
+  { id: 'cloudpants', slot: 'pants', rarity: 3, name: '구름 비단 바지', bonus: 0.16 },
+  { id: 'qilinpants', slot: 'pants', rarity: 4, name: '기린 바지', bonus: 0.2 },
 ];
 const GEAR_BY_ID = Object.fromEntries(GEAR.map((g) => [g.id, g]));
 
@@ -78,7 +110,7 @@ function gamePlayer() {
   const t = userRecord.game.player.equip.title;
   if (t && (!TITLE_BY_ID[t] || !userRecord.game.player.titles[t])) userRecord.game.player.equip.title = null;
   // 저장된 장착 장비가 목록에 없거나 가지고 있지 않으면 해제
-  for (const slot of ['weapon', 'hat']) {
+  for (const slot of GEAR_SLOTS.map((g) => g.id)) {
     const id = userRecord.game.player.equip[slot];
     if (id && (!GEAR_BY_ID[id] || !userRecord.game.player.items[id])) userRecord.game.player.equip[slot] = null;
   }
@@ -102,7 +134,24 @@ function levelInfo(totalExp) {
 
 function equippedGear() {
   const p = gamePlayer();
-  return { weapon: GEAR_BY_ID[p.equip.weapon] || null, hat: GEAR_BY_ID[p.equip.hat] || null };
+  return Object.fromEntries(GEAR_SLOTS.map(({ id }) => [id, GEAR_BY_ID[p.equip[id]] || null]));
+}
+
+// 갑옷: 틀렸을 때 공격을 막을 확률
+function guardChance() {
+  const a = equippedGear().armor;
+  return a ? a.guard : 0;
+}
+
+// 바지: 클리어 보상 추가 비율
+function rewardBonus() {
+  const b = equippedGear().pants;
+  return b ? b.bonus : 0;
+}
+
+// 장비 종류 이름 (투구는 머리 칸이지만 이름은 '투구')
+function gearKindName(g) {
+  return SLOT_NAME[g.kind || g.slot];
 }
 
 function critBonus() {
@@ -145,7 +194,8 @@ function rollGear(tier) {
 }
 
 function makeStageRewards(level, stage, stars, replay) {
-  const mult = LEVEL_MULT[level] * (1 + Math.min(stage.chapter - 1, 20) * 0.06) * (stage.final ? 3 : stage.boss ? 2 : 1) * (0.7 + stars * 0.1);
+  const mult = LEVEL_MULT[level] * (1 + Math.min(stage.chapter - 1, 20) * 0.06) * (stage.final ? 3 : stage.boss ? 2 : 1) * (0.7 + stars * 0.1)
+    * (1 + rewardBonus()); // 바지 효과
   const rate = replay ? REPLAY_RATE : 1;
   const base = {
     exp: Math.round(25 * mult * rate),
@@ -238,7 +288,10 @@ const bagPreview = document.getElementById('bag-preview');
 let onBagClose = null;
 
 function gearEffectText(g) {
-  return g.slot === 'weapon' ? `빠른 공격 판정 +${Math.round(g.crit * 100)}%` : `제한 시간 +${g.time}초`;
+  if (g.slot === 'weapon') return `빠른 공격 판정 +${Math.round(g.crit * 100)}%`;
+  if (g.slot === 'armor') return `공격 막기 ${Math.round(g.guard * 100)}%`;
+  if (g.slot === 'pants') return `보상 +${Math.round(g.bonus * 100)}%`;
+  return `제한 시간 +${g.time}초`;
 }
 
 // ---------- 칭호 ----------
@@ -282,7 +335,13 @@ function renderBag() {
   const p = gamePlayer();
   bagPreview.innerHTML = renderAvatar(getAvatar(), 'normal', p.equip);
   const eq = equippedGear();
-  bagStats.innerHTML = `${eq.weapon ? `${renderGearIcon(eq.weapon.id)} ${eq.weapon.name}` : '맨손'} · ${eq.hat ? `${renderGearIcon(eq.hat.id)} ${eq.hat.name}` : '모자 없음'}`
+  // 장착 중인 장비 4칸 (무기·머리·갑옷·바지)
+  bagStats.innerHTML = `<span class="bag-slots">${GEAR_SLOTS.map((slot) => {
+    const g = eq[slot.id];
+    return `<span class="bag-slot${g ? ' on' : ''}"${g ? ` style="--rarity:${RARITIES[g.rarity].color}"` : ''}>`
+      + `<span class="bag-slot-icon">${g ? renderGearIcon(g.id) : ''}</span>`
+      + `<span class="bag-slot-text"><small>${slot.name}</small>${g ? g.name : slot.empty}</span></span>`;
+  }).join('')}</span>`
     + `<span class="bag-title-line">${titleBadgeHtml() || '<span class="bag-no-title">칭호 없음</span>'}</span>`;
   document.querySelectorAll('.bag-tab').forEach((b) => {
     const on = b.dataset.tab === bagTab;
@@ -301,7 +360,22 @@ function renderBag() {
     bagList.replaceChildren(empty);
     return;
   }
-  bagList.replaceChildren(...owned.map((g) => {
+  // 칸별로 묶고, 칸 안에서는 희귀한 장비부터
+  const rows = [];
+  GEAR_SLOTS.forEach((slot) => {
+    const list = owned.filter((g) => g.slot === slot.id).sort((a, b) => b.rarity - a.rarity);
+    if (!list.length) return;
+    const head = document.createElement('p');
+    head.className = 'bag-slot-head';
+    head.textContent = `${slot.name} · ${list.length}개`;
+    rows.push(head, ...list.map(gearRow));
+  });
+  bagList.replaceChildren(...rows);
+}
+
+function gearRow(g) {
+  const p = gamePlayer();
+  {
     const row = document.createElement('div');
     const equipped = p.equip[g.slot] === g.id;
     row.className = 'bag-item' + (equipped ? ' equipped' : '');
@@ -314,7 +388,7 @@ function renderBag() {
     const name = document.createElement('strong');
     name.textContent = g.name;
     const meta = document.createElement('small');
-    meta.textContent = `${RARITIES[g.rarity].name} ${g.slot === 'weapon' ? '무기' : '모자'} · ${gearEffectText(g)}`;
+    meta.textContent = `${RARITIES[g.rarity].name} ${gearKindName(g)} · ${gearEffectText(g)}`;
     info.append(name, meta);
     const btn = document.createElement('button');
     btn.className = 'bag-item-btn';
@@ -326,7 +400,7 @@ function renderBag() {
     });
     row.append(icon, info, btn);
     return row;
-  }));
+  }
 }
 
 // 칭호 칸: 얻은 칭호는 착용·해제, 아직 못 얻은 칭호는 얻는 방법을 보여 줌

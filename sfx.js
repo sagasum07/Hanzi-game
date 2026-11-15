@@ -267,6 +267,12 @@ const Sfx = (() => {
       tone(c, 140, 0.05, 0.25, { type: 'square', gain: 0.18, slideTo: 70 });
       tone(c, 233, 0.12, 0.3, { type: 'sawtooth', gain: 0.07, slideTo: 196 });
     }),
+    // 갑옷으로 막기: 쇠가 부딪히는 '쨍'
+    guard: () => play('guard', (c) => {
+      hiss(c, 0, 0.08, { gain: 0.5, type: 'highpass', freq: 3000 });
+      [1, 2.76, 5.4].forEach((r, i) => tone(c, 620 * r, 0, 0.5 - i * 0.12, { type: 'triangle', gain: 0.16 / (i + 1) }));
+      tone(c, 180, 0, 0.15, { gain: 0.4, slideTo: 90 });
+    }),
     // 몬스터 쓰러짐
     ko: () => play(`ko`, (c) => {
       drum(c, 0, 1, 65);
