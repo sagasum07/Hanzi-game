@@ -277,7 +277,11 @@ function renderGameMap() {
       const starEl = document.createElement('span');
       starEl.className = 'stage-node-stars';
       starEl.textContent = cleared ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '';
-      node.append(icon, label, starEl);
+      // 엽전(동그라미) 그림과 라벨·별을 나눠 라벨이 엽전과 겹치지 않게 함
+      const coin = document.createElement('span');
+      coin.className = 'stage-coin';
+      coin.appendChild(icon);
+      node.append(coin, label, starEl);
       node.setAttribute('aria-label', `${s.boss ? `챕터 ${c} 두목` : `스테이지 ${c}-${s.pos}`}${cleared ? `, 별 ${stars}개` : node.disabled ? ', 잠김' : ''}`);
       node.addEventListener('click', () => startBattle(gameLevel, s.no));
       path.appendChild(node);
