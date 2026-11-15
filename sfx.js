@@ -1,7 +1,7 @@
 // ========================================
 // 게임 모드 효과음 — 소리 파일 없이 Web Audio 로 직접 합성합니다.
 // ========================================
-// app.js 다음에 불러오는 일반 스크립트입니다. (userSettings.sfxOn, currentVolume, audioCtx 를 씀)
+// app.js 다음에 불러오는 일반 스크립트입니다. (userSettings.sfxOn, currentVolume 을 씀, 배경음악과는 다른 AudioContext 사용)
 // 동양풍 느낌: 북(둥) · 징(웅~) · 오음계(궁상각치우) 종소리
 //
 // 사용: Sfx.punch(), Sfx.critical() … 소리를 낼 수 없는 환경이면 조용히 넘어갑니다.
@@ -11,29 +11,43 @@ const Sfx = (() => {
   let master = null;
   let noiseBuffer = null;
 
+  // 효과음 전용 AudioContext (배경음악과 따로 써서 효과음 문제가 배경음악에 번지지 않음)
   function getCtx() {
     if (!userSettings.sfxOn || currentVolume <= 0) return null;
     try {
-      // 배경음악용 AudioContext 가 있으면 함께 쓰고, 없으면 효과음용을 따로 만듦
-      const base = (typeof audioCtx !== 'undefined' && audioCtx) || ctx;
-      if (!base) {
+      if (!ctx || ctx.state === 'closed') {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return null;
         ctx = new AudioCtx();
-      }
-      const c = (typeof audioCtx !== 'undefined' && audioCtx) || ctx;
-      if (!master || master.context !== c) {
-        master = c.createGain();
-        master.connect(c.destination);
+        // 리미터: 소리가 겹쳐도 찢어지지 않게
+        const limiter = ctx.createDynamicsCompressor();
+        limiter.threshold.value = -6;
+        limiter.knee.value = 6;
+        limiter.ratio.value = 12;
+        limiter.attack.value = 0.003;
+        limiter.release.value = 0.15;
+        limiter.connect(ctx.destination);
+        master = ctx.createGain();
+        master.connect(limiter);
         noiseBuffer = null;
       }
       master.gain.value = Math.min(1, 0.25 + currentVolume * 0.85);
-      if (c.state !== 'running') c.resume().catch(() => {});
-      return c;
+      if (ctx.state !== 'running') ctx.resume().catch(() => {});
+      return ctx;
     } catch (error) {
       return null;
     }
   }
+
+  // 전투마다 효과음 장치를 새로 만들어, 혹시 멈추거나 고장 난 상태가 이어지지 않게 함
+  function reset() {
+    if (ctx) ctx.close().catch(() => {});
+    ctx = null;
+    master = null;
+    noiseBuffer = null;
+  }
+
+  const safe = (v, min, max) => Math.min(max, Math.max(min, Number.isFinite(v) ? v : min));
 
   function noise(c) {
     if (!noiseBuffer) {
@@ -52,9 +66,9 @@ const Sfx = (() => {
     const osc = c.createOscillator();
     const g = c.createGain();
     osc.type = type;
-    osc.frequency.setValueAtTime(freq, t);
+    osc.frequency.setValueAtTime(safe(freq, 20, 12000), t);
     osc.detune.value = detune;
-    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(safe(slideTo, 20, 12000), t + dur);
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(gain, t + attack);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
@@ -69,9 +83,11 @@ const Sfx = (() => {
     const src = noise(c);
     const filter = c.createBiquadFilter();
     filter.type = type;
-    filter.Q.value = q;
-    filter.frequency.setValueAtTime(freq, t);
-    if (slideTo) filter.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+    // 필터 값은 안전한 범위로 (지나친 값은 필터가 불안정해져 소리 전체가 끊길 수 있음)
+    const nyquist = c.sampleRate / 2 - 100;
+    filter.Q.value = safe(q, 0.1, 10);
+    filter.frequency.setValueAtTime(safe(freq, 40, nyquist), t);
+    if (slideTo) filter.frequency.exponentialRampToValueAtTime(safe(slideTo, 40, nyquist), t + dur);
     const g = c.createGain();
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(gain, t + 0.008);
@@ -109,12 +125,13 @@ const Sfx = (() => {
   }
 
   return {
-    // 전투 시작: 북 두 번
-    battleStart: (boss) => play((c) => {
+    reset,
+    // 전투 시작: 효과음 장치를 새로 만들고 북 두 번
+    battleStart: (boss) => { reset(); play((c) => {
       drum(c, 0, 0.8, boss ? 80 : 100);
       drum(c, 0.22, 0.9, boss ? 70 : 90);
       if (boss) gong(c, 0.45, 0.3, 98);
-    }),
+    }); },
     // 글자 조각 놓기·빼기
     tap: () => play((c) => tone(c, 1320, 0, 0.06, { type: 'triangle', gain: 0.18 })),
     untap: () => play((c) => tone(c, 880, 0, 0.06, { type: 'triangle', gain: 0.14, slideTo: 660 })),

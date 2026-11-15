@@ -2417,9 +2417,14 @@ function applyVolume() {
   }
 }
 
+// iOS(아이폰·아이패드)만 audio.volume 을 무시하므로 Web Audio 로 음량을 조절함.
+// 컴퓨터·안드로이드는 일반 <audio> 재생을 그대로 써서, 효과음 등 Web Audio 쪽 문제가 배경음악에 번지지 않게 함
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 // 사용자 상호작용 안에서 호출해야 AudioContext 가 정상 동작함
 function setupAudioGraph() {
-  if (gainNode || location.protocol === 'file:') return;
+  if (!IS_IOS || gainNode || location.protocol === 'file:') return;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return;
   try {

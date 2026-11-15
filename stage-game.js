@@ -428,7 +428,7 @@ function nextQuestion() {
   battle.busy = false;
   q.filled = []; // 채운 칸: 조각 인덱스
 
-  bubbleKind.textContent = q.type === 'word' ? '🔤 이 뜻의 중국어 단어는?' : '✍️ 이 문장을 중국어로 말해 봐!';
+  bubbleKind.textContent = q.type === 'word' ? '🔤 중국어 단어는?' : '✍️ 중국어로 말해 봐!';
   bubbleText.textContent = q.prompt;
   bubbleText.removeAttribute('lang');
   battleFeedback.textContent = '';
