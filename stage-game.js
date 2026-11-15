@@ -362,6 +362,8 @@ async function startBattle(level, stageNo) {
   setPlayerMood('normal');
   showScreen('game');
   renderBattleStatus();
+  ensureBgm(); // 전투에 들어올 때 멈춰 있던 배경음악 다시 재생
+  Sfx.battleStart(stage.boss);
   nextQuestion();
 }
 
@@ -459,6 +461,7 @@ function renderTiles() {
       slot.addEventListener('click', () => {
         if (battle.busy) return;
         q.filled.splice(i, 1);
+        Sfx.untap();
         renderTiles();
       });
     } else {
@@ -486,6 +489,8 @@ function placeTile(idx) {
   const q = battle && battle.question;
   if (!q || battle.busy || q.filled.includes(idx) || q.filled.length >= q.answer.length) return;
   q.filled.push(idx);
+  Sfx.tap();
+  ensureBgm(); // 터치(사용자 동작) 중에 배경음악이 멈춰 있으면 다시 켬 (모바일 정책상 이때 가능)
   renderTiles();
   if (q.filled.length === q.answer.length) checkAnswer();
 }
@@ -695,10 +700,12 @@ function afterimages() {
 function normalAttack(current, damage) {
   const fast = damage >= 2;
   playMotion(playerFighter, 'attack');
+  Sfx.whoosh(fast);
   if (!reduceMotion.matches) afterimages();
   setTimeout(() => {
     if (battle !== current) return;
     const m = centerOf(monsterEl);
+    Sfx.punch(fast);
     hitStop(fast ? 120 : 90);
     hitMonster(fast);
     if (!reduceMotion.matches) {
@@ -714,6 +721,7 @@ function normalAttack(current, damage) {
 // 크리티컬: 화면이 확대되고 "CRITICAL" 배너와 함께 3연타, 마지막 한 방에 큰 충격파
 function criticalAttack(current, damage) {
   playMotion(playerFighter, 'attack critical');
+  Sfx.whoosh(true);
   if (!reduceMotion.matches) {
     afterimages();
     stageEffect('crit-zoom', 900);
@@ -725,6 +733,8 @@ function criticalAttack(current, damage) {
       if (battle !== current) return;
       const m = centerOf(monsterEl);
       const last = i === CRIT_HITS_MS.length - 1;
+      if (last) Sfx.critical();
+      else Sfx.punch(true);
       hitStop(last ? 140 : 60);
       hitMonster(last);
       if (!reduceMotion.matches) {
@@ -743,8 +753,10 @@ function criticalAttack(current, damage) {
 // 몬스터 공격: 달려들어 할퀴기 → 붉은 섬광, 하트가 깨짐
 function monsterAttack(current) {
   playMotion(monsterFighter, 'attack');
+  Sfx.whoosh(false);
   setTimeout(() => {
     if (battle !== current) return;
+    Sfx.claw();
     const p = centerOf(playerAvatarEl);
     hitStop(80);
     setPlayerMood('hurt');
@@ -764,6 +776,8 @@ function monsterAttack(current) {
 
 // 마지막 일격: 몬스터가 폭발하며 사라짐
 function monsterExplode() {
+  Sfx.ko();
+  setTimeout(() => Sfx.victory(), 650);
   const m = centerOf(monsterEl);
   monsterEl.classList.add('defeated');
   flash('rgba(244,235,221,0.9)', 500);
@@ -870,7 +884,10 @@ function finishBattle(won) {
     ? (stage.no >= total ? `HSK ${level}급의 모든 스테이지를 클리어했어요! 🏆` : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
     : '틀린 단어는 오답 노트에 모였어요. 다시 도전해 보세요!';
   btnBattleNext.style.display = won && stage.no < total ? '' : 'none';
-  if (!won) setPlayerMood('hurt');
+  if (!won) {
+    setPlayerMood('hurt');
+    Sfx.defeat();
+  }
   battleResult.style.display = '';
   battle.finished = true;
 }
@@ -1003,7 +1020,7 @@ function chestBurst(tier) {
 }
 
 // 카드 하나를 상자에서 포물선으로 날려 제자리에 놓고 뒤집기
-function flyLoot(card, index) {
+function flyLoot(card, index, rarity = -1) {
   const from = chestBig.getBoundingClientRect();
   const to = card.getBoundingClientRect();
   const dx = from.left + from.width / 2 - (to.left + to.width / 2);
@@ -1018,7 +1035,10 @@ function flyLoot(card, index) {
     { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 90}px) scale(1.15) rotate(-40deg)`, opacity: 1, offset: 0.55 },
     { transform: 'translate(0, 0) scale(1) rotate(0deg)', opacity: 1 },
   ], { duration: 700, delay, easing: 'cubic-bezier(0.25, 0.8, 0.35, 1)', fill: 'backwards' });
-  setTimeout(() => card.classList.add('landed'), delay + 700);
+  setTimeout(() => {
+    card.classList.add('landed');
+    Sfx.loot(rarity);
+  }, delay + 700);
   setTimeout(() => card.classList.add('flipped'), delay + 820);
 }
 
@@ -1029,24 +1049,27 @@ chestBig.addEventListener('click', () => {
   chestBig.disabled = true;
   chestOpenHint.textContent = '두근두근…';
   chestStage.className = `chest-stage tier-${rewards.chest.id} opening`;
+  Sfx.chestShake();
 
   setTimeout(() => {
     const result = applyRewards(rewards);
     flushRecordSave();
     chestBigArt.innerHTML = renderChest(rewards.tier, true);
     chestStage.className = `chest-stage tier-${rewards.chest.id} opened`;
+    Sfx.chestOpen(rewards.tier);
     chestOpenHint.style.display = 'none';
     if (!reduceMotion.matches) chestBurst(rewards.tier);
 
     // 카드를 먼저 자리에 놓고(보이지 않게) 상자에서 날아오게 함
     const cards = rewards.contents.map(lootCard);
     chestLoot.replaceChildren(...cards);
-    cards.forEach((card, i) => flyLoot(card, i));
+    cards.forEach((card, i) => flyLoot(card, i, rewards.contents[i].type === 'gear' ? rewards.contents[i].gear.rarity : -1));
 
     const done = rewards.contents.length * LOOT_GAP_MS + 1000;
     setTimeout(() => {
       if (result.levelUp) {
         levelUpEl.textContent = `🎉 레벨 업! Lv.${result.level}`;
+        Sfx.levelUp();
         levelUpEl.style.display = '';
       }
       lootButtons.style.display = '';

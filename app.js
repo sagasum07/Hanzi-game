@@ -444,7 +444,7 @@ function speakHanzi(text) {
     }).catch((error) => {
       console.warn('발음 재생 실패:', error);
       showToast('기기에 중국어 음성이 없어 발음을 재생할 수 없어요');
-    });
+    }).finally(() => ensureBgm()); // 발음이 오디오 포커스를 가져가 멈춘 배경음악 되살리기
     return;
   }
 
@@ -479,7 +479,10 @@ function speakHanzi(text) {
   if (selectedVoice) {
     utterance.voice = selectedVoice;
   }
-  
+
+  // 모바일 브라우저는 발음이 끝난 뒤 배경음악이 멈춰 있는 경우가 있어 다시 재생
+  utterance.onend = () => ensureBgm();
+  utterance.onerror = () => ensureBgm();
   window.speechSynthesis.speak(utterance);
 }
 
@@ -2433,13 +2436,24 @@ function setupAudioGraph() {
 }
 
 function playBgm() {
-  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  // iOS 는 발음(TTS) 재생 뒤 오디오가 'interrupted' 상태가 되기도 하므로 running 이 아니면 모두 다시 깨움
+  if (audioCtx && audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
   if (bgm.paused) {
     bgm.play().catch(error => {
       console.log('브라우저 정책으로 인해 자동 재생이 차단되었습니다. 사용자 상호작용 후 재생됩니다.', error);
     });
   }
 }
+
+// 발음 재생·화면 전환 등으로 배경음악이 멈췄으면 다시 재생 (음소거가 아닐 때만)
+function ensureBgm() {
+  if (isMuted || currentVolume === 0) return;
+  playBgm();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) ensureBgm();
+});
 
 applyVolume();
 
@@ -2565,7 +2579,7 @@ const NICKNAME_MIN = 2;
 const NICKNAME_MAX = 12;
 const NICKNAME_PATTERN = /^[0-9A-Za-z가-힣一-鿿 _-]+$/;
 
-const userSettings = { musicOn: true, volume: DEFAULT_VOLUME, speechSpeed: 'normal', showPinyin: true, reverseStage: true };
+const userSettings = { musicOn: true, volume: DEFAULT_VOLUME, speechSpeed: 'normal', showPinyin: true, reverseStage: true, sfxOn: true };
 try {
   const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
   if (typeof saved.musicOn === 'boolean') userSettings.musicOn = saved.musicOn;
@@ -2573,6 +2587,7 @@ try {
   if (SPEECH_SPEED_FACTORS[saved.speechSpeed]) userSettings.speechSpeed = saved.speechSpeed;
   if (typeof saved.showPinyin === 'boolean') userSettings.showPinyin = saved.showPinyin;
   if (typeof saved.reverseStage === 'boolean') userSettings.reverseStage = saved.reverseStage;
+  if (typeof saved.sfxOn === 'boolean') userSettings.sfxOn = saved.sfxOn;
 } catch (error) {
   // 저장소를 쓸 수 없으면 기본값 사용
 }
@@ -2703,6 +2718,7 @@ const settingsNicknameForm = document.getElementById('settings-nickname-form');
 const settingsNicknameInput = document.getElementById('settings-nickname-input');
 const settingsNicknameError = document.getElementById('settings-nickname-error');
 const settingsMusic = document.getElementById('settings-music');
+const settingsSfx = document.getElementById('settings-sfx');
 const settingsVolume = document.getElementById('settings-volume');
 const settingsPinyin = document.getElementById('settings-pinyin');
 const settingsReverseStage = document.getElementById('settings-reverse-stage');
@@ -2730,6 +2746,7 @@ function renderSettings() {
   });
   settingsPinyin.checked = userSettings.showPinyin;
   settingsReverseStage.checked = userSettings.reverseStage;
+  settingsSfx.checked = userSettings.sfxOn;
 
   settingsAccountStatus.textContent = isGoogle
     ? `${getDisplayName()}님, Google 계정으로 로그인되어 있어요.`
@@ -2797,6 +2814,11 @@ btnPreviewSpeech.addEventListener('click', () => speakHanzi('你好'));
 
 settingsPinyin.addEventListener('change', () => {
   userSettings.showPinyin = settingsPinyin.checked;
+  saveSettings();
+});
+
+settingsSfx.addEventListener('change', () => {
+  userSettings.sfxOn = settingsSfx.checked;
   saveSettings();
 });
 

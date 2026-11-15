@@ -203,6 +203,16 @@
           </label>
         </div>
         <div class="settings-row">
+          <div>
+            <span class="settings-label">효과음</span>
+            <p class="settings-note">게임 모드의 타격·상자 소리 (음량을 따라가요)</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="settings-sfx">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+        <div class="settings-row">
           <span class="settings-label">음량</span>
           <input type="range" class="settings-range" id="settings-volume" min="0.05" max="1" step="0.05" value="0.5">
         </div>
@@ -746,6 +756,7 @@
   <script src="data_hsk5.js"></script>
   <script src="data_hsk6.js"></script>
   <script src="app.js"></script>
+  <script src="sfx.js"></script>
   <script src="avatar.js"></script>
   <script src="rewards.js"></script>
   <script src="stage-game.js"></script>
