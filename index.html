@@ -18,7 +18,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"中文学习","alternateName":"중국어 학습 게임","url":"https://www.zhongwenxuexi-app.com/","description":"HSK 1~6급 중국어 단어와 작문 문장을 일차별 학습 플랜과 퀴즈로 공부하는 무료 학습 게임","applicationCategory":"EducationalApplication","operatingSystem":"Web, Android","inLanguage":"ko","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=Nanum+Pen+Script&family=Song+Myung&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <!-- adsense:start (웹사이트 전용 — 앱용 파일을 만들 때 scripts/build-web.mjs 가 자동으로 제거) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8544888666744598" crossorigin="anonymous"></script>
@@ -74,12 +74,12 @@
         </button>
       </div>
       <button class="btn-game-mode" id="btn-game-mode">
-        <span class="game-mode-icon">⚔️</span>
+        <span class="game-mode-icon" aria-hidden="true">武</span>
         <span class="game-mode-text">
-          <strong>게임 모드</strong>
-          <small>몬스터를 물리치고 스테이지를 클리어하세요!</small>
+          <strong>게임 모드 · 한자 무림</strong>
+          <small>요괴를 물리치며 한자 수행을 떠나요!</small>
         </span>
-        <span class="game-mode-arrow">›</span>
+        <span class="game-mode-arrow" aria-hidden="true">›</span>
       </button>
       <div class="sub-mode-row">
         <button class="btn-review" id="btn-review" disabled>
@@ -470,8 +470,8 @@
     <div class="game-screen" id="game-screen" style="display:none;">
       <!-- 캐릭터 만들기 (avatar.js) -->
       <div class="avatar-maker" id="avatar-maker" style="display:none;">
-        <h2 class="game-map-title">🧑‍🎤 나의 캐릭터</h2>
-        <p class="game-map-desc">몬스터와 싸울 캐릭터를 꾸며 보세요.</p>
+        <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">人</span>나의 무인(武人)</h2>
+        <p class="game-map-desc">요괴와 겨룰 나만의 무인을 꾸며 보세요.</p>
         <div class="avatar-preview" id="avatar-preview" aria-hidden="true"></div>
         <div class="avatar-options" id="avatar-options"></div>
         <div class="avatar-maker-buttons">
@@ -484,7 +484,7 @@
       <!-- 가방: 상자에서 얻은 장비 장착 (rewards.js) -->
       <div class="game-modal" id="bag-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="bag-title">
         <div class="game-modal-card">
-          <h3 class="game-modal-title" id="bag-title">🎒 가방</h3>
+          <h3 class="game-modal-title" id="bag-title"><span class="title-seal small" aria-hidden="true">囊</span>가방</h3>
           <div class="bag-preview" id="bag-preview" aria-hidden="true"></div>
           <p class="bag-stats" id="bag-stats"></p>
           <div class="bag-list" id="bag-list"></div>
@@ -494,7 +494,7 @@
 
       <!-- 스테이지 지도 -->
       <div class="game-map" id="game-map">
-        <h2 class="game-map-title">⚔️ 게임 모드</h2>
+        <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">武</span>한자 무림</h2>
         <div class="my-avatar-card">
           <div class="my-avatar" id="game-my-avatar" aria-hidden="true"></div>
           <div class="my-avatar-info">
@@ -508,7 +508,7 @@
             <button class="btn-avatar-edit" id="btn-bag">🎒 가방</button>
           </div>
         </div>
-        <p class="game-map-desc">스테이지를 클리어하면 다음 스테이지가 열려요.<br>6개 스테이지마다 7번째는 배운 단어를 모두 복습하는 <strong>보스 스테이지</strong>예요.</p>
+        <p class="game-map-desc">관문을 넘으면 다음 관문이 열려요.<br>여섯 관문마다 일곱 번째는 배운 단어를 모두 복습하는 <strong>요괴 두목</strong>과의 결전이에요.</p>
         <div class="game-level-tabs" id="game-level-tabs" role="tablist"></div>
         <p class="game-map-summary" id="game-map-summary"></p>
         <div class="game-chapters" id="game-chapters"></div>
@@ -570,6 +570,28 @@
           </div>
         </div>
 
+        <!-- 상자 열기 화면: 눌러서 열면 보상이 하나씩 튀어나옴 -->
+        <div class="chest-open" id="chest-open" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="chest-open-title">
+          <div class="chest-open-card">
+            <h2 class="chest-open-title" id="chest-open-title"></h2>
+            <div class="chest-stage" id="chest-stage">
+              <div class="chest-rays" aria-hidden="true"></div>
+              <button class="chest-big" id="chest-big" aria-label="상자 열기">
+                <span class="chest-big-art" id="chest-big-art"></span>
+              </button>
+              <div class="chest-particles" id="chest-particles" aria-hidden="true"></div>
+            </div>
+            <p class="chest-open-hint" id="chest-open-hint">상자를 눌러 열어 보세요!</p>
+            <div class="chest-loot" id="chest-loot"></div>
+            <p class="level-up" id="level-up" style="display:none;"></p>
+            <div class="battle-result-buttons" id="loot-buttons" style="display:none;">
+              <button class="btn-start-quiz" id="btn-loot-next">다음 스테이지 →</button>
+              <button class="btn-restart" id="btn-loot-retry">다시 도전 🔄</button>
+              <button class="btn-home" id="btn-loot-map">스테이지 목록</button>
+            </div>
+          </div>
+        </div>
+
         <div class="battle-result" id="battle-result" style="display:none;">
           <div class="battle-result-card">
             <div class="battle-result-icon" id="battle-result-icon"></div>
@@ -577,15 +599,15 @@
             <div class="battle-result-stars" id="battle-result-stars"></div>
             <p class="battle-result-text" id="battle-result-text"></p>
             <!-- 클리어 보상: 기본 경험치·코인 + 보상 상자 -->
+            <!-- 클리어 보상: 기본 경험치·코인 + 얻은 상자 (여는 건 다음 화면에서) -->
             <div class="reward-area" id="reward-area" style="display:none;">
               <div class="reward-base" id="reward-base"></div>
-              <button class="chest-box" id="chest-box" aria-label="보상 상자 열기">
+              <div class="chest-box chest-got" id="chest-got">
                 <span class="chest-art" id="chest-art"></span>
                 <span class="chest-name" id="chest-name"></span>
-                <span class="chest-hint" id="chest-hint">눌러서 열기!</span>
-              </button>
-              <div class="chest-items" id="chest-items"></div>
-              <p class="level-up" id="level-up" style="display:none;"></p>
+                <span class="chest-hint">획득!</span>
+              </div>
+              <button class="btn-start-quiz" id="btn-go-open">📦 상자 열러 가기 →</button>
             </div>
             <div class="battle-result-buttons" id="battle-result-buttons">
               <button class="btn-start-quiz" id="btn-battle-next">다음 스테이지 →</button>

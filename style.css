@@ -4970,3 +4970,1171 @@ header h1, .header-titles h1 {
     animation: none;
   }
 }
+
+/* ==========================================================
+   게임 모드 동양풍 테마 — 한지·먹·주홍 낙관·금박
+   (앞의 게임 모드 스타일 위에 덮어쓰는 층. 크기는 건드리지 않고 색·모양·글꼴만 바꿈)
+   ========================================================== */
+.game-screen,
+.btn-game-mode {
+  --ink: #1F1A17;
+  --ink-soft: #4A423A;
+  --paper: #F4EBDD;
+  --paper-2: #EADBC1;
+  --paper-3: #D9C4A0;
+  --cinnabar: #B8332A;
+  --cinnabar-dark: #8E241D;
+  --gold: #C9A14A;
+  --gold-light: #E8CF8A;
+  --jade: #3F7D6B;
+  --brush: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+  --serif-ko: 'Song Myung', 'Noto Serif SC', serif;
+}
+
+/* ---- 시작 화면 입장 버튼: 먹 바탕 + 금테 + 붉은 낙관 ---- */
+.btn-game-mode {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 80' preserveAspectRatio='none'%3E%3Cpath d='M0 62 L30 44 L52 56 L84 30 L118 52 L150 38 L186 58 L220 34 L256 54 L300 40 L300 80 L0 80Z' fill='%23ffffff' opacity='0.07'/%3E%3Cpath d='M0 70 L40 56 L76 66 L120 50 L170 68 L214 54 L260 68 L300 58 L300 80 L0 80Z' fill='%23ffffff' opacity='0.06'/%3E%3C/svg%3E") bottom / 100% 100% no-repeat,
+    linear-gradient(135deg, #1F1A17 0%, #3A3029 60%, #4A3A2C 100%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 3px #1F1A17, 0 8px 20px rgba(31, 26, 23, 0.35);
+  color: var(--paper);
+}
+
+.btn-game-mode:hover {
+  box-shadow: 0 0 0 3px #1F1A17, 0 12px 26px rgba(31, 26, 23, 0.45);
+}
+
+.btn-game-mode .game-mode-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  font-family: var(--brush);
+  font-size: 1.9rem;
+  color: #FFF6E6;
+  background: var(--cinnabar);
+  border-radius: 6px;
+  transform: rotate(-4deg);
+  box-shadow: inset 0 0 0 2px rgba(255, 246, 230, 0.6);
+}
+
+.btn-game-mode .game-mode-text strong {
+  font-family: var(--serif-ko);
+  font-size: 1.2rem;
+  color: var(--gold-light);
+  letter-spacing: 1px;
+}
+
+.btn-game-mode .game-mode-text small {
+  color: var(--paper-2);
+}
+
+.btn-game-mode .game-mode-arrow {
+  color: var(--gold);
+}
+
+/* ---- 공통: 제목·낙관·버튼 ---- */
+.game-screen .game-map-title,
+.game-screen .game-modal-title,
+.game-screen .battle-result-title,
+.game-screen .reveal-title {
+  font-family: var(--serif-ko);
+  color: var(--ink);
+  letter-spacing: 1px;
+}
+
+.game-screen .game-map-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-seal {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6em;
+  height: 1.6em;
+  font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+  font-weight: 400;
+  color: #FFF6E6;
+  background: #B8332A;
+  border-radius: 5px;
+  transform: rotate(-5deg);
+  box-shadow: inset 0 0 0 2px rgba(255, 246, 230, 0.55);
+  line-height: 1;
+}
+
+.title-seal.small {
+  font-size: 0.9em;
+  margin-right: 6px;
+}
+
+.game-screen .game-map-desc {
+  color: var(--ink-soft);
+}
+
+.game-screen .game-map-desc strong {
+  color: var(--cinnabar);
+}
+
+.game-screen .btn-start-quiz {
+  font-family: var(--serif-ko);
+  background: linear-gradient(180deg, #C2402F 0%, var(--cinnabar) 50%, var(--cinnabar-dark) 100%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 0 2px var(--cinnabar-dark), 0 6px 14px rgba(142, 36, 29, 0.35);
+  color: #FFF6E6;
+  letter-spacing: 1px;
+}
+
+.game-screen .btn-restart {
+  font-family: var(--serif-ko);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink-soft);
+  box-shadow: 0 3px 0 var(--ink-soft);
+}
+
+.game-screen .btn-home,
+.game-screen .btn-back {
+  font-family: var(--serif-ko);
+  color: var(--ink-soft);
+}
+
+/* 한지 카드 공통 */
+.game-screen .my-avatar-card,
+.game-screen .game-chapter,
+.game-screen .game-battle,
+.game-screen .game-modal-card,
+.game-screen .battle-result-card,
+.game-screen .answer-reveal-card {
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.55), transparent 45%),
+    repeating-linear-gradient(17deg, rgba(120, 90, 50, 0.025) 0 2px, transparent 2px 7px),
+    var(--paper);
+  border: 1.5px solid var(--paper-3);
+  box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5px rgba(201, 161, 74, 0.55), 0 6px 18px rgba(74, 58, 44, 0.18);
+}
+
+/* ---- 지도 ---- */
+.game-screen .player-level {
+  background: var(--cinnabar);
+  font-family: var(--serif-ko);
+}
+
+.game-screen .exp-bar {
+  background: var(--paper-3);
+}
+
+.game-screen .exp-bar-fill {
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+}
+
+.game-screen .my-avatar,
+.game-screen .avatar-preview,
+.game-screen .bag-preview {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.6), transparent 60%),
+    linear-gradient(180deg, #E9DFCB, #D8C9AC);
+  border: 1.5px solid var(--paper-3);
+}
+
+.game-screen .btn-avatar-edit {
+  background: var(--paper);
+  border: 1.5px solid var(--ink-soft);
+  color: var(--ink);
+  font-family: var(--serif-ko);
+}
+
+.game-screen .game-level-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 5px 12px 4px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #4A3A2C, #2E241C);
+  border: 1.5px solid #6B5440;
+  color: var(--gold-light);
+  box-shadow: 0 3px 0 #1F1A17;
+}
+
+.game-screen .game-level-tab .tab-han {
+  font-family: var(--brush);
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+
+.game-screen .game-level-tab small {
+  font-size: 0.62rem;
+  opacity: 0.75;
+}
+
+.game-screen .game-level-tab.active {
+  background: linear-gradient(180deg, #C2402F, var(--cinnabar-dark));
+  border-color: var(--gold);
+  color: #FFF6E6;
+}
+
+.game-screen .game-map-summary {
+  color: var(--cinnabar);
+  font-family: var(--serif-ko);
+}
+
+.game-screen .game-chapter-title {
+  font-family: var(--serif-ko);
+  color: var(--ink-soft);
+}
+
+.game-screen .chapter-han {
+  font-family: var(--brush);
+  font-size: 1.15em;
+  color: var(--cinnabar);
+  margin-right: 2px;
+}
+
+/* 스테이지 = 엽전 (가운데 네모 구멍), 두목 = 붉은 낙관 */
+.game-screen .stage-path {
+  row-gap: 30px;
+  padding-bottom: 18px;
+}
+
+.game-screen .stage-node {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  border: 2px solid #8C8278;
+  background: radial-gradient(circle at 35% 30%, #CFC6BA, #9C9389 70%);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.25), 0 3px 0 rgba(31, 26, 23, 0.25);
+  overflow: visible;
+  padding: 0;
+}
+
+.game-screen .stage-node::before {
+  content: '';
+  position: absolute;
+  width: 38%;
+  height: 38%;
+  left: 31%;
+  top: 31%;
+  background: var(--paper);
+  border: 1.5px solid rgba(31, 26, 23, 0.35);
+  border-radius: 2px;
+}
+
+.game-screen .stage-node-icon {
+  position: relative;
+  z-index: 1;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.9rem;
+}
+
+.game-screen .stage-node-label,
+.game-screen .stage-node-stars {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 1;
+}
+
+.game-screen .stage-node-label {
+  bottom: -15px;
+  color: var(--ink-soft);
+}
+
+.game-screen .stage-node-stars {
+  bottom: -27px;
+  color: var(--gold);
+}
+
+.game-screen .stage-node.cleared {
+  border-color: #9C7A2E;
+  background: radial-gradient(circle at 35% 30%, #F6DE8E, #C9A14A 65%, #9C7A2E);
+}
+
+.game-screen .stage-node.current {
+  border-color: var(--cinnabar-dark);
+  background: radial-gradient(circle at 35% 30%, #E0624F, var(--cinnabar) 65%, var(--cinnabar-dark));
+  color: #FFF6E6;
+  animation: seal-pulse 1.6s ease-in-out infinite;
+}
+
+.game-screen .stage-node.current .stage-node-icon {
+  color: var(--ink);
+}
+
+.game-screen .stage-node.locked {
+  border-color: #B6ADA2;
+  background: radial-gradient(circle at 35% 30%, #E4DDD3, #C7BEB2 70%);
+  color: #8C8278;
+  opacity: 0.85;
+}
+
+.game-screen .stage-node.locked .stage-node-icon {
+  font-size: 0.7rem;
+}
+
+.game-screen .stage-node.boss {
+  border-radius: 8px;
+  transform: rotate(-3deg);
+  border: 2px solid var(--cinnabar-dark);
+  background: linear-gradient(160deg, #C2402F, var(--cinnabar-dark));
+}
+
+.game-screen .stage-node.boss::before {
+  display: none;
+}
+
+.game-screen .stage-node.boss .stage-node-icon {
+  font-size: 1.3rem;
+}
+
+.game-screen .stage-node.boss.locked {
+  background: linear-gradient(160deg, #9A6B63, #6E4B45);
+  border-color: #6E4B45;
+}
+
+.game-screen .stage-node.boss.cleared {
+  background: linear-gradient(160deg, #E8CF8A, #9C7A2E);
+  border-color: #9C7A2E;
+}
+
+@keyframes seal-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(184, 51, 42, 0.5), inset 0 0 0 3px rgba(255, 255, 255, 0.25); }
+  50% { box-shadow: 0 0 0 7px rgba(184, 51, 42, 0), inset 0 0 0 3px rgba(255, 255, 255, 0.25); }
+}
+
+/* ---- 캐릭터 만들기·가방 ---- */
+.game-screen .avatar-group-title {
+  font-family: var(--serif-ko);
+  color: var(--ink);
+}
+
+.game-screen .avatar-choice {
+  background: var(--paper);
+  border-color: var(--paper-3);
+  color: var(--ink);
+}
+
+.game-screen .avatar-choice.selected {
+  border-color: var(--cinnabar);
+  background: #FBEFE6;
+  color: var(--cinnabar);
+}
+
+.game-screen .avatar-choices.swatch .avatar-choice {
+  border-color: var(--paper);
+  box-shadow: 0 0 0 2px var(--paper-3);
+}
+
+.game-screen .avatar-choices.swatch .avatar-choice.selected {
+  box-shadow: 0 0 0 3px var(--cinnabar);
+}
+
+.game-screen .bag-stats {
+  color: var(--cinnabar);
+  font-family: var(--serif-ko);
+}
+
+.game-screen .bag-item {
+  background: var(--paper);
+  border-color: var(--paper-3);
+}
+
+.game-screen .bag-item.equipped {
+  background: #FBEFE6;
+  border-color: var(--cinnabar);
+}
+
+.game-screen .bag-item-btn {
+  background: var(--cinnabar);
+  font-family: var(--serif-ko);
+}
+
+/* ---- 전투 ---- */
+.game-screen .battle-title {
+  font-family: var(--serif-ko);
+  color: var(--ink);
+}
+
+.game-screen .battle-exit {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* 수묵 산수화 무대: 붉은 해, 겹겹의 먹빛 산, 안개, 돌 바닥 */
+.game-screen .battle-stage {
+  background:
+    linear-gradient(180deg, transparent 72%, rgba(74, 62, 50, 0.55) 72.5%, #4A3E32 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23EFE6D3'/%3E%3Cstop offset='1' stop-color='%23D9C9AA'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='260' fill='url(%23s)'/%3E%3Ccircle cx='318' cy='58' r='26' fill='%23B8332A' opacity='0.82'/%3E%3Cpath d='M0 150 L34 112 L58 128 L96 76 L132 122 L168 92 L204 132 L244 86 L282 124 L320 96 L356 120 L400 88 L400 260 L0 260Z' fill='%236E655A' opacity='0.28'/%3E%3Cpath d='M0 172 L46 136 L84 156 L130 112 L170 150 L214 120 L262 160 L310 126 L352 152 L400 130 L400 260 L0 260Z' fill='%233E3832' opacity='0.42'/%3E%3Cellipse cx='120' cy='150' rx='120' ry='10' fill='%23FFFFFF' opacity='0.35'/%3E%3Cellipse cx='300' cy='168' rx='110' ry='9' fill='%23FFFFFF' opacity='0.3'/%3E%3Cpath d='M30 70 q14 -8 28 0 M48 62 q10 -6 20 0' stroke='%233E3832' stroke-width='1.5' fill='none' opacity='0.5'/%3E%3C/svg%3E") center / cover no-repeat,
+    #E3D6BC;
+  border: 2px solid var(--ink);
+  box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px var(--gold);
+}
+
+/* 두목전: 붉게 물든 하늘과 누각 */
+.game-screen .boss-battle .battle-stage {
+  background:
+    linear-gradient(180deg, transparent 72%, rgba(60, 30, 24, 0.6) 72.5%, #3B241D 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23C8553D'/%3E%3Cstop offset='1' stop-color='%23E9B98A'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='260' fill='url(%23s)'/%3E%3Ccircle cx='86' cy='62' r='30' fill='%23FFF0D0' opacity='0.85'/%3E%3Cpath d='M0 160 L40 120 L80 140 L120 96 L160 136 L200 110 L240 146 L280 104 L330 140 L400 112 L400 260 L0 260Z' fill='%234A2620' opacity='0.4'/%3E%3Cg fill='%232B1712' opacity='0.75'%3E%3Cpath d='M300 150 h56 v40 h-56z'/%3E%3Cpath d='M290 152 q38 -16 76 0 l-6 -8 q-32 -12 -64 0z'/%3E%3Cpath d='M308 124 h40 v24 h-40z'/%3E%3Cpath d='M298 126 q30 -14 60 0 l-6 -8 q-24 -10 -48 0z'/%3E%3Cpath d='M316 102 h24 v20 h-24z'/%3E%3Cpath d='M306 104 q22 -14 44 0 l-6 -8 q-16 -10 -32 0z'/%3E%3C/g%3E%3C/svg%3E") center / cover no-repeat,
+    #C8553D;
+  border-color: var(--cinnabar-dark);
+}
+
+.game-screen .fighter-name {
+  color: var(--ink);
+  font-family: var(--serif-ko);
+  text-shadow: 0 0 4px var(--paper), 0 0 4px var(--paper), 0 0 8px var(--paper);
+}
+
+.game-screen .boss-battle .fighter-name {
+  color: #FFF6E6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.name-seal {
+  display: inline-grid;
+  place-items: center;
+  width: 1.35em;
+  height: 1.35em;
+  margin-right: 4px;
+  font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+  font-weight: 400;
+  color: #FFF6E6;
+  background: #B8332A;
+  border-radius: 3px;
+  text-shadow: none;
+  vertical-align: middle;
+}
+
+.game-screen .fighter-hp {
+  background: rgba(31, 26, 23, 0.35);
+  border: 1.5px solid var(--gold);
+}
+
+.game-screen .monster-hp-fill {
+  background: linear-gradient(90deg, var(--cinnabar-dark), #D9533F);
+}
+
+.game-screen .monster {
+  filter: drop-shadow(0 6px 0 rgba(31, 26, 23, 0.18)) drop-shadow(0 0 10px rgba(31, 26, 23, 0.25));
+}
+
+/* 말풍선: 요괴는 먹 바탕 두루마리, 나는 한지 */
+.game-screen .monster-speech {
+  background: linear-gradient(180deg, #2A231E, #1F1A17);
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.game-screen .monster-speech::after {
+  border-top-color: #1F1A17;
+}
+
+.game-screen .monster-speech .bubble-kind {
+  color: var(--gold-light);
+  font-family: var(--serif-ko);
+}
+
+.game-screen .boss-battle .monster-speech .bubble-kind {
+  color: #F2A08F;
+}
+
+.game-screen .monster-speech .bubble-text {
+  color: #FFF6E6;
+  font-family: var(--serif-ko);
+}
+
+.game-screen .player-speech {
+  background: #FFF9EC;
+  border: 1.5px solid var(--cinnabar);
+}
+
+.game-screen .player-speech::after {
+  border-top-color: var(--cinnabar);
+}
+
+.game-screen .player-bubble-text {
+  font-family: 'Noto Serif SC', var(--serif-ko);
+  color: var(--ink);
+}
+
+.game-screen .player-bubble-sub {
+  color: var(--cinnabar);
+}
+
+/* 제한 시간 = 타들어 가는 향 */
+.game-screen .battle-timer {
+  background: #D9C9AA;
+  border: 1px solid rgba(31, 26, 23, 0.2);
+  overflow: visible;
+}
+
+.game-screen .battle-timer-fill {
+  position: relative;
+  background: linear-gradient(90deg, #6B4A2E, #8B6B4A);
+}
+
+.game-screen .battle-timer-fill::after {
+  content: '';
+  position: absolute;
+  right: -3px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: #FF8A3D;
+  box-shadow: 0 0 6px 3px rgba(255, 138, 61, 0.7);
+}
+
+.game-screen .battle-timer-fill.danger {
+  background: linear-gradient(90deg, var(--cinnabar-dark), var(--cinnabar));
+}
+
+/* 답칸 = 米자 격자 습자지 */
+.game-screen .answer-slots {
+  background: #FFF9EC;
+  border: 2px solid var(--cinnabar);
+  box-shadow: inset 0 0 0 3px #FFF9EC, inset 0 0 0 4px rgba(184, 51, 42, 0.35);
+}
+
+.game-screen .answer-slot {
+  background:
+    linear-gradient(45deg, transparent calc(50% - 0.5px), rgba(184, 51, 42, 0.22) 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(-45deg, transparent calc(50% - 0.5px), rgba(184, 51, 42, 0.22) 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(90deg, transparent calc(50% - 0.5px), rgba(184, 51, 42, 0.3) 50%, transparent calc(50% + 0.5px)),
+    linear-gradient(0deg, transparent calc(50% - 0.5px), rgba(184, 51, 42, 0.3) 50%, transparent calc(50% + 0.5px)),
+    #FFFDF7;
+  border: 1.5px solid rgba(184, 51, 42, 0.55);
+  border-radius: 2px;
+  color: var(--ink);
+}
+
+.game-screen .answer-slot.filled {
+  border-color: var(--cinnabar);
+  color: var(--ink);
+}
+
+/* 글자 조각 = 마작패 */
+.game-screen .pool-tile {
+  background: linear-gradient(180deg, #FFFEF8 0%, #F3EAD3 100%);
+  border: 1.5px solid #CDBF9F;
+  border-radius: 8px;
+  color: var(--ink);
+  box-shadow: 0 3px 0 #3F7D6B, 0 5px 0 #2C5E50, 0 7px 8px rgba(31, 26, 23, 0.2);
+}
+
+.game-screen .pool-tile:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 #3F7D6B, 0 2px 0 #2C5E50;
+}
+
+.game-screen .pool-tile.used {
+  box-shadow: none;
+  opacity: 0.18;
+}
+
+/* ---- 정답 확인·결과 창: 두루마리 ---- */
+.game-screen .answer-reveal,
+.game-screen .battle-result {
+  background: rgba(31, 26, 23, 0.6);
+}
+
+.game-screen .answer-reveal-card,
+.game-screen .battle-result-card {
+  position: relative;
+  border-top: none;
+  border-radius: 6px;
+}
+
+.game-screen .answer-reveal-card::before,
+.game-screen .answer-reveal-card::after {
+  content: '';
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #6B4A2E, #3A2A1E);
+}
+
+.game-screen .answer-reveal-card::before { top: -6px; }
+.game-screen .answer-reveal-card::after { bottom: -6px; }
+
+.game-screen .reveal-title {
+  color: var(--cinnabar);
+}
+
+.game-screen .reveal-zh {
+  color: var(--ink);
+}
+
+.game-screen .reveal-pinyin {
+  color: var(--cinnabar);
+}
+
+.game-screen .reveal-meaning {
+  color: var(--ink-soft);
+  font-family: var(--serif-ko);
+}
+
+/* 낙관 도장: 胜 / 败 */
+.game-screen .result-seal {
+  align-self: center;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  font-family: var(--brush);
+  font-size: 3rem;
+  line-height: 1;
+  color: #FFF6E6;
+  background: var(--cinnabar);
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 3px rgba(255, 246, 230, 0.6);
+  transform: rotate(-6deg);
+  animation: stamp 0.45s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.game-screen .result-seal.lose {
+  background: #3A3530;
+}
+
+@keyframes stamp {
+  0% { transform: rotate(-6deg) scale(2.4); opacity: 0; }
+  60% { transform: rotate(-6deg) scale(0.92); opacity: 1; }
+  100% { transform: rotate(-6deg) scale(1); }
+}
+
+.game-screen .battle-result-stars {
+  color: var(--gold);
+}
+
+.game-screen .battle-result-text {
+  color: var(--ink-soft);
+  font-family: var(--serif-ko);
+}
+
+.game-screen .reward-base {
+  color: var(--cinnabar);
+  font-family: var(--serif-ko);
+}
+
+.game-screen .chest-name {
+  font-family: var(--serif-ko);
+}
+
+.game-screen .chest-hint {
+  color: var(--cinnabar);
+}
+
+.game-screen .reward-card {
+  background: #FFF9EC;
+  border-color: var(--paper-3);
+}
+
+.game-screen .level-up {
+  color: var(--cinnabar);
+  font-family: var(--serif-ko);
+}
+
+/* ---- 타격 효과: 먹·주홍·금박 ---- */
+.game-screen .fx-word {
+  font-family: var(--brush);
+  font-weight: 400;
+  color: var(--ink);
+  -webkit-text-stroke: 0;
+  text-shadow: 0 0 2px #FFF6E6, 0 0 6px #FFF6E6, 3px 3px 0 rgba(184, 51, 42, 0.85);
+}
+
+.game-screen .fx-word.big {
+  color: var(--cinnabar);
+  text-shadow: 0 0 3px #FFF6E6, 0 0 10px #FFF6E6, 3px 3px 0 #1F1A17;
+}
+
+.game-screen .fx-impact {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(31, 26, 23, 0.9) 0 16%, transparent 17%),
+    radial-gradient(circle at 30% 35%, rgba(31, 26, 23, 0.85) 0 9%, transparent 10%),
+    radial-gradient(circle at 72% 30%, rgba(184, 51, 42, 0.9) 0 8%, transparent 9%),
+    radial-gradient(circle at 68% 70%, rgba(31, 26, 23, 0.85) 0 10%, transparent 11%),
+    radial-gradient(circle at 28% 72%, rgba(184, 51, 42, 0.8) 0 7%, transparent 8%),
+    radial-gradient(circle, rgba(31, 26, 23, 0.25) 0 40%, transparent 60%);
+  mix-blend-mode: multiply;
+}
+
+.game-screen .fx-ring {
+  border-color: rgba(31, 26, 23, 0.75);
+}
+
+.game-screen .fx-ring.big {
+  border-color: var(--cinnabar);
+}
+
+.game-screen .fx-spark {
+  border-radius: 50% 40% 55% 45%;
+  box-shadow: none;
+}
+
+.game-screen .fx-banner {
+  font-family: var(--brush);
+  font-style: normal;
+  font-weight: 400;
+  color: var(--gold-light);
+  -webkit-text-stroke: 1.5px #1F1A17;
+  text-shadow: 0 0 14px rgba(201, 161, 74, 0.9), 4px 4px 0 var(--cinnabar);
+  letter-spacing: 4px;
+}
+
+.game-screen .fx-ghost {
+  filter: grayscale(1) contrast(1.4) blur(1px);
+  opacity: 0.45;
+}
+
+/* 붓으로 그은 할퀴기 자국 */
+.game-screen .fx-slash {
+  height: 9px;
+  background: linear-gradient(90deg, transparent, #1F1A17 18%, #3A3029 55%, var(--cinnabar) 80%, transparent);
+  box-shadow: 0 0 6px rgba(184, 51, 42, 0.7);
+  border-radius: 50% 10% 50% 10%;
+}
+
+/* 마지막 일격: 먹물 폭발 */
+.fx-ink {
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(31, 26, 23, 0.95) 0 18%, transparent 19%),
+    radial-gradient(circle at 22% 30%, rgba(31, 26, 23, 0.9) 0 7%, transparent 8%),
+    radial-gradient(circle at 80% 26%, rgba(31, 26, 23, 0.9) 0 6%, transparent 7%),
+    radial-gradient(circle at 84% 72%, rgba(184, 51, 42, 0.95) 0 8%, transparent 9%),
+    radial-gradient(circle at 16% 76%, rgba(31, 26, 23, 0.85) 0 9%, transparent 10%),
+    radial-gradient(circle at 50% 12%, rgba(184, 51, 42, 0.85) 0 5%, transparent 6%),
+    radial-gradient(circle at 50% 90%, rgba(31, 26, 23, 0.8) 0 6%, transparent 7%);
+  animation: ink-burst 1s ease-out forwards;
+}
+
+@keyframes ink-burst {
+  0% { transform: scale(0.2) rotate(0deg); opacity: 1; }
+  35% { transform: scale(1.15) rotate(20deg); opacity: 1; }
+  100% { transform: scale(1.5) rotate(30deg); opacity: 0; }
+}
+
+@media (min-width: 720px) {
+  .game-wide .stage-node-icon {
+    font-size: 1.2rem;
+  }
+
+  .game-wide .stage-path {
+    row-gap: 36px;
+  }
+
+  .game-wide .result-seal {
+    width: 92px;
+    height: 92px;
+    font-size: 4rem;
+  }
+}
+
+/* 결과·확인·모달 카드가 화면보다 길 때 내용이 찌그러지지 않고 스크롤되도록 */
+.battle-result-card > *,
+.answer-reveal-card > *,
+.game-modal-card > * {
+  flex-shrink: 0;
+}
+
+/* ==========================================================
+   상자 획득(결과 창) → 상자 열기 화면 → 보상이 튀어나오는 연출
+   ========================================================== */
+.chest-got {
+  cursor: default;
+}
+
+.chest-got .chest-art {
+  animation: chest-bounce 1.4s ease-in-out infinite;
+}
+
+.chest-got .chest-hint {
+  font-family: 'Song Myung', serif;
+  font-size: 0.95rem;
+  color: #B8332A;
+}
+
+#btn-go-open {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* 상자 열기 화면: 어두운 먹 바탕 위 두루마리 */
+.chest-open {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: radial-gradient(circle at 50% 40%, rgba(74, 58, 44, 0.75), rgba(20, 16, 14, 0.9));
+}
+
+.chest-open-card {
+  width: 100%;
+  max-width: 420px;
+  max-height: 96%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 16px 20px;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.55), transparent 45%),
+    repeating-linear-gradient(17deg, rgba(120, 90, 50, 0.025) 0 2px, transparent 2px 7px),
+    #F4EBDD;
+  box-shadow: inset 0 0 0 4px #F4EBDD, inset 0 0 0 5px rgba(201, 161, 74, 0.6), 0 10px 30px rgba(0, 0, 0, 0.4);
+  animation: monster-appear 0.35s ease;
+}
+
+.chest-open-card > * {
+  flex-shrink: 0;
+}
+
+.chest-open-title {
+  font-family: 'Song Myung', serif;
+  font-size: 1.4rem;
+  color: #1F1A17;
+  letter-spacing: 1px;
+}
+
+.chest-stage {
+  position: relative;
+  width: 220px;
+  height: 190px;
+  display: grid;
+  place-items: center;
+}
+
+.chest-big {
+  position: relative;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.chest-big:disabled {
+  cursor: default;
+}
+
+.chest-big-art {
+  display: block;
+  width: 170px;
+}
+
+.chest-big-art .chest-svg {
+  width: 170px;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+
+/* 뒤의 빛살 (등급이 높을수록 진하게) */
+.chest-rays {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 300px;
+  height: 300px;
+  margin: -150px 0 0 -150px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(232, 207, 138, 0.5) 0deg 8deg, transparent 8deg 24deg);
+  -webkit-mask: radial-gradient(circle, #000 15%, transparent 68%);
+  mask: radial-gradient(circle, #000 15%, transparent 68%);
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.chest-stage.waiting .chest-rays {
+  opacity: 0.35;
+  animation: spin 14s linear infinite;
+}
+
+.chest-stage.tier-shiny .chest-rays { background: repeating-conic-gradient(rgba(140, 210, 190, 0.55) 0deg 8deg, transparent 8deg 24deg); }
+.chest-stage.tier-gold .chest-rays { background: repeating-conic-gradient(rgba(255, 210, 90, 0.65) 0deg 8deg, transparent 8deg 24deg); }
+.chest-stage.tier-diamond .chest-rays { background: repeating-conic-gradient(rgba(150, 235, 255, 0.7) 0deg 6deg, rgba(255, 180, 255, 0.35) 6deg 10deg, transparent 10deg 22deg); }
+.chest-stage.tier-worn .chest-rays { opacity: 0 !important; }
+
+.chest-stage.waiting .chest-big-art {
+  animation: chest-bounce 1.2s ease-in-out infinite;
+}
+
+.chest-stage.opening .chest-big-art {
+  animation: chest-shake-big 0.95s ease-in forwards;
+}
+
+.chest-stage.opened .chest-big-art {
+  animation: chest-pop 0.5s ease-out;
+}
+
+.chest-stage.opened .chest-rays {
+  animation: rays-burst 1.8s ease-out forwards, spin 10s linear infinite;
+}
+
+.chest-stage.opened::after {
+  content: '';
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 246, 214, 0.95), transparent 55%);
+  animation: flash-fade 0.7s ease-out forwards;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.chest-open-hint {
+  font-family: 'Song Myung', serif;
+  color: #B8332A;
+  font-weight: 700;
+  animation: twinkle 1.4s ease-in-out infinite;
+}
+
+/* 튀는 금빛 조각·엽전 */
+.chest-particles {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.chest-particle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFF3C4, #C9A14A);
+  font-size: 1rem;
+  line-height: 9px;
+  animation: particle-fly 1s cubic-bezier(0.15, 0.7, 0.35, 1) var(--d) forwards;
+}
+
+.chest-particle:not(:empty) {
+  background: none;
+  width: auto;
+  height: auto;
+}
+
+/* 보상 카드 (뒷면 → 앞면 뒤집기) */
+.chest-loot {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  perspective: 800px;
+}
+
+.loot-item {
+  min-height: 96px;
+}
+
+.loot-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 96px;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+.loot-item.flipped .loot-inner {
+  transform: rotateY(180deg);
+}
+
+.loot-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+.loot-back {
+  font-family: 'Ma Shan Zheng', serif;
+  font-size: 2.2rem;
+  color: #FFF6E6;
+  background: linear-gradient(160deg, #C2402F, #8E241D);
+  box-shadow: inset 0 0 0 3px rgba(255, 246, 230, 0.5), 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.loot-front {
+  transform: rotateY(180deg);
+  background: #FFF9EC;
+  border: 2px solid #D9C4A0;
+  box-shadow: 0 4px 10px rgba(74, 58, 44, 0.2);
+}
+
+.loot-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.loot-label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #1F1A17;
+  line-height: 1.25;
+}
+
+.loot-label strong {
+  font-family: 'Song Myung', serif;
+  font-size: 0.95rem;
+}
+
+.loot-label small {
+  font-weight: 600;
+  font-size: 0.68rem;
+  color: #4A423A;
+}
+
+.loot-new {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #B8332A;
+  color: #FFF6E6;
+  font-size: 0.65rem;
+  font-weight: 900;
+  transform: rotate(8deg);
+}
+
+/* 장비는 등급 색으로 빛남, 희귀 이상은 빛이 돌고 착지할 때 번쩍 */
+.loot-item.gear .loot-front {
+  border-color: var(--rarity);
+  background: linear-gradient(180deg, #FFFDF5, color-mix(in srgb, var(--rarity) 16%, #FFF9EC));
+  box-shadow: 0 0 0 1px var(--rarity), 0 0 16px color-mix(in srgb, var(--rarity) 55%, transparent);
+}
+
+.loot-item.gear.flipped .loot-front {
+  animation: loot-glow 1.6s ease-in-out 0.5s infinite;
+}
+
+.loot-item.rarity-rare.landed,
+.loot-item.rarity-epic.landed,
+.loot-item.rarity-legendary.landed {
+  animation: loot-land-big 0.6s ease-out;
+}
+
+.loot-item.landed {
+  animation: loot-land 0.35s ease-out;
+}
+
+.chest-open .level-up {
+  font-size: 1.15rem;
+}
+
+.chest-open .battle-result-buttons {
+  width: 100%;
+}
+
+@keyframes chest-shake-big {
+  0% { transform: rotate(0) scale(1); }
+  15% { transform: rotate(-6deg) scale(1.03); }
+  30% { transform: rotate(7deg) scale(1.06); }
+  45% { transform: rotate(-9deg) scale(1.1) translateY(-4px); }
+  60% { transform: rotate(10deg) scale(1.13) translateY(-6px); }
+  75% { transform: rotate(-12deg) scale(1.16) translateY(-8px); filter: brightness(1.5); }
+  90% { transform: rotate(6deg) scale(1.2) translateY(-10px); filter: brightness(2); }
+  100% { transform: rotate(0) scale(1.24) translateY(-12px); filter: brightness(2.6); }
+}
+
+@keyframes rays-burst {
+  0% { opacity: 0; transform: scale(0.3); }
+  25% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 0.55; transform: scale(1); }
+}
+
+@keyframes particle-fly {
+  0% { transform: translate(0, 0) scale(0.4); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(var(--dx), calc(var(--dy) + 40px)) scale(1); opacity: 0; }
+}
+
+@keyframes loot-land {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08, 0.92); }
+  100% { transform: scale(1); }
+}
+
+@keyframes loot-land-big {
+  0% { transform: scale(1); filter: brightness(2.2); }
+  35% { transform: scale(1.14); filter: brightness(1.6); }
+  100% { transform: scale(1); filter: none; }
+}
+
+@keyframes loot-glow {
+  0%, 100% { box-shadow: 0 0 0 1px var(--rarity), 0 0 10px color-mix(in srgb, var(--rarity) 45%, transparent); }
+  50% { box-shadow: 0 0 0 2px var(--rarity), 0 0 22px color-mix(in srgb, var(--rarity) 80%, transparent); }
+}
+
+@media (min-width: 720px) {
+  .game-wide .chest-stage {
+    width: 280px;
+    height: 230px;
+  }
+
+  .game-wide .chest-big-art,
+  .game-wide .chest-big-art .chest-svg {
+    width: 210px;
+  }
+
+  .game-wide .chest-loot {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .game-wide .chest-open-card {
+    max-width: 620px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chest-stage.waiting .chest-big-art,
+  .chest-stage.opening .chest-big-art,
+  .chest-stage .chest-rays,
+  .chest-got .chest-art,
+  .loot-item.landed,
+  .loot-item.gear.flipped .loot-front {
+    animation: none;
+  }
+}
+
+/* 레벨 업 문구: 튀어나온 뒤 그대로 남음 */
+.chest-open .level-up {
+  animation: levelup-pop 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) forwards;
+  transform: none;
+}
+
+@keyframes levelup-pop {
+  0% { transform: scale(0.3) rotate(-6deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(-3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+}

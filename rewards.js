@@ -14,12 +14,13 @@
 const LEVEL_MULT = { 1: 1, 2: 1.3, 3: 1.7, 4: 2.2, 5: 2.8, 6: 3.5 };
 const REPLAY_RATE = 0.35; // 다시 클리어할 때 보상 비율
 
+// 동양풍 보물함: 낡은 나무함 · 붉은 옻칠함 · 청자빛 함 · 금박 함 · 수정 함
 const CHESTS = [
-  { id: 'worn', name: '낡은 상자', slots: [1, 1], gear: 0.12, color: '#8B6B4A', trim: '#5C4630', glow: 'rgba(160,130,90,0.0)' },
-  { id: 'common', name: '일반 상자', slots: [2, 2], gear: 0.2, color: '#B5783A', trim: '#6E6E78', glow: 'rgba(255,255,255,0.25)' },
-  { id: 'shiny', name: '반짝이는 상자', slots: [2, 3], gear: 0.32, color: '#4A7FD9', trim: '#C9D6F2', glow: 'rgba(120,180,255,0.55)' },
-  { id: 'gold', name: '금 상자', slots: [3, 3], gear: 0.45, color: '#E3A92B', trim: '#FFF0B3', glow: 'rgba(255,210,80,0.7)' },
-  { id: 'diamond', name: '다이아몬드 상자', slots: [3, 4], gear: 0.6, color: '#46C8E0', trim: '#E8FBFF', glow: 'rgba(120,240,255,0.85)' },
+  { id: 'worn', name: '낡은 상자', slots: [1, 1], gear: 0.12, color: '#7A5C3E', trim: '#4A3828' },
+  { id: 'common', name: '일반 상자', slots: [2, 2], gear: 0.2, color: '#A8342B', trim: '#C9A14A' },
+  { id: 'shiny', name: '반짝이는 상자', slots: [2, 3], gear: 0.32, color: '#5E9C8E', trim: '#E6F2EE' },
+  { id: 'gold', name: '금 상자', slots: [3, 3], gear: 0.45, color: '#D4A83A', trim: '#FFF0B3' },
+  { id: 'diamond', name: '다이아몬드 상자', slots: [3, 4], gear: 0.6, color: '#7FD3E6', trim: '#F4FDFF' },
 ];
 
 const RARITIES = [
@@ -186,23 +187,26 @@ function renderChest(tier, open = false) {
   const cracks = tier === 0
     ? '<path d="M34 70 l6 8 -3 7 M86 64 l-5 9 4 6" stroke="#3B2A1A" stroke-width="2" fill="none"/><path d="M28 44 l8 4" stroke="#3B2A1A" stroke-width="2"/>'
     : '';
+  // 자물쇠판 가운데 장식: 수정 · 홍옥 · 열쇠 구멍
   const gem = tier === 4
-    ? '<path d="M60 66 l9 7 -9 11 -9 -11z" fill="#B8F4FF" stroke="#fff" stroke-width="1.5"/><path d="M51 73 h18" stroke="#7ADCEB" stroke-width="1.2"/>'
+    ? '<path d="M60 71 l8 7 -8 10 -8 -10z" fill="#DFF9FF" stroke="#fff" stroke-width="1.5"/><path d="M52 78 h16" stroke="#7ADCEB" stroke-width="1.2"/>'
     : tier === 3
-      ? '<circle cx="60" cy="74" r="7" fill="#FF5A5A" stroke="#FFF0B3" stroke-width="2"/>'
-      : '<rect x="54" y="66" width="12" height="15" rx="3" fill="' + c.trim + '" stroke="' + dark + '" stroke-width="2"/><circle cx="60" cy="72" r="2.5" fill="' + dark + '"/>';
+      ? '<circle cx="60" cy="80" r="6" fill="#B8332A" stroke="#FFF0B3" stroke-width="2"/>'
+      : '<circle cx="60" cy="77" r="3" fill="' + dark + '"/><path d="M58.5 79 h3 l1 7 h-5z" fill="' + dark + '"/>';
+  // 처마처럼 끝이 들린 뚜껑
   const lid = open
-    ? `<g class="chest-lid open"><path d="M22 40 Q60 6 98 40 L98 30 Q60 -4 22 30 Z" fill="${c.color}" stroke="${dark}" stroke-width="3"/></g>`
-    : `<g class="chest-lid"><path d="M20 58 L20 44 Q60 14 100 44 L100 58 Z" fill="${c.color}" stroke="${dark}" stroke-width="3"/>
-        <path d="M20 52 L100 52" stroke="${c.trim}" stroke-width="5"/><path d="M40 30 L40 58 M80 30 L80 58" stroke="${c.trim}" stroke-width="5"/></g>`;
+    ? `<g class="chest-lid open"><path d="M12 30 Q20 34 26 26 Q60 10 94 26 Q100 34 108 30 L102 40 Q60 22 18 40 Z" fill="${c.color}" stroke="${dark}" stroke-width="3" stroke-linejoin="round"/></g>`
+    : `<g class="chest-lid"><path d="M12 54 Q20 56 24 46 Q60 30 96 46 Q100 56 108 54 L102 60 L18 60 Z" fill="${c.color}" stroke="${dark}" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M24 52 Q60 40 96 52" stroke="${c.trim}" stroke-width="3" fill="none"/></g>`;
   const light = open ? `<path d="M30 58 L10 0 L110 0 L90 58 Z" fill="url(#chestLight${tier})" opacity="0.9"/>` : '';
   return `<svg viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg" class="chest-svg tier-${c.id}">
   <defs><linearGradient id="chestLight${tier}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF6C9" stop-opacity="1"/><stop offset="1" stop-color="#FFF6C9" stop-opacity="0"/></linearGradient></defs>
   <ellipse cx="60" cy="102" rx="44" ry="6" fill="rgba(0,0,0,0.2)"/>
   ${light}
-  <rect x="20" y="56" width="80" height="44" rx="5" fill="${c.color}" stroke="${dark}" stroke-width="3"/>
-  <path d="M20 66 L100 66" stroke="${dark}" stroke-width="2" opacity="0.4"/>
-  <path d="M40 56 L40 100 M80 56 L80 100" stroke="${c.trim}" stroke-width="5"/>
+  <rect x="20" y="58" width="80" height="42" rx="3" fill="${c.color}" stroke="${dark}" stroke-width="3"/>
+  <path d="M20 68 L100 68" stroke="${dark}" stroke-width="2" opacity="0.35"/>
+  <path d="M20 58 h12 v8 h-4 v-4 h-8z M100 58 h-12 v8 h4 v-4 h8z M20 100 h12 v-8 h-4 v4 h-8z M100 100 h-12 v-8 h4 v4 h8z" fill="${c.trim}"/>
+  <circle cx="60" cy="80" r="13" fill="${c.trim}" stroke="${dark}" stroke-width="2"/>
   ${cracks}
   ${lid}
   ${gem}

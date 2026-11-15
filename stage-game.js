@@ -21,24 +21,33 @@ const SENTENCE_RATE = { normal: 0.3, boss: 0.45 }; // 문장 조립 문제가 �
 const MAX_SENTENCE_TILES = 8;
 const REVEAL_MS = { correct: 1300 }; // 맞혔을 때 답을 보여 주는 시간 (틀리면 확인 창에서 직접 넘김)
 
+// 동양 설화 속 요괴들 (이름은 일반적인 요괴 종류로만 지음)
 const MONSTERS = [
-  { icon: '👾', name: '꼬마 외계인' },
-  { icon: '👻', name: '장난꾸러기 유령' },
-  { icon: '🦇', name: '밤의 박쥐' },
-  { icon: '🐙', name: '먹물 문어' },
-  { icon: '🦂', name: '사막 전갈' },
-  { icon: '🐺', name: '회색 늑대' },
-  { icon: '🧟', name: '느림보 좀비' },
-  { icon: '🦖', name: '아기 공룡' },
-  { icon: '🕷️', name: '거미 여왕' },
-  { icon: '🐍', name: '독뱀' },
+  { icon: '👻', name: '물귀신', han: '鬼' },
+  { icon: '🦊', name: '꼬리 아홉 여우', han: '狐' },
+  { icon: '🧟', name: '깡충 강시', han: '尸' },
+  { icon: '🐍', name: '이무기', han: '蛇' },
+  { icon: '🦇', name: '박쥐 요괴', han: '蝠' },
+  { icon: '🐸', name: '두꺼비 도사', han: '蟾' },
+  { icon: '🐗', name: '멧돼지 장수', han: '猪' },
+  { icon: '🐒', name: '산원숭이 요괴', han: '猴' },
+  { icon: '🦂', name: '독전갈 요괴', han: '蝎' },
+  { icon: '🕷️', name: '거미 요괴', han: '蛛' },
 ];
 const BOSSES = [
-  { icon: '🐉', name: '한자 드래곤' },
-  { icon: '👹', name: '단어 도깨비' },
-  { icon: '🧙', name: '문장 마법사' },
-  { icon: '🤖', name: '병음 로봇' },
+  { icon: '🐉', name: '청룡', han: '龍' },
+  { icon: '👹', name: '도깨비 대왕', han: '王' },
+  { icon: '🐯', name: '산군 백호', han: '虎' },
+  { icon: '👺', name: '붉은 얼굴 천구', han: '天' },
 ];
+
+// 한자 숫자 (一 ~ 九十九)
+const HAN_DIGITS = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+function hanNum(n) {
+  if (n < 10) return HAN_DIGITS[n];
+  const tens = Math.floor(n / 10);
+  return `${tens > 1 ? HAN_DIGITS[tens] : ''}十${HAN_DIGITS[n % 10]}`;
+}
 
 // ---------- DOM ----------
 const btnGameMode = document.getElementById('btn-game-mode');
@@ -172,6 +181,7 @@ function saveStageClear(level, stageNo, stars) {
 
 // ---------- 스테이지 지도 ----------
 function openGameMap(level) {
+  claimPendingRewards();
   if (level) gameLevel = level;
   stopBattleTimer();
   battle = null;
@@ -218,7 +228,14 @@ function renderGameMap() {
     btn.className = 'game-level-tab' + (l === gameLevel ? ' active' : '');
     btn.setAttribute('role', 'tab');
     btn.setAttribute('aria-selected', String(l === gameLevel));
-    btn.textContent = `HSK ${l}`;
+    // 一級·二級… (아래에 작게 HSK 숫자)
+    const han = document.createElement('span');
+    han.className = 'tab-han';
+    han.textContent = `${hanNum(l)}级`;
+    const small = document.createElement('small');
+    small.textContent = `HSK ${l}`;
+    btn.append(han, small);
+    btn.setAttribute('aria-label', `HSK ${l}급`);
     btn.addEventListener('click', () => {
       gameLevel = l;
       renderGameMap();
@@ -238,7 +255,10 @@ function renderGameMap() {
     card.className = 'game-chapter';
     const head = document.createElement('h3');
     head.className = 'game-chapter-title';
-    head.textContent = `챕터 ${c}`;
+    const chapterHan = document.createElement('span');
+    chapterHan.className = 'chapter-han';
+    chapterHan.textContent = `第${hanNum(c)}章`;
+    head.append(chapterHan, ` 챕터 ${c}`);
     const path = document.createElement('div');
     path.className = 'stage-path';
     stages.filter((s) => s.chapter === c).forEach((s) => {
@@ -253,12 +273,12 @@ function renderGameMap() {
       icon.textContent = s.boss ? (cleared ? '👑' : stageMonster(s).icon) : (!cleared && !open ? '🔒' : String(s.no));
       const label = document.createElement('span');
       label.className = 'stage-node-label';
-      label.textContent = s.boss ? '보스' : `${c}-${s.pos}`;
+      label.textContent = s.boss ? '두목' : `${c}-${s.pos}`;
       const starEl = document.createElement('span');
       starEl.className = 'stage-node-stars';
       starEl.textContent = cleared ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '';
       node.append(icon, label, starEl);
-      node.setAttribute('aria-label', `${s.boss ? `챕터 ${c} 보스` : `스테이지 ${c}-${s.pos}`}${cleared ? `, 별 ${stars}개` : node.disabled ? ', 잠김' : ''}`);
+      node.setAttribute('aria-label', `${s.boss ? `챕터 ${c} 두목` : `스테이지 ${c}-${s.pos}`}${cleared ? `, 별 ${stars}개` : node.disabled ? ', 잠김' : ''}`);
       node.addEventListener('click', () => startBattle(gameLevel, s.no));
       path.appendChild(node);
     });
@@ -302,11 +322,15 @@ async function startBattle(level, stageNo) {
   answerReveal.style.display = 'none';
   rewardArea.style.display = 'none';
   resultButtons.style.display = '';
+  hideChestOpen();
   fxLayer.replaceChildren();
   battleStage.className = 'battle-stage';
   gameBattle.classList.toggle('boss-battle', stage.boss);
-  battleTitle.textContent = stage.boss ? `챕터 ${stage.chapter} 보스` : `스테이지 ${stage.chapter}-${stage.pos}`;
-  monsterName.textContent = `${monster.name}${stage.boss ? ' 👑' : ''}`;
+  battleTitle.textContent = stage.boss ? `第${hanNum(stage.chapter)}章 두목전` : `스테이지 ${stage.chapter}-${stage.pos}`;
+  const seal = document.createElement('span');
+  seal.className = 'name-seal';
+  seal.textContent = monster.han;
+  monsterName.replaceChildren(seal, `${monster.name}${stage.boss ? ' (두목)' : ''}`);
   monsterEl.textContent = monster.icon;
   monsterEl.className = 'monster appear';
   monsterFighter.className = 'fighter monster-side';
@@ -471,7 +495,7 @@ function resolveQuestion(correct, timedOut) {
     const damage = remainRatio >= 0.6 - critBonus() ? 2 : 1;
     battle.hp = Math.max(0, battle.hp - damage);
     // 내 캐릭터가 정답을 외치며 달려가 주먹으로 공격
-    playerBubbleText.textContent = `${answerText}!`;
+    playerBubbleText.textContent = /[。！？!?]$/.test(answerText) ? answerText : `${answerText}!`;
     playerBubbleText.lang = 'zh-CN';
     playerBubbleSub.textContent = answerPinyin;
     bubbleKind.textContent = damage === 2 ? '⚡ 크리티컬!' : '👊 명중!';
@@ -605,8 +629,9 @@ function flash(color, ms = 350) {
   spawnFx('fx-flash', 0, 0, ms, (el) => el.style.setProperty('--flash', color));
 }
 
-const IMPACT_WORDS = ['퍽!', '쾅!', '빡!', '팍!'];
-const SPARK_COLORS = ['#FFE066', '#FFFFFF', '#FFB347', '#FF7A45'];
+// 효과음은 붓글씨 한자로 (破 깨뜨리다 · 击 치다 · 砰/嘭 쾅)
+const IMPACT_WORDS = ['破!', '击!', '砰!', '嘭!'];
+const SPARK_COLORS = ['#1F1A17', '#B8332A', '#C9A14A', '#F4EBDD']; // 먹·주홍·금박·한지
 
 function impactBurst(x, y, { big = false, word } = {}) {
   spawnFx(big ? 'fx-impact big' : 'fx-impact', x, y, 500);
@@ -654,7 +679,7 @@ function normalAttack(current, damage) {
       impactBurst(m.x, m.y);
       stageEffect('shake-s', 350);
     }
-    flash('rgba(255,255,255,0.55)', 250);
+    flash('rgba(244,235,221,0.6)', 250);
     showDamage(damagePop, `-${damage}`);
     renderBattleStatus();
   }, ATTACK_MS);
@@ -667,7 +692,7 @@ function criticalAttack(current, damage) {
     afterimages();
     stageEffect('crit-zoom', 900);
     const stage = battleStage.getBoundingClientRect();
-    spawnFx('fx-banner', stage.width / 2, stage.height * 0.42, 1000, (el) => { el.textContent = 'CRITICAL!!'; });
+    spawnFx('fx-banner', stage.width / 2, stage.height * 0.42, 1000, (el) => { el.textContent = '会心一击!'; });
   }
   CRIT_HITS_MS.forEach((ms, i) => {
     setTimeout(() => {
@@ -677,11 +702,11 @@ function criticalAttack(current, damage) {
       hitStop(last ? 140 : 60);
       hitMonster(last);
       if (!reduceMotion.matches) {
-        impactBurst(m.x + (last ? 0 : (i ? 18 : -18)), m.y + (last ? 0 : (i ? -14 : 12)), last ? { big: true, word: '콰광!!' } : {});
+        impactBurst(m.x + (last ? 0 : (i ? 18 : -18)), m.y + (last ? 0 : (i ? -14 : 12)), last ? { big: true, word: '轰!!' } : {});
         stageEffect(last ? 'shake-l' : 'shake-s', last ? 500 : 250);
       }
       if (last) {
-        flash('rgba(255,214,79,0.7)', 420);
+        flash('rgba(201,161,74,0.65)', 420);
         showDamage(damagePop, `-${damage} CRITICAL`);
         renderBattleStatus();
       }
@@ -705,7 +730,7 @@ function monsterAttack(current) {
       stageEffect('shake-m', 420);
       spawnFx('fx-heartbreak', p.x, p.y - 40, 900, (el) => { el.textContent = '💔'; });
     }
-    flash('rgba(224,82,82,0.55)', 380);
+    flash('rgba(184,51,42,0.5)', 380);
     showDamage(playerPop, '-❤️');
     renderBattleStatus();
   }, ATTACK_MS);
@@ -715,12 +740,12 @@ function monsterAttack(current) {
 function monsterExplode() {
   const m = centerOf(monsterEl);
   monsterEl.classList.add('defeated');
-  flash('rgba(255,255,255,0.85)', 500);
+  flash('rgba(244,235,221,0.9)', 500);
   if (reduceMotion.matches) return;
   stageEffect('shake-l', 600);
-  impactBurst(m.x, m.y, { big: true, word: 'K.O.!' });
-  spawnFx('fx-explosion', m.x, m.y, 900, (el) => { el.textContent = '💥'; });
-  setTimeout(() => impactBurst(m.x - 20, m.y + 10, { big: false, word: '' }), 150);
+  impactBurst(m.x, m.y, { big: true, word: '胜!' });
+  spawnFx('fx-ink', m.x, m.y, 1000); // 먹물이 사방으로 튀는 폭발
+  setTimeout(() => impactBurst(m.x - 20, m.y + 10, { big: false, word: '破!' }), 150);
 }
 
 // ---------- 제한 시간 ----------
@@ -797,7 +822,9 @@ function finishBattle(won) {
   }
   flushRecordSave();
 
-  battleResultIcon.textContent = won ? (stage.boss ? '👑' : '🎉') : '💀';
+  // 낙관 도장: 이기면 '胜', 지면 '败'
+  battleResultIcon.textContent = won ? '胜' : '败';
+  battleResultIcon.className = `battle-result-icon result-seal ${won ? 'win' : 'lose'}`;
   battleResultTitle.textContent = won ? (stage.boss ? '보스 격파!' : '스테이지 클리어!') : '패배했어요…';
   battleResultStars.textContent = won ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '';
   battleResultText.textContent = won
@@ -810,16 +837,27 @@ function finishBattle(won) {
 }
 
 // ---------- 클리어 보상 ----------
+// 1) 결과 창: 기본 경험치·코인과 '얻은 상자'만 보여 줌
+// 2) 상자 열기 화면: 사용자가 상자를 누르면 흔들리다 열리고, 보상이 상자에서 튀어나와 카드로 뒤집힘
 const rewardArea = document.getElementById('reward-area');
 const rewardBase = document.getElementById('reward-base');
-const chestBox = document.getElementById('chest-box');
+const chestGot = document.getElementById('chest-got');
 const chestArt = document.getElementById('chest-art');
 const chestName = document.getElementById('chest-name');
-const chestHint = document.getElementById('chest-hint');
-const chestItems = document.getElementById('chest-items');
-const levelUpEl = document.getElementById('level-up');
+const btnGoOpen = document.getElementById('btn-go-open');
 const resultButtons = document.getElementById('battle-result-buttons');
+const chestOpen = document.getElementById('chest-open');
+const chestOpenTitle = document.getElementById('chest-open-title');
+const chestStage = document.getElementById('chest-stage');
+const chestBig = document.getElementById('chest-big');
+const chestBigArt = document.getElementById('chest-big-art');
+const chestParticles = document.getElementById('chest-particles');
+const chestOpenHint = document.getElementById('chest-open-hint');
+const chestLoot = document.getElementById('chest-loot');
+const levelUpEl = document.getElementById('level-up');
+const lootButtons = document.getElementById('loot-buttons');
 let pendingRewards = null;
+const LOOT_GAP_MS = 380; // 보상이 하나씩 튀어나오는 간격
 
 function showRewards(rewards, replay) {
   pendingRewards = rewards;
@@ -827,70 +865,160 @@ function showRewards(rewards, replay) {
   rewardBase.textContent = `+${rewards.base.exp} EXP · 🪙 +${rewards.base.coins}${replay ? ' (다시 클리어)' : ''}`;
   chestArt.innerHTML = renderChest(rewards.tier);
   chestName.textContent = rewards.chest.name;
-  chestName.style.color = CHESTS[rewards.tier].id === 'worn' ? '' : shade(CHESTS[rewards.tier].color, 0.15);
-  chestHint.textContent = '눌러서 열기!';
-  chestBox.className = `chest-box tier-${rewards.chest.id} waiting`;
-  chestBox.disabled = false;
-  chestItems.replaceChildren();
-  levelUpEl.style.display = 'none';
+  chestGot.className = `chest-box chest-got tier-${rewards.chest.id}`;
   resultButtons.style.display = 'none'; // 상자를 열어야 다음으로
 }
 
-function rewardCard(item, index) {
+// 상자를 열지 않고 나가면(뒤로 가기·✕) 보상은 그대로 받게 함
+function claimPendingRewards() {
+  if (!pendingRewards) return;
+  applyRewards(pendingRewards);
+  pendingRewards = null;
+  flushRecordSave();
+}
+
+function hideChestOpen() {
+  chestOpen.style.display = 'none';
+  chestLoot.replaceChildren();
+  chestParticles.replaceChildren();
+}
+
+btnGoOpen.addEventListener('click', () => {
+  if (!pendingRewards) return;
+  const rewards = pendingRewards;
+  battleResult.style.display = 'none';
+  chestOpenTitle.textContent = rewards.chest.name;
+  chestBigArt.innerHTML = renderChest(rewards.tier);
+  chestStage.className = `chest-stage tier-${rewards.chest.id} waiting`;
+  chestBig.disabled = false;
+  chestOpenHint.textContent = '상자를 눌러 열어 보세요!';
+  chestOpenHint.style.display = '';
+  chestLoot.replaceChildren();
+  chestParticles.replaceChildren();
+  levelUpEl.style.display = 'none';
+  lootButtons.style.display = 'none';
+  document.getElementById('btn-loot-next').style.display = btnBattleNext.style.display;
+  chestOpen.style.display = '';
+  chestBig.focus();
+});
+
+// 보상 카드: 뒷면(낙관 '?')으로 날아와서 앞면으로 뒤집힘
+function lootCard(item) {
   const card = document.createElement('div');
-  card.className = `reward-card ${item.type}`;
-  card.style.animationDelay = `${0.15 + index * 0.25}s`;
+  card.className = `loot-item ${item.type}`;
+  const inner = document.createElement('div');
+  inner.className = 'loot-inner';
+  const back = document.createElement('div');
+  back.className = 'loot-face loot-back';
+  back.textContent = '宝';
+  const front = document.createElement('div');
+  front.className = 'loot-face loot-front';
   const icon = document.createElement('span');
-  icon.className = 'reward-icon';
+  icon.className = 'loot-icon';
   const label = document.createElement('span');
-  label.className = 'reward-label';
+  label.className = 'loot-label';
   if (item.type === 'exp') {
     icon.textContent = '✨';
     label.textContent = `+${item.amount} EXP`;
   } else if (item.type === 'coins') {
     icon.textContent = '🪙';
-    label.textContent = `+${item.amount} 코인`;
+    label.textContent = `+${item.amount}`;
   } else {
     const g = item.gear;
     card.style.setProperty('--rarity', RARITIES[g.rarity].color);
+    card.classList.add(`rarity-${RARITIES[g.rarity].id}`);
     icon.textContent = g.icon;
     const name = document.createElement('strong');
     name.textContent = g.name;
     const sub = document.createElement('small');
-    sub.textContent = item.duplicate
-      ? `이미 가진 장비 → 🪙 +${item.duplicate}`
-      : `${RARITIES[g.rarity].name} ${g.slot === 'weapon' ? '무기' : '모자'} · ${gearEffectText(g)}${item.isNew ? ' · NEW!' : ''}`;
+    sub.textContent = item.duplicate ? `중복 → 🪙 +${item.duplicate}` : `${RARITIES[g.rarity].name} · ${gearEffectText(g)}`;
     label.append(name, sub);
+    if (item.isNew) {
+      const badge = document.createElement('span');
+      badge.className = 'loot-new';
+      badge.textContent = 'NEW';
+      front.appendChild(badge);
+    }
   }
-  card.append(icon, label);
+  front.prepend(icon, label);
+  inner.append(back, front);
+  card.appendChild(inner);
   return card;
 }
 
-chestBox.addEventListener('click', () => {
-  if (!pendingRewards || chestBox.disabled) return;
+// 상자가 열릴 때 금빛 조각·엽전이 사방으로 튐
+function chestBurst(tier) {
+  const count = 10 + tier * 4;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('span');
+    p.className = 'chest-particle';
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.4;
+    const dist = 70 + Math.random() * (60 + tier * 15);
+    p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+    p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+    p.style.setProperty('--d', `${Math.random() * 0.15}s`);
+    p.textContent = Math.random() < 0.35 ? '🪙' : '';
+    chestParticles.appendChild(p);
+  }
+  setTimeout(() => chestParticles.replaceChildren(), 1400);
+}
+
+// 카드 하나를 상자에서 포물선으로 날려 제자리에 놓고 뒤집기
+function flyLoot(card, index) {
+  const from = chestBig.getBoundingClientRect();
+  const to = card.getBoundingClientRect();
+  const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+  const dy = from.top + from.height * 0.45 - (to.top + to.height / 2);
+  const delay = index * LOOT_GAP_MS;
+  if (reduceMotion.matches || !card.animate) {
+    card.classList.add('landed', 'flipped');
+    return;
+  }
+  card.animate([
+    { transform: `translate(${dx}px, ${dy}px) scale(0.2) rotate(-200deg)`, opacity: 0 },
+    { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 90}px) scale(1.15) rotate(-40deg)`, opacity: 1, offset: 0.55 },
+    { transform: 'translate(0, 0) scale(1) rotate(0deg)', opacity: 1 },
+  ], { duration: 700, delay, easing: 'cubic-bezier(0.25, 0.8, 0.35, 1)', fill: 'backwards' });
+  setTimeout(() => card.classList.add('landed'), delay + 700);
+  setTimeout(() => card.classList.add('flipped'), delay + 820);
+}
+
+chestBig.addEventListener('click', () => {
+  if (!pendingRewards || chestBig.disabled) return;
   const rewards = pendingRewards;
   pendingRewards = null;
-  chestBox.disabled = true;
-  chestHint.textContent = '';
-  chestBox.className = `chest-box tier-${rewards.chest.id} opening`;
-  // 흔들흔들 → 뚜껑이 열리며 빛 → 보상이 하나씩 튀어나옴
+  chestBig.disabled = true;
+  chestOpenHint.textContent = '두근두근…';
+  chestStage.className = `chest-stage tier-${rewards.chest.id} opening`;
+
   setTimeout(() => {
     const result = applyRewards(rewards);
-    chestArt.innerHTML = renderChest(rewards.tier, true);
-    chestBox.className = `chest-box tier-${rewards.chest.id} opened`;
-    chestItems.replaceChildren(...rewards.contents.map(rewardCard));
-    const delay = 0.15 + rewards.contents.length * 0.25;
+    flushRecordSave();
+    chestBigArt.innerHTML = renderChest(rewards.tier, true);
+    chestStage.className = `chest-stage tier-${rewards.chest.id} opened`;
+    chestOpenHint.style.display = 'none';
+    if (!reduceMotion.matches) chestBurst(rewards.tier);
+
+    // 카드를 먼저 자리에 놓고(보이지 않게) 상자에서 날아오게 함
+    const cards = rewards.contents.map(lootCard);
+    chestLoot.replaceChildren(...cards);
+    cards.forEach((card, i) => flyLoot(card, i));
+
+    const done = rewards.contents.length * LOOT_GAP_MS + 1000;
     setTimeout(() => {
       if (result.levelUp) {
         levelUpEl.textContent = `🎉 레벨 업! Lv.${result.level}`;
         levelUpEl.style.display = '';
       }
-      resultButtons.style.display = '';
-      resultButtons.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      flushRecordSave();
-    }, delay * 1000 + 200);
-  }, 900);
+      lootButtons.style.display = '';
+      lootButtons.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, done);
+  }, 950);
 });
+
+document.getElementById('btn-loot-next').addEventListener('click', () => btnBattleNext.click());
+document.getElementById('btn-loot-retry').addEventListener('click', () => btnBattleRetry.click());
+document.getElementById('btn-loot-map').addEventListener('click', () => document.getElementById('btn-battle-map').click());
 
 btnBattleNext.addEventListener('click', () => {
   if (!battle) return;
@@ -936,6 +1064,7 @@ function gameHandleBack() {
 const _showScreenForGame = showScreen;
 // eslint-disable-next-line no-global-assign
 showScreen = function (name) {
+  if (name !== 'game') claimPendingRewards();
   if (name !== 'game' && battle) {
     stopBattleTimer();
     battle = null;

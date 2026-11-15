@@ -225,28 +225,33 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
   const skinDark = shade(skin, 0.12);
   const cloth = a.outfit;
   const clothDark = shade(cloth, 0.25);
+  // 동양풍 도포: 교차 깃(交領) + 허리띠, 남자는 무릎까지 오는 도포와 바지, 여자는 발목까지 오는 긴 치마
   const legs = a.gender === 'f'
-    ? `<path d="M36 116 L84 116 L91 134 L29 134 Z" fill="${clothDark}"/>
-       <rect x="45" y="132" width="10" height="16" rx="4" fill="${skin}"/><rect x="65" y="132" width="10" height="16" rx="4" fill="${skin}"/>`
-    : `<rect x="43" y="116" width="15" height="31" rx="5" fill="#3B4258"/><rect x="62" y="116" width="15" height="31" rx="5" fill="#3B4258"/>`;
-  const collar = a.gender === 'f'
-    ? `<path d="M52 84 Q60 92 68 84" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>`
-    : `<path d="M53 83 L60 92 L67 83" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/>`;
+    ? `<path d="M36 108 L84 108 L94 146 L26 146 Z" fill="${clothDark}"/><path d="M48 112 L44 144 M72 112 L76 144" stroke="${cloth}" stroke-width="2" opacity="0.6"/>`
+    : `<rect x="44" y="118" width="14" height="29" rx="4" fill="#3A3530"/><rect x="62" y="118" width="14" height="29" rx="4" fill="#3A3530"/>
+       <path d="M35 108 L85 108 L90 130 L30 130 Z" fill="${cloth}"/><path d="M60 110 L60 130" stroke="${clothDark}" stroke-width="2"/>`;
+  const collar = `<path d="M49 82 L69 106" stroke="#F4EBDD" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M71 82 L61 94" stroke="#F4EBDD" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M49 82 L69 106" stroke="${clothDark}" stroke-width="1" stroke-linecap="round" opacity="0.5"/>`;
+  const sash = `<rect x="35" y="101" width="50" height="8" rx="2" fill="${a.gender === 'f' ? '#C9A14A' : '#2B2321'}"/>
+    <path d="M74 105 L80 118 L76 119 Z M74 105 L71 119 L68 117 Z" fill="${a.gender === 'f' ? '#C9A14A' : '#2B2321'}"/>
+    <circle cx="74" cy="105" r="3.2" fill="#B8332A"/>`;
   return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="avatar-svg" overflow="visible">
   <ellipse cx="60" cy="152" rx="30" ry="5" fill="rgba(0,0,0,0.18)"/>
   ${hairBack(a.hair, a.hairColor)}
   ${legs}
   <ellipse cx="50" cy="148" rx="9" ry="5" fill="#2B2321"/><ellipse cx="70" cy="148" rx="9" ry="5" fill="#2B2321"/>
-  <g class="arm-back"><path d="M80 88 Q91 99 89 113" fill="none" stroke="${cloth}" stroke-width="10" stroke-linecap="round"/><circle cx="89" cy="115" r="6" fill="${skin}"/></g>
-  <path d="M38 88 Q60 78 82 88 L86 120 L34 120 Z" fill="${cloth}"/>
+  <g class="arm-back"><path d="M80 88 Q91 99 89 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M84 108 L95 108" stroke="#F4EBDD" stroke-width="3" stroke-linecap="round"/><circle cx="89" cy="115" r="6" fill="${skin}"/></g>
+  <path d="M38 88 Q60 78 82 88 L86 110 L34 110 Z" fill="${cloth}"/>
   ${collar}
+  ${sash}
   <rect x="54" y="72" width="12" height="10" rx="3" fill="${skinDark}"/>
   <circle cx="60" cy="50" r="28" fill="${skin}"/>
   <ellipse cx="32" cy="54" rx="4" ry="6" fill="${skin}"/><ellipse cx="88" cy="54" rx="4" ry="6" fill="${skin}"/>
   ${faceParts(a.face, mood)}
   ${hairFront(a.hair, a.hairColor)}
   ${hat}
-  <g class="arm-front"><path d="M40 88 Q29 99 31 113" fill="none" stroke="${cloth}" stroke-width="10" stroke-linecap="round"/>${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
+  <g class="arm-front"><path d="M40 88 Q29 99 31 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M25 108 L37 108" stroke="#F4EBDD" stroke-width="3" stroke-linecap="round"/>${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
 </svg>`;
 }
 
