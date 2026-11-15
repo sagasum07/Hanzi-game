@@ -18,7 +18,8 @@ const STAGES_PER_CHAPTER = 6; // 보스 전까지의 학습 스테이지 수
 const PLAYER_HEARTS = 3;
 // 몬스터 체력: 빨리 풀수록 데미지가 커서(1~3) 금방 이기고,
 // 천천히 풀면 그 스테이지의 단어·문장을 더 여러 번 풀며 체력을 깎게 됨 (학습 스테이지 약 7~20문제)
-const MONSTER_HP = { normal: 20, boss: 32 };
+// 마왕: 급수의 모든 챕터를 끝내면 나오는 마지막 결전. 급수 전체 단어를 복습하고, 두목의 2배 체력(= 문제 수 2배)
+const MONSTER_HP = { normal: 20, boss: 32, final: 64 };
 // 남은 시간 비율에 따른 데미지 단계 (무기를 장착하면 기준이 낮아짐)
 const SPEED_TIERS = [
   { min: 0.75, damage: 3, kind: '会心一击! 번개 같은 답!', cry: '크아아악!!' },
@@ -59,6 +60,7 @@ const BOSSES = [
   { art: 'tiger', name: '산군 백호', han: '虎' },
   { art: 'tengu', name: '붉은 얼굴 천구', han: '天' },
 ];
+const DEMON_KING = { art: 'demonking', name: '마왕', han: '魔' };
 
 // 한자 숫자 (一 ~ 九十九)
 const HAN_DIGITS = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -171,7 +173,17 @@ function levelStages(level) {
       chunks: Array.from({ length: n }, (_, i) => first + i),
     });
   }
+  // 모든 챕터 뒤의 마왕성: 급수의 모든 단어를 복습
+  stages.push({
+    no: stages.length + 1, chapter: chapterCount(level) + 1, pos: 1, boss: true, final: true,
+    chunks: Array.from({ length: chunkCount(level) }, (_, i) => i),
+  });
   return stages;
+}
+
+// 화면에 쓰는 스테이지 이름
+function stageKindName(stage) {
+  return stage.final ? '마왕' : stage.boss ? '두목' : '';
 }
 
 function stageWords(level, stage) {
@@ -180,6 +192,7 @@ function stageWords(level, stage) {
 }
 
 function stageMonster(stage) {
+  if (stage.final) return DEMON_KING;
   if (stage.boss) return BOSSES[(stage.chapter - 1) % BOSSES.length];
   return MONSTERS[(stage.no - 1) % MONSTERS.length];
 }
@@ -243,11 +256,12 @@ const TUTORIAL_STEPS = [
   },
   {
     title: '관문을 하나씩 넘어요',
-    text: '관문을 클리어하면 다음 관문이 열려요. 여섯 관문을 넘으면 일곱 번째에는 앞에서 배운 단어를 모두 복습하는 <b>요괴 두목</b>이 기다려요.',
+    text: '관문을 클리어하면 다음 관문이 열려요. 여섯 관문마다 일곱 번째에는 그 챕터를 복습하는 <b>요괴 두목</b>이, 모든 챕터를 끝내면 급수 전체를 문제로 내는 <b>마왕</b>이 기다려요.',
     art: () => `
       <div class="tut-path">
         ${HAN_DIGITS.slice(1, 7).map((h, i) => `<span class="tut-coin${i < 2 ? ' done' : i === 2 ? ' now' : ''}">${h}</span>`).join('<i class="tut-link"></i>')}
         <i class="tut-link"></i><span class="tut-coin boss">${renderMonster('dragon')}<em>두목</em></span>
+        <i class="tut-link dots"></i><span class="tut-coin boss final">${renderMonster('demonking')}<em>마왕</em></span>
       </div>`,
   },
   {
@@ -422,15 +436,16 @@ function renderGameMap() {
 
   const nextNo = prog.cleared + 1;
   const chapters = [];
-  for (let c = 1; c <= chapterCount(gameLevel); c++) {
+  for (let c = 1; c <= chapterCount(gameLevel) + 1; c++) {
+    const isFinal = c > chapterCount(gameLevel);
     const card = document.createElement('section');
-    card.className = 'game-chapter';
+    card.className = 'game-chapter' + (isFinal ? ' final-chapter' : '');
     const head = document.createElement('h3');
     head.className = 'game-chapter-title';
     const chapterHan = document.createElement('span');
     chapterHan.className = 'chapter-han';
-    chapterHan.textContent = `第${hanNum(c)}章`;
-    head.append(chapterHan, ` 챕터 ${c}`);
+    chapterHan.textContent = isFinal ? '魔王城' : `第${hanNum(c)}章`;
+    head.append(chapterHan, isFinal ? ' 마왕성' : ` 챕터 ${c}`);
     const path = document.createElement('div');
     path.className = 'stage-path';
     stages.filter((s) => s.chapter === c).forEach((s) => {
@@ -447,7 +462,7 @@ function renderGameMap() {
       else icon.textContent = String(s.no);
       const label = document.createElement('span');
       label.className = 'stage-node-label';
-      label.textContent = s.boss ? '두목' : `${c}-${s.pos}`;
+      label.textContent = s.boss ? stageKindName(s) : `${c}-${s.pos}`;
       const starEl = document.createElement('span');
       starEl.className = 'stage-node-stars';
       starEl.textContent = cleared ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '';
@@ -456,11 +471,17 @@ function renderGameMap() {
       coin.className = 'stage-coin';
       coin.appendChild(icon);
       node.append(coin, label, starEl);
-      node.setAttribute('aria-label', `${s.boss ? `챕터 ${c} 두목` : `스테이지 ${c}-${s.pos}`}${cleared ? `, 별 ${stars}개` : node.disabled ? ', 잠김' : ''}`);
+      node.setAttribute('aria-label', `${s.final ? '마왕성 마왕' : s.boss ? `챕터 ${c} 두목` : `스테이지 ${c}-${s.pos}`}${cleared ? `, 별 ${stars}개` : node.disabled ? ', 잠김' : ''}`);
       node.addEventListener('click', () => startBattle(gameLevel, s.no));
       path.appendChild(node);
     });
     card.append(head, path);
+    if (isFinal) {
+      const desc = document.createElement('p');
+      desc.className = 'final-chapter-desc';
+      desc.textContent = `모든 챕터를 끝내면 열려요 · HSK ${gameLevel}급 단어 ${wordsByLevel[gameLevel].length}개 총복습 · 문제 2배`;
+      card.append(desc);
+    }
     chapters.push(card);
   }
   gameChapters.replaceChildren(...chapters);
@@ -476,7 +497,7 @@ async function startBattle(level, stageNo) {
   if (!stage) return;
   const words = stageWords(level, stage);
   const examples = await loadExamples(level);
-  const kind = stage.boss ? 'boss' : 'normal';
+  const kind = stage.final ? 'final' : stage.boss ? 'boss' : 'normal';
   const monster = stageMonster(stage);
 
   battle = {
@@ -506,11 +527,12 @@ async function startBattle(level, stageNo) {
   fxLayer.replaceChildren();
   battleStage.className = 'battle-stage';
   gameBattle.classList.toggle('boss-battle', stage.boss);
-  battleTitle.textContent = stage.boss ? `第${hanNum(stage.chapter)}章 두목전` : `스테이지 ${stage.chapter}-${stage.pos}`;
+  gameBattle.classList.toggle('final-battle', !!stage.final);
+  battleTitle.textContent = stage.final ? '魔王城 마왕전' : stage.boss ? `第${hanNum(stage.chapter)}章 두목전` : `스테이지 ${stage.chapter}-${stage.pos}`;
   const seal = document.createElement('span');
   seal.className = 'name-seal';
   seal.textContent = monster.han;
-  monsterName.replaceChildren(seal, `${monster.name}${stage.boss ? ' (두목)' : ''}`);
+  monsterName.replaceChildren(seal, `${monster.name}${stage.boss && !stage.final ? ' (두목)' : ''}`);
   monsterEl.innerHTML = renderMonster(monster.art);
   monsterEl.className = 'monster appear';
   battle.monsterArt = monster.art;
@@ -540,13 +562,15 @@ function playIntro(stage, monster) {
   tilePool.replaceChildren();
   battleTimerFill.style.width = '100%';
   bubbleKind.textContent = '';
-  bubbleText.textContent = stage.boss ? '여기까지 온 걸 후회하게 해 주마!' : '덤벼라!';
+  bubbleText.textContent = stage.final ? '네가 배운 모든 것을 시험해 주마!' : stage.boss ? '여기까지 온 걸 후회하게 해 주마!' : '덤벼라!';
   bubbleText.removeAttribute('lang');
   playerBubbleText.textContent = '좋아, 간다!';
   playerBubbleText.lang = 'ko';
   playerBubbleSub.textContent = '';
 
-  document.getElementById('intro-stage').textContent = stage.boss
+  document.getElementById('intro-stage').textContent = stage.final
+    ? `魔王城 · HSK ${battle.level}급 최종 결전`
+    : stage.boss
     ? `第${hanNum(stage.chapter)}章 · 두목전`
     : `第${hanNum(stage.chapter)}章 · 스테이지 ${stage.chapter}-${stage.pos}`;
   document.getElementById('intro-monster').innerHTML = renderMonster(monster.art);
@@ -557,7 +581,7 @@ function playIntro(stage, monster) {
   introWord.textContent = '';
   introWord.className = 'intro-word';
   introPinyin.textContent = '';
-  battleIntro.className = `battle-intro${stage.boss ? ' boss' : ''}`;
+  battleIntro.className = `battle-intro${stage.boss ? ' boss' : ''}${stage.final ? ' final' : ''}`;
   battleIntro.style.display = '';
 
   const timers = [];
@@ -599,7 +623,7 @@ battleIntro.addEventListener('click', () => {
 const battleVictory = document.getElementById('battle-victory');
 
 function playVictory(stage) {
-  document.getElementById('victory-sub').textContent = stage.boss ? '두목 격파!' : '스테이지 클리어!';
+  document.getElementById('victory-sub').textContent = stage.final ? '마왕 격파!' : stage.boss ? '두목 격파!' : '스테이지 클리어!';
   const sparks = document.getElementById('victory-sparks');
   sparks.replaceChildren();
   if (!reduceMotion.matches) {
@@ -640,7 +664,7 @@ function playDefeat(current) {
   playerFighter.classList.add('fallen');
   monsterFighter.classList.add('taunt');
   bubbleKind.textContent = '';
-  bubbleText.textContent = stage.boss ? '하찮은 녀석! 썩 물러가라!' : DEFEAT_TAUNTS[Math.floor(Math.random() * DEFEAT_TAUNTS.length)];
+  bubbleText.textContent = stage.final ? '크하하! 이 마왕을 넘기엔 아직 멀었다!' : stage.boss ? '하찮은 녀석! 썩 물러가라!' : DEFEAT_TAUNTS[Math.floor(Math.random() * DEFEAT_TAUNTS.length)];
   bubbleText.removeAttribute('lang');
   playerBubbleText.textContent = '으윽…';
   playerBubbleText.lang = 'ko';
@@ -651,7 +675,7 @@ function playDefeat(current) {
   const timers = [];
   const at = (ms, fn) => timers.push(setTimeout(() => { if (battle === current && current.defeating) fn(); }, ms));
   at(DEFEAT_SHOW_MS, () => {
-    document.getElementById('defeat-sub').textContent = stage.boss ? '두목에게 패배했어요…' : '패배했어요…';
+    document.getElementById('defeat-sub').textContent = stage.final ? '마왕에게 패배했어요…' : stage.boss ? '두목에게 패배했어요…' : '패배했어요…';
     document.getElementById('defeat-tip').textContent = '틀린 단어를 익히고 다시 도전!';
     const ash = document.getElementById('defeat-ash');
     ash.replaceChildren();
@@ -1191,7 +1215,7 @@ function finishBattle(won) {
     const current = battle;
     monsterExplode();
     setPlayerMood('win');
-    playerBubbleText.textContent = battle.stage.boss ? '두목을 쓰러뜨렸다!' : '이겼다!';
+    playerBubbleText.textContent = battle.stage.final ? '마왕을 쓰러뜨렸다!' : battle.stage.boss ? '두목을 쓰러뜨렸다!' : '이겼다!';
     playerBubbleText.lang = 'ko';
     playerBubbleSub.textContent = '';
     // 폭발 → 胜！ 연출 → 결과 창
@@ -1228,10 +1252,12 @@ function finishBattle(won) {
   // 낙관 도장: 이기면 '胜', 지면 '败'
   battleResultIcon.textContent = won ? '胜' : '败';
   battleResultIcon.className = `battle-result-icon result-seal ${won ? 'win' : 'lose'}`;
-  battleResultTitle.textContent = won ? (stage.boss ? '보스 격파!' : '스테이지 클리어!') : '패배했어요…';
+  battleResultTitle.textContent = won ? (stage.final ? '마왕 격파!' : stage.boss ? '보스 격파!' : '스테이지 클리어!') : '패배했어요…';
   battleResultStars.textContent = won ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '';
   battleResultText.textContent = won
-    ? (stage.no >= total ? `HSK ${level}급의 모든 스테이지를 클리어했어요!` : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
+    ? (stage.final ? `HSK ${level}급 마왕을 물리쳤어요! 이 급수의 모든 단어를 정복했어요!`
+      : stage.no === total - 1 ? '모든 챕터를 마쳤어요. 마왕성의 문이 열렸어요!'
+      : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
     : '틀린 단어는 오답 노트에 모였어요. 다시 도전해 보세요!';
   btnBattleNext.style.display = won && stage.no < total ? '' : 'none';
   if (!won) setPlayerMood('hurt');

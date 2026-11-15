@@ -102,7 +102,7 @@ function timeBonus() {
 // ---------- 보상 계산 ----------
 // 스테이지의 '난이도 점수' (0 ~ 약 6): 급수·챕터·보스·별
 function rewardPower(level, stage, stars) {
-  return (level - 1) * 0.65 + Math.min(stage.chapter - 1, 12) * 0.08 + (stage.boss ? 1.4 : 0) + (stars - 1) * 0.35;
+  return (level - 1) * 0.65 + Math.min(stage.chapter - 1, 12) * 0.08 + (stage.final ? 2.4 : stage.boss ? 1.4 : 0) + (stars - 1) * 0.35;
 }
 
 function pickChestTier(power, replay) {
@@ -129,7 +129,7 @@ function rollGear(tier) {
 }
 
 function makeStageRewards(level, stage, stars, replay) {
-  const mult = LEVEL_MULT[level] * (1 + Math.min(stage.chapter - 1, 20) * 0.06) * (stage.boss ? 2 : 1) * (0.7 + stars * 0.1);
+  const mult = LEVEL_MULT[level] * (1 + Math.min(stage.chapter - 1, 20) * 0.06) * (stage.final ? 3 : stage.boss ? 2 : 1) * (0.7 + stars * 0.1);
   const rate = replay ? REPLAY_RATE : 1;
   const base = {
     exp: Math.round(25 * mult * rate),

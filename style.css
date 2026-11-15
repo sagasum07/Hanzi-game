@@ -7249,3 +7249,113 @@ header h1, .header-titles h1 {
   .tutorial-modal *,
   .tutorial-card.turn .tutorial-art > * { animation: none !important; }
 }
+
+/* ==========================================================
+   마왕성 (급수의 마지막 결전)
+   ========================================================== */
+.game-screen .game-chapter.final-chapter {
+  background:
+    radial-gradient(circle at 50% 40%, rgba(155, 79, 192, 0.35), transparent 65%),
+    linear-gradient(180deg, #2B1B33, #1A1020);
+  border-color: #6B2A8C;
+  box-shadow: inset 0 0 0 3px #2B1B33, inset 0 0 0 4px rgba(201, 161, 74, 0.6), 0 6px 18px rgba(43, 27, 51, 0.35);
+}
+
+.game-screen .final-chapter .game-chapter-title {
+  color: #F4EBDD;
+  justify-content: center;
+}
+
+.game-screen .final-chapter .chapter-han {
+  color: #E0624F;
+  text-shadow: 0 0 10px rgba(224, 48, 42, 0.6);
+}
+
+.game-screen .final-chapter .stage-path {
+  display: flex;
+  justify-content: center;
+}
+
+.game-screen .final-chapter .stage-node {
+  width: 96px;
+}
+
+.game-screen .final-chapter .stage-node.boss .stage-coin,
+.game-screen .final-chapter .stage-node.boss.current .stage-coin {
+  max-width: 96px;
+  width: 96px;
+  border-radius: 50%;
+  transform: none;
+  border: 3px solid var(--gold);
+  background: radial-gradient(circle at 50% 40%, #6B2A8C, #241326 75%);
+  box-shadow: 0 0 18px rgba(155, 79, 192, 0.6), 0 3px 0 rgba(0, 0, 0, 0.4);
+}
+
+.game-screen .final-chapter .stage-node.current .stage-coin {
+  animation: final-gate 1.8s ease-in-out infinite;
+}
+
+.game-screen .final-chapter .stage-node.locked .stage-coin {
+  filter: grayscale(0.7) brightness(0.6);
+}
+
+.game-screen .final-chapter .stage-node.boss .stage-node-icon .monster-svg {
+  width: 80px;
+  height: 80px;
+}
+
+.game-screen .final-chapter .stage-node.boss .stage-node-icon .ui-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.game-screen .final-chapter .stage-node .stage-node-label {
+  color: #F4EBDD;
+  font-size: 0.95rem;
+}
+
+.game-screen .final-chapter .stage-node-stars {
+  color: var(--gold);
+}
+
+.final-chapter-desc {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(244, 235, 221, 0.75);
+  word-break: keep-all;
+}
+
+@keyframes final-gate {
+  0%, 100% { box-shadow: 0 0 14px rgba(155, 79, 192, 0.5), 0 3px 0 rgba(0, 0, 0, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(224, 48, 42, 0.8), 0 3px 0 rgba(0, 0, 0, 0.4); }
+}
+
+/* 마왕전 무대: 보랏빛 밤하늘과 붉은 달 */
+.game-screen .final-battle .battle-stage {
+  background:
+    linear-gradient(180deg, transparent 72%, rgba(30, 14, 36, 0.7) 72.5%, #1E0E24 100%),
+    radial-gradient(circle at 20% 22%, #FF7A5C 0 22px, rgba(255, 90, 60, 0.35) 23px 40px, transparent 41px),
+    linear-gradient(180deg, #2B1240, #6B2A8C 65%, #9B4FC0);
+  border-color: #6B2A8C;
+}
+
+.battle-intro.final {
+  background: radial-gradient(circle at 50% 40%, rgba(107, 42, 140, 0.75), rgba(15, 6, 20, 0.95));
+}
+
+/* 튜토리얼 지도 그림의 마왕 */
+.tut-link.dots { width: 10px; background: repeating-linear-gradient(90deg, rgba(31, 26, 23, 0.4) 0 2px, transparent 2px 4px); }
+.tut-coin.boss.final { background: radial-gradient(circle at 50% 40%, #6B2A8C, #241326 75%); }
+
+/* 튜토리얼 지도: 두목 + 마왕까지 한 줄에 들어가게 조금 작게 */
+.tut-path .tut-coin { width: 26px; height: 26px; font-size: 0.85rem; }
+.tut-path .tut-coin.boss { width: 44px; height: 44px; }
+.tut-path .tut-coin.boss .monster-svg { width: 38px; height: 38px; }
+.tut-path .tut-link { width: 5px; }
+@media (min-width: 720px) {
+  .game-wide .tut-path .tut-coin { width: 36px; height: 36px; font-size: 1rem; }
+  .game-wide .tut-path .tut-coin.boss { width: 58px; height: 58px; }
+  .game-wide .tut-path .tut-coin.boss .monster-svg { width: 50px; height: 50px; }
+  .game-wide .tut-path .tut-link { width: 10px; }
+}

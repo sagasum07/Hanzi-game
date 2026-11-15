@@ -259,6 +259,33 @@ const MONSTER_ART = {
       <rect x="52" y="22" width="16" height="10" rx="3" fill="${INK}"/><path d="M50 30 h20" stroke="${INK}" stroke-width="3"/>`,
     eyes: [{ x: 49, y: 50, r: 4.5, color: '#F2C230' }, { x: 71, y: 50, r: 4.5, color: '#F2C230' }],
   },
+  // ---- 마왕: 급수의 마지막 결전 ----
+  // 보랏빛 요기, 굽은 두 뿔, 흑금관, 어깨 갑옷과 망토, 가슴의 '魔' 문장
+  demonking: {
+    body: `${shadow(46)}
+      <path d="M12 104 Q2 72 16 50 Q16 66 26 64 Q18 40 36 24 Q36 42 46 38 Q46 16 60 2 Q74 16 74 38 Q84 42 84 24 Q102 40 94 64 Q104 66 104 50 Q118 72 108 104 Z" fill="#6B2A8C" opacity="0.5"/>
+      <path d="M22 104 Q12 74 34 60 Q18 82 30 104 Z M98 104 Q108 74 86 60 Q102 82 90 104 Z" fill="#9B4FC0" opacity="0.55"/>
+      <path d="M24 68 Q12 92 16 108 L104 108 Q108 92 96 68 Z" fill="#241326" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M26 72 Q24 92 28 108 M94 72 Q96 92 92 108" stroke="#8E241D" stroke-width="5" fill="none"/>
+      <path d="M38 72 L36 108 L84 108 L82 72 Z" fill="#3A2A44" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M37 79 h46" stroke="#C9A14A" stroke-width="4"/>
+      <circle cx="60" cy="94" r="10" fill="#C9A14A" stroke="${INK}" stroke-width="2.5"/>
+      <text x="60" y="98.5" font-size="13" text-anchor="middle" fill="#8E241D" font-weight="700" font-family="'Ma Shan Zheng', 'Noto Serif SC', serif">魔</text>
+      <path d="M20 76 Q26 62 44 68 L42 82 Q30 84 20 76 Z" fill="#4E3A5C" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M100 76 Q94 62 76 68 L78 82 Q90 84 100 76 Z" fill="#4E3A5C" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M24 70 L16 58 L30 66 Z M96 70 L104 58 L90 66 Z" fill="#E8DCC0" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M42 40 Q18 36 14 8 Q28 28 48 30 Z" fill="#E8DCC0" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M78 40 Q102 36 106 8 Q92 28 72 30 Z" fill="#E8DCC0" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M24 24 l7 3 M30 32 l6 1 M96 24 l-7 3 M90 32 l-6 1" stroke="#A89878" stroke-width="2" stroke-linecap="round"/>
+      <path d="M38 50 Q38 28 60 28 Q82 28 82 50 Q82 66 70 74 L50 74 Q38 66 38 50 Z" fill="#7A3A8C" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M42 36 L44 16 L52 26 L60 10 L68 26 L76 16 L78 36 Z" fill="#2B2321" stroke="#C9A14A" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="60" cy="25" r="3.5" fill="#E0302A" stroke="#C9A14A" stroke-width="1.2"/>
+      <path d="M43 44 L56 50 M77 44 L64 50" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+      <path d="M47 63 Q60 72 73 63 Q60 67 47 63 Z" fill="#3A0F14" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M51 64 L53 71 L56 65 M64 65 L67 71 L69 64" fill="#FFF8E6" stroke="${INK}" stroke-width="1.2" stroke-linejoin="round"/>`,
+    eyes: [{ x: 50, y: 54, r: 5.5, color: '#FF3B30', slit: true }, { x: 70, y: 54, r: 5.5, color: '#FF3B30', slit: true }],
+    glow: true,
+  },
 };
 
 function renderMonster(id, mood = 'normal') {
