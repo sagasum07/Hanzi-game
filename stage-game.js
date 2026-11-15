@@ -21,9 +21,9 @@ const PLAYER_HEARTS = 3;
 const MONSTER_HP = { normal: 20, boss: 32 };
 // 남은 시간 비율에 따른 데미지 단계 (무기를 장착하면 기준이 낮아짐)
 const SPEED_TIERS = [
-  { min: 0.75, damage: 3, kind: '⚡ 会心一击! 번개 같은 답!', cry: '크아아악!!' },
-  { min: 0.45, damage: 2, kind: '💨 빠른 공격!', cry: '크윽!' },
-  { min: 0, damage: 1, kind: '👊 명중!', cry: '으윽!' },
+  { min: 0.75, damage: 3, kind: '会心一击! 번개 같은 답!', cry: '크아아악!!' },
+  { min: 0.45, damage: 2, kind: '快! 빠른 공격!', cry: '크윽!' },
+  { min: 0, damage: 1, kind: '击! 명중!', cry: '으윽!' },
 ];
 
 function speedTier(remainRatio) {
@@ -42,22 +42,22 @@ const REVEAL_MS = { correct: 1300 }; // 맞혔을 때 답을 보여 주는 시�
 
 // 동양 설화 속 요괴들 (이름은 일반적인 요괴 종류로만 지음)
 const MONSTERS = [
-  { icon: '👻', name: '물귀신', han: '鬼' },
-  { icon: '🦊', name: '꼬리 아홉 여우', han: '狐' },
-  { icon: '🧟', name: '깡충 강시', han: '尸' },
-  { icon: '🐍', name: '이무기', han: '蛇' },
-  { icon: '🦇', name: '박쥐 요괴', han: '蝠' },
-  { icon: '🐸', name: '두꺼비 도사', han: '蟾' },
-  { icon: '🐗', name: '멧돼지 장수', han: '猪' },
-  { icon: '🐒', name: '산원숭이 요괴', han: '猴' },
-  { icon: '🦂', name: '독전갈 요괴', han: '蝎' },
-  { icon: '🕷️', name: '거미 요괴', han: '蛛' },
+  { art: 'ghost', name: '물귀신', han: '鬼' },
+  { art: 'fox', name: '꼬리 아홉 여우', han: '狐' },
+  { art: 'jiangshi', name: '깡충 강시', han: '尸' },
+  { art: 'imugi', name: '이무기', han: '蛇' },
+  { art: 'bat', name: '박쥐 요괴', han: '蝠' },
+  { art: 'toad', name: '두꺼비 도사', han: '蟾' },
+  { art: 'boar', name: '멧돼지 장수', han: '猪' },
+  { art: 'monkey', name: '산원숭이 요괴', han: '猴' },
+  { art: 'scorpion', name: '독전갈 요괴', han: '蝎' },
+  { art: 'spider', name: '거미 요괴', han: '蛛' },
 ];
 const BOSSES = [
-  { icon: '🐉', name: '청룡', han: '龍' },
-  { icon: '👹', name: '도깨비 대왕', han: '王' },
-  { icon: '🐯', name: '산군 백호', han: '虎' },
-  { icon: '👺', name: '붉은 얼굴 천구', han: '天' },
+  { art: 'dragon', name: '청룡', han: '龍' },
+  { art: 'dokkaebi', name: '도깨비 대왕', han: '王' },
+  { art: 'tiger', name: '산군 백호', han: '虎' },
+  { art: 'tengu', name: '붉은 얼굴 천구', han: '天' },
 ];
 
 // 한자 숫자 (一 ~ 九十九)
@@ -236,8 +236,10 @@ function renderPlayerCard() {
   document.getElementById('exp-bar-fill').style.width = `${(info.exp / info.need) * 100}%`;
   document.getElementById('exp-text').textContent = `${info.exp.toLocaleString()} / ${info.need.toLocaleString()} EXP`;
   document.getElementById('coin-text').textContent = p.coins.toLocaleString();
+  document.querySelector('.my-avatar-card .coin-mark').innerHTML = uiIcon('coin');
   const eq = equippedGear();
-  document.getElementById('player-gear').textContent = `${eq.weapon ? `${eq.weapon.icon} ${eq.weapon.name}` : '👊 맨손'}${eq.hat ? ` · ${eq.hat.icon} ${eq.hat.name}` : ''}`;
+  // 장비 이름은 고정 목록에서 온 문자열이라 그림과 함께 HTML 로 넣어도 안전함
+  document.getElementById('player-gear').innerHTML = `${eq.weapon ? `${renderGearIcon(eq.weapon.id)} ${eq.weapon.name}` : '맨손'}${eq.hat ? ` · ${renderGearIcon(eq.hat.id)} ${eq.hat.name}` : ''}`;
 }
 
 function renderGameMap() {
@@ -265,7 +267,7 @@ function renderGameMap() {
   const stages = levelStages(gameLevel);
   const prog = gameProgress(gameLevel);
   const totalStars = Object.values(prog.stars).reduce((a, b) => a + b, 0);
-  gameMapSummary.textContent = `HSK ${gameLevel}급 · 스테이지 ${Math.min(prog.cleared, stages.length)}/${stages.length} 클리어 · ⭐ ${totalStars}`;
+  gameMapSummary.textContent = `HSK ${gameLevel}급 · 스테이지 ${Math.min(prog.cleared, stages.length)}/${stages.length} 클리어 · ★ ${totalStars}`;
 
   const nextNo = prog.cleared + 1;
   const chapters = [];
@@ -289,7 +291,9 @@ function renderGameMap() {
       const stars = prog.stars[s.no] || 0;
       const icon = document.createElement('span');
       icon.className = 'stage-node-icon';
-      icon.textContent = s.boss ? (cleared ? '👑' : stageMonster(s).icon) : (!cleared && !open ? '🔒' : String(s.no));
+      if (s.boss) icon.innerHTML = cleared ? uiIcon('crown') : renderMonster(stageMonster(s).art);
+      else if (!cleared && !open) icon.innerHTML = uiIcon('lock');
+      else icon.textContent = String(s.no);
       const label = document.createElement('span');
       label.className = 'stage-node-label';
       label.textContent = s.boss ? '두목' : `${c}-${s.pos}`;
@@ -354,8 +358,9 @@ async function startBattle(level, stageNo) {
   seal.className = 'name-seal';
   seal.textContent = monster.han;
   monsterName.replaceChildren(seal, `${monster.name}${stage.boss ? ' (두목)' : ''}`);
-  monsterEl.textContent = monster.icon;
+  monsterEl.innerHTML = renderMonster(monster.art);
   monsterEl.className = 'monster appear';
+  battle.monsterArt = monster.art;
   monsterFighter.className = 'fighter monster-side';
   playerFighter.className = 'fighter player-side';
   playerNameEl.textContent = playerDisplayName();
@@ -368,7 +373,7 @@ async function startBattle(level, stageNo) {
 }
 
 function renderBattleStatus() {
-  battleHearts.textContent = '❤️'.repeat(battle.hearts) + '🤍'.repeat(PLAYER_HEARTS - battle.hearts);
+  battleHearts.innerHTML = uiIcon('heart').repeat(battle.hearts) + uiIcon('heart-empty').repeat(PLAYER_HEARTS - battle.hearts);
   monsterHpFill.style.width = `${(battle.hp / battle.maxHp) * 100}%`;
 }
 
@@ -428,7 +433,7 @@ function nextQuestion() {
   battle.busy = false;
   q.filled = []; // 채운 칸: 조각 인덱스
 
-  bubbleKind.textContent = q.type === 'word' ? '🔤 중국어 단어는?' : '✍️ 중국어로 말해 봐!';
+  bubbleKind.textContent = q.type === 'word' ? '問 중국어 단어는?' : '問 중국어로 말해 봐!';
   bubbleText.textContent = q.prompt;
   bubbleText.removeAttribute('lang');
   battleFeedback.textContent = '';
@@ -443,7 +448,7 @@ function nextQuestion() {
 function renderPlayerBubble() {
   const q = battle.question;
   const built = q.filled.map((i) => q.tiles[i]).join(q.type === 'sentence' ? ' ' : '');
-  playerBubbleText.textContent = built || '음… 🤔';
+  playerBubbleText.textContent = built || '음…';
   playerBubbleText.lang = built ? 'zh-CN' : 'ko';
   playerBubbleSub.textContent = built ? `${q.filled.length}/${q.answer.length}` : '';
 }
@@ -539,7 +544,7 @@ function resolveQuestion(correct, timedOut) {
     playerBubbleText.textContent = timedOut ? '앗, 시간이…!' : '으악!';
     playerBubbleText.lang = 'ko';
     playerBubbleSub.textContent = '';
-    bubbleKind.textContent = timedOut ? '⏰ 시간 초과! 정답은' : '💥 틀렸다! 정답은';
+    bubbleKind.textContent = timedOut ? '시간 초과! 정답은' : '틀렸다! 정답은';
     bubbleText.textContent = `${answerText} (${answerPinyin})`;
     bubbleText.lang = 'zh-CN';
     battleFeedback.textContent = `${timedOut ? '시간 초과' : '오답'}. 정답: ${answerText} ${answerPinyin}`;
@@ -568,7 +573,7 @@ function continueBattle() {
 }
 
 function showAnswerReveal(q, timedOut, built) {
-  revealTitle.textContent = timedOut ? '⏰ 시간이 다 됐어요' : '💥 아쉬워요, 틀렸어요';
+  revealTitle.textContent = timedOut ? '시간이 다 됐어요' : '아쉬워요, 틀렸어요';
   if (q.type === 'word') {
     revealZh.textContent = q.word.hanzi;
     revealPinyin.textContent = q.word.pinyin;
@@ -598,8 +603,9 @@ document.getElementById('btn-reveal-speak').addEventListener('click', () => {
   if (q) speakHanzi(q.type === 'word' ? q.word.hanzi : q.sentence.zh);
 });
 
-function showDamage(el, text) {
-  el.textContent = text;
+function showDamage(el, text, isHtml = false) {
+  if (isHtml) el.innerHTML = text; // 고정 그림(uiIcon)만 들어감
+  else el.textContent = text;
   el.classList.remove('show');
   void el.offsetWidth; // 애니메이션 다시 시작
   el.classList.add('show');
@@ -620,6 +626,14 @@ function hitMonster(strong) {
   monsterEl.classList.remove('appear', 'hit', 'hit-strong');
   void monsterEl.offsetWidth;
   monsterEl.classList.add(strong ? 'hit-strong' : 'hit');
+  // 맞는 동안 찡그린 표정
+  if (!battle || !battle.monsterArt) return;
+  const current = battle;
+  monsterEl.innerHTML = renderMonster(battle.monsterArt, 'hurt');
+  clearTimeout(current.faceTimer);
+  current.faceTimer = setTimeout(() => {
+    if (battle === current && !current.exploded) monsterEl.innerHTML = renderMonster(current.monsterArt);
+  }, strong ? 650 : 450);
 }
 
 // ---------- 타격 연출 ----------
@@ -766,10 +780,10 @@ function monsterAttack(current) {
         setTimeout(() => spawnFx('fx-slash', p.x + offset, p.y - 6, 450), i * 50);
       });
       stageEffect('shake-m', 420);
-      spawnFx('fx-heartbreak', p.x, p.y - 40, 900, (el) => { el.textContent = '💔'; });
+      spawnFx('fx-heartbreak', p.x, p.y - 40, 900, (el) => { el.innerHTML = uiIcon('heartbreak'); });
     }
     flash('rgba(184,51,42,0.5)', 380);
-    showDamage(playerPop, '-❤️');
+    showDamage(playerPop, `-1 ${uiIcon('heart')}`, true);
     renderBattleStatus();
   }, ATTACK_MS);
 }
@@ -777,6 +791,7 @@ function monsterAttack(current) {
 // 마지막 일격: 몬스터가 폭발하며 사라짐
 function monsterExplode() {
   Sfx.ko();
+  if (battle && battle.monsterArt) monsterEl.innerHTML = renderMonster(battle.monsterArt, 'ko');
   setTimeout(() => Sfx.victory(), 650);
   const m = centerOf(monsterEl);
   monsterEl.classList.add('defeated');
@@ -853,7 +868,7 @@ function finishBattle(won) {
     const current = battle;
     monsterExplode();
     setPlayerMood('win');
-    playerBubbleText.textContent = battle.stage.boss ? '보스를 쓰러뜨렸다! 💪' : '이겼다! ✌️';
+    playerBubbleText.textContent = battle.stage.boss ? '두목을 쓰러뜨렸다!' : '이겼다!';
     playerBubbleText.lang = 'ko';
     playerBubbleSub.textContent = '';
     setTimeout(() => {
@@ -881,7 +896,7 @@ function finishBattle(won) {
   battleResultTitle.textContent = won ? (stage.boss ? '보스 격파!' : '스테이지 클리어!') : '패배했어요…';
   battleResultStars.textContent = won ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '';
   battleResultText.textContent = won
-    ? (stage.no >= total ? `HSK ${level}급의 모든 스테이지를 클리어했어요! 🏆` : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
+    ? (stage.no >= total ? `HSK ${level}급의 모든 스테이지를 클리어했어요!` : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
     : '틀린 단어는 오답 노트에 모였어요. 다시 도전해 보세요!';
   btnBattleNext.style.display = won && stage.no < total ? '' : 'none';
   if (!won) {
@@ -918,7 +933,7 @@ const LOOT_GAP_MS = 380; // 보상이 하나씩 튀어나오는 간격
 function showRewards(rewards, replay) {
   pendingRewards = rewards;
   rewardArea.style.display = '';
-  rewardBase.textContent = `+${rewards.base.exp} EXP · 🪙 +${rewards.base.coins}${replay ? ' (다시 클리어)' : ''}`;
+  rewardBase.innerHTML = `${uiIcon('exp')} +${rewards.base.exp} EXP · ${uiIcon('coin')} +${rewards.base.coins}${replay ? ' (다시 클리어)' : ''}`;
   chestArt.innerHTML = renderChest(rewards.tier);
   chestName.textContent = rewards.chest.name;
   chestGot.className = `chest-box chest-got tier-${rewards.chest.id}`;
@@ -974,20 +989,20 @@ function lootCard(item) {
   const label = document.createElement('span');
   label.className = 'loot-label';
   if (item.type === 'exp') {
-    icon.textContent = '✨';
+    icon.innerHTML = uiIcon('exp');
     label.textContent = `+${item.amount} EXP`;
   } else if (item.type === 'coins') {
-    icon.textContent = '🪙';
+    icon.innerHTML = uiIcon('coin');
     label.textContent = `+${item.amount}`;
   } else {
     const g = item.gear;
     card.style.setProperty('--rarity', RARITIES[g.rarity].color);
     card.classList.add(`rarity-${RARITIES[g.rarity].id}`);
-    icon.textContent = g.icon;
+    icon.innerHTML = renderGearIcon(g.id);
     const name = document.createElement('strong');
     name.textContent = g.name;
     const sub = document.createElement('small');
-    sub.textContent = item.duplicate ? `중복 → 🪙 +${item.duplicate}` : `${RARITIES[g.rarity].name} · ${gearEffectText(g)}`;
+    sub.textContent = item.duplicate ? `중복 → 코인 +${item.duplicate}` : `${RARITIES[g.rarity].name} · ${gearEffectText(g)}`;
     label.append(name, sub);
     if (item.isNew) {
       const badge = document.createElement('span');
@@ -1013,7 +1028,7 @@ function chestBurst(tier) {
     p.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
     p.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
     p.style.setProperty('--d', `${Math.random() * 0.15}s`);
-    p.textContent = Math.random() < 0.35 ? '🪙' : '';
+    if (Math.random() < 0.35) p.innerHTML = uiIcon('coin');
     chestParticles.appendChild(p);
   }
   setTimeout(() => chestParticles.replaceChildren(), 1400);
@@ -1068,7 +1083,7 @@ chestBig.addEventListener('click', () => {
     const done = rewards.contents.length * LOOT_GAP_MS + 1000;
     setTimeout(() => {
       if (result.levelUp) {
-        levelUpEl.textContent = `🎉 레벨 업! Lv.${result.level}`;
+        levelUpEl.textContent = `升级! 레벨 업! Lv.${result.level}`;
         Sfx.levelUp();
         levelUpEl.style.display = '';
       }

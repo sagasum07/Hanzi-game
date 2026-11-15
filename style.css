@@ -6312,3 +6312,94 @@ header h1, .header-titles h1 {
     font-size: 1.35rem;
   }
 }
+
+/* ==========================================================
+   직접 그린 그림(art.js): 몬스터·장비·UI 아이콘 크기
+   ========================================================== */
+.monster .monster-svg {
+  display: block;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.ui-icon,
+.gear-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+}
+
+.fighter-hearts .ui-icon {
+  width: 1.1em;
+  height: 1.1em;
+  margin: 0 1px;
+}
+
+.game-screen .fighter-hearts {
+  height: auto;
+  line-height: 1;
+}
+
+/* 스테이지 지도: 자물쇠·왕관·두목 그림 */
+.game-screen .stage-node-icon .ui-icon {
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: middle;
+}
+
+.game-screen .stage-node.boss .stage-node-icon .monster-svg {
+  width: 1.9em;
+  height: 1.9em;
+  display: block;
+}
+
+.game-screen .stage-node.boss .stage-node-icon .ui-icon {
+  width: 1.5em;
+  height: 1.5em;
+}
+
+/* 가방·보상 카드의 장비 그림 */
+.bag-item-icon .gear-icon {
+  width: 40px;
+  height: 40px;
+  vertical-align: middle;
+}
+
+.loot-icon .ui-icon,
+.loot-icon .gear-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.player-gear .gear-icon,
+.bag-stats .gear-icon {
+  width: 1.4em;
+  height: 1.4em;
+  vertical-align: -0.35em;
+}
+
+.coin-mark .ui-icon,
+.reward-base .ui-icon {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+/* 깨진 하트·튀는 엽전 */
+.fx-heartbreak .ui-icon {
+  width: 34px;
+  height: 34px;
+  display: block;
+}
+
+.chest-particle .ui-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.damage-pop .ui-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+}

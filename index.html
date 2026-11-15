@@ -485,7 +485,7 @@
         <div class="avatar-preview" id="avatar-preview" aria-hidden="true"></div>
         <div class="avatar-options" id="avatar-options"></div>
         <div class="avatar-maker-buttons">
-          <button class="btn-restart" id="btn-avatar-random">🎲 랜덤</button>
+          <button class="btn-restart" id="btn-avatar-random">랜덤</button>
           <button class="btn-start-quiz" id="btn-avatar-done">완료 →</button>
         </div>
         <button class="btn-back" id="btn-avatar-back">← 뒤로</button>
@@ -510,12 +510,12 @@
           <div class="my-avatar-info">
             <strong><span class="player-level" id="player-level">Lv.1</span> <span id="my-avatar-name"></span></strong>
             <div class="exp-bar" aria-hidden="true"><div class="exp-bar-fill" id="exp-bar-fill"></div></div>
-            <span class="player-stats"><span id="exp-text">0 / 100 EXP</span> · 🪙 <span id="coin-text">0</span></span>
+            <span class="player-stats"><span id="exp-text">0 / 100 EXP</span> · <span class="coin-mark" aria-label="코인"></span><span id="coin-text">0</span></span>
             <span class="player-gear" id="player-gear"></span>
           </div>
           <div class="my-avatar-buttons">
-            <button class="btn-avatar-edit" id="btn-avatar-edit">✏️ 꾸미기</button>
-            <button class="btn-avatar-edit" id="btn-bag">🎒 가방</button>
+            <button class="btn-avatar-edit" id="btn-avatar-edit">꾸미기</button>
+            <button class="btn-avatar-edit" id="btn-bag">가방</button>
           </div>
         </div>
         <p class="game-map-desc">관문을 넘으면 다음 관문이 열려요.<br>여섯 관문마다 일곱 번째는 배운 단어를 모두 복습하는 <strong>요괴 두목</strong>과의 결전이에요.</p>
@@ -546,7 +546,7 @@
             <div class="fighter monster-side" id="monster-fighter">
               <div class="fighter-name" id="monster-name"></div>
               <div class="fighter-hp" aria-hidden="true"><div class="monster-hp-fill" id="monster-hp-fill"></div></div>
-              <div class="monster" id="monster" aria-hidden="true">👾</div>
+              <div class="monster" id="monster" aria-hidden="true"></div>
               <div class="damage-pop" id="damage-pop" aria-hidden="true"></div>
             </div>
             <div class="fighter player-side" id="player-fighter">
@@ -579,7 +579,7 @@
             <p class="reveal-meaning" id="reveal-meaning"></p>
             <p class="reveal-mine" id="reveal-mine"></p>
             <div class="reveal-buttons">
-              <button class="btn-restart" id="btn-reveal-speak">🔊 듣기</button>
+              <button class="btn-restart" id="btn-reveal-speak">듣기</button>
               <button class="btn-start-quiz" id="btn-reveal-next">확인 →</button>
             </div>
           </div>
@@ -601,7 +601,7 @@
             <p class="level-up" id="level-up" style="display:none;"></p>
             <div class="battle-result-buttons" id="loot-buttons" style="display:none;">
               <button class="btn-start-quiz" id="btn-loot-next">다음 스테이지 →</button>
-              <button class="btn-restart" id="btn-loot-retry">다시 도전 🔄</button>
+              <button class="btn-restart" id="btn-loot-retry">다시 도전</button>
               <button class="btn-home" id="btn-loot-map">스테이지 목록</button>
             </div>
           </div>
@@ -622,11 +622,11 @@
                 <span class="chest-name" id="chest-name"></span>
                 <span class="chest-hint">획득!</span>
               </div>
-              <button class="btn-start-quiz" id="btn-go-open">📦 상자 열러 가기 →</button>
+              <button class="btn-start-quiz" id="btn-go-open">상자 열러 가기 →</button>
             </div>
             <div class="battle-result-buttons" id="battle-result-buttons">
               <button class="btn-start-quiz" id="btn-battle-next">다음 스테이지 →</button>
-              <button class="btn-restart" id="btn-battle-retry">다시 도전 🔄</button>
+              <button class="btn-restart" id="btn-battle-retry">다시 도전</button>
               <button class="btn-home" id="btn-battle-map">스테이지 목록</button>
             </div>
           </div>
@@ -757,6 +757,7 @@
   <script src="data_hsk6.js"></script>
   <script src="app.js"></script>
   <script src="sfx.js"></script>
+  <script src="art.js"></script>
   <script src="avatar.js"></script>
   <script src="rewards.js"></script>
   <script src="stage-game.js"></script>

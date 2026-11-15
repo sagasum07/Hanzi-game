@@ -33,20 +33,20 @@ const RARITIES = [
 
 // 무기: 빠른 공격(데미지 ×2·×3) 판정이 쉬워짐 (남은 시간 기준을 낮춤) / 모자: 제한 시간이 늘어남
 const GEAR = [
-  { id: 'stick', slot: 'weapon', rarity: 0, name: '나무 막대기', icon: '🪵', crit: 0.04 },
-  { id: 'glove', slot: 'weapon', rarity: 0, name: '가죽 장갑', icon: '🥊', crit: 0.05 },
-  { id: 'woodsword', slot: 'weapon', rarity: 1, name: '목검', icon: '🗡️', crit: 0.08 },
-  { id: 'knuckle', slot: 'weapon', rarity: 1, name: '쇠 너클', icon: '👊', crit: 0.09 },
-  { id: 'brush', slot: 'weapon', rarity: 2, name: '서예 붓', icon: '🖌️', crit: 0.12 },
-  { id: 'bronzesword', slot: 'weapon', rarity: 2, name: '청동검', icon: '⚔️', crit: 0.13 },
-  { id: 'goldbrush', slot: 'weapon', rarity: 3, name: '황금 붓', icon: '✒️', crit: 0.17 },
-  { id: 'dragonbrush', slot: 'weapon', rarity: 4, name: '용의 붓', icon: '🐉', crit: 0.22 },
-  { id: 'straw', slot: 'hat', rarity: 0, name: '밀짚모자', icon: '👒', time: 1 },
-  { id: 'cap', slot: 'hat', rarity: 0, name: '야구 모자', icon: '🧢', time: 1 },
-  { id: 'band', slot: 'hat', rarity: 1, name: '무사 머리띠', icon: '🎽', time: 1.5 },
-  { id: 'gradcap', slot: 'hat', rarity: 2, name: '학사모', icon: '🎓', time: 2 },
-  { id: 'scholar', slot: 'hat', rarity: 3, name: '선비 갓', icon: '🎩', time: 3 },
-  { id: 'crown', slot: 'hat', rarity: 4, name: '황금 왕관', icon: '👑', time: 4 },
+  { id: 'stick', slot: 'weapon', rarity: 0, name: '나무 막대기', crit: 0.04 },
+  { id: 'glove', slot: 'weapon', rarity: 0, name: '가죽 장갑', crit: 0.05 },
+  { id: 'woodsword', slot: 'weapon', rarity: 1, name: '목검', crit: 0.08 },
+  { id: 'knuckle', slot: 'weapon', rarity: 1, name: '쇠 너클', crit: 0.09 },
+  { id: 'brush', slot: 'weapon', rarity: 2, name: '서예 붓', crit: 0.12 },
+  { id: 'bronzesword', slot: 'weapon', rarity: 2, name: '청동검', crit: 0.13 },
+  { id: 'goldbrush', slot: 'weapon', rarity: 3, name: '황금 붓', crit: 0.17 },
+  { id: 'dragonbrush', slot: 'weapon', rarity: 4, name: '용의 붓', crit: 0.22 },
+  { id: 'straw', slot: 'hat', rarity: 0, name: '밀짚모자', time: 1 },
+  { id: 'cap', slot: 'hat', rarity: 0, name: '야구 모자', time: 1 },
+  { id: 'band', slot: 'hat', rarity: 1, name: '무사 머리띠', time: 1.5 },
+  { id: 'gradcap', slot: 'hat', rarity: 2, name: '학사모', time: 2 },
+  { id: 'scholar', slot: 'hat', rarity: 3, name: '선비 갓', time: 3 },
+  { id: 'crown', slot: 'hat', rarity: 4, name: '황금 왕관', time: 4 },
 ];
 const GEAR_BY_ID = Object.fromEntries(GEAR.map((g) => [g.id, g]));
 const DUPLICATE_COINS = [30, 60, 120, 250, 500]; // 같은 장비가 또 나오면 등급별로 바꿔 주는 코인
@@ -235,7 +235,7 @@ function renderBag() {
   const p = gamePlayer();
   bagPreview.innerHTML = renderAvatar(getAvatar(), 'normal', p.equip);
   const eq = equippedGear();
-  bagStats.textContent = `👊 ${eq.weapon ? eq.weapon.name : '맨손'} · 🎩 ${eq.hat ? eq.hat.name : '모자 없음'}`;
+  bagStats.innerHTML = `${eq.weapon ? `${renderGearIcon(eq.weapon.id)} ${eq.weapon.name}` : '맨손'} · ${eq.hat ? `${renderGearIcon(eq.hat.id)} ${eq.hat.name}` : '모자 없음'}`;
   const owned = GEAR.filter((g) => p.items[g.id]);
   if (owned.length === 0) {
     const empty = document.createElement('p');
@@ -251,7 +251,7 @@ function renderBag() {
     row.style.setProperty('--rarity', RARITIES[g.rarity].color);
     const icon = document.createElement('span');
     icon.className = 'bag-item-icon';
-    icon.textContent = g.icon;
+    icon.innerHTML = renderGearIcon(g.id);
     const info = document.createElement('span');
     info.className = 'bag-item-info';
     const name = document.createElement('strong');
