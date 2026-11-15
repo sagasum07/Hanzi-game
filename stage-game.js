@@ -1100,7 +1100,19 @@ document.getElementById('btn-game-home').addEventListener('click', () => showScr
 document.getElementById('btn-avatar-back').addEventListener('click', () => {
   if (!getAvatar()) showScreen('start');
 });
-btnGameMode.addEventListener('click', () => openGameMap());
+btnGameMode.addEventListener('click', () => {
+  openGameMap();
+  ensureBgm();
+});
+
+// 게임 화면에서는 화면을 누를 때마다(모바일은 사용자 동작 중에만 소리를 다시 켤 수 있음)
+// 그리고 몇 초마다 배경음악이 멈춰 있지 않은지 확인해서 다시 재생
+const gameScreenEl = document.getElementById('game-screen');
+gameScreenEl.addEventListener('pointerdown', () => ensureBgm(), { passive: true });
+gameScreenEl.addEventListener('touchend', () => ensureBgm(), { passive: true });
+setInterval(() => {
+  if (gameScreenEl.style.display !== 'none' && !document.hidden) ensureBgm();
+}, 3000);
 document.getElementById('btn-bag').addEventListener('click', () => openBag(() => renderPlayerCard()));
 document.getElementById('btn-avatar-edit').addEventListener('click', () => {
   gameMap.style.display = 'none';

@@ -2461,10 +2461,14 @@ applyVolume();
 playBgm();
 
 // 2) 사용자 첫 상호작용 시 무조건 재생 (클릭 등)
-document.addEventListener('click', () => {
+function startAudioOnFirstGesture() {
   setupAudioGraph();
   playBgm();
-}, { once: true });
+  document.removeEventListener('click', startAudioOnFirstGesture);
+  document.removeEventListener('touchend', startAudioOnFirstGesture);
+}
+document.addEventListener('click', startAudioOnFirstGesture);
+document.addEventListener('touchend', startAudioOnFirstGesture); // iOS 는 터치 끝에서 소리 시작이 더 확실함
 
 // ========================================
 // Volume Control Logic
