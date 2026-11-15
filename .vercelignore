@@ -20,3 +20,5 @@ title_bg.png
 title_bg_blue.png
 check_missing_pinyin.js
 게임 테스트
+examples/src
+examples/hsk-pinyin.json

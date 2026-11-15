@@ -394,17 +394,33 @@
 
       <!-- Quiz Card -->
       <main class="quiz-card" id="quiz-card">
-        <div class="hanzi-display" id="hanzi-display">
-          <span class="hanzi-char" id="hanzi-char">大</span>
-          <div class="pinyin-row">
-            <span class="hanzi-pinyin" id="hanzi-pinyin">dà</span>
-            <button class="btn-speak" id="btn-speak" aria-label="발음 듣기" title="발음 듣기">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53M19.07 4.93C20.9447 6.80528 21.998 9.34836 21.998 12C21.998 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <button class="btn-save-word" id="btn-save-word" aria-pressed="false">☆ 단어장에 저장</button>
+        <!-- 단어 카드: 앞면(단어) / 뒷면(예문) — '예문 보기'를 누르면 뒤집힘 -->
+        <div class="word-flip" id="word-flip">
+          <div class="word-flip-inner">
+            <div class="hanzi-display word-face word-front" id="hanzi-display">
+              <span class="hanzi-char" id="hanzi-char">大</span>
+              <div class="pinyin-row">
+                <span class="hanzi-pinyin" id="hanzi-pinyin">dà</span>
+                <button class="btn-speak" id="btn-speak" aria-label="발음 듣기" title="발음 듣기">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53M19.07 4.93C20.9447 6.80528 21.998 9.34836 21.998 12C21.998 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <button class="btn-save-word" id="btn-save-word" aria-pressed="false">☆ 단어장에 저장</button>
+              </div>
+              <button class="btn-show-example" id="btn-show-example" disabled>📖 예문 보기</button>
+            </div>
+            <div class="word-face word-back" id="word-back" aria-hidden="true">
+              <span class="example-label">예문</span>
+              <p class="example-zh" id="example-zh" lang="zh-CN"></p>
+              <p class="example-pinyin" id="example-pinyin"></p>
+              <p class="example-ko" id="example-ko"></p>
+              <div class="example-actions">
+                <button class="btn-example-action" id="btn-speak-example">🔊 예문 듣기</button>
+                <button class="btn-example-action" id="btn-hide-example">↩ 단어 보기</button>
+              </div>
+            </div>
           </div>
         </div>
         <div class="choices" id="choices">

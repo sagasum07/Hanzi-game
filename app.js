@@ -680,6 +680,7 @@ function showQuestion() {
   hanziPinyin.textContent = q.pinyin;
   // 설정에서 병음 보기를 끄면 가려 두고, 누르거나 답을 고르면 보여 줌
   hanziPinyin.classList.toggle('pinyin-hidden', !userSettings.showPinyin);
+  prepareExample(q);
   updateSaveWordButton(q.level, q.hanzi);
 
   // Shuffle choices for this question
@@ -714,6 +715,7 @@ function handleAnswer(selectedBtn, selected, answer) {
 
   const isCorrect = selected === answer;
   hanziPinyin.classList.remove('pinyin-hidden');
+  revealExampleTranslation();
   const q = shuffledQuiz[currentIndex];
   recordAnswer('words', q.level, q.hanzi, isCorrect);
   // 오답 노트 복습에서 맞힌 단어는 바로 오답 노트에서 뺌
@@ -779,6 +781,91 @@ btnNext.addEventListener('click', () => {
   } else {
     showResult();
   }
+});
+
+// ========================================
+// 단어 카드 예문 (카드 뒤집기)
+// ========================================
+// examples/hsk{급수}.json = { 한자: [예문, 예문 병음, 한국어 해석] } 를 급수별로 필요할 때 불러옵니다.
+// 답을 고르기 전에는 해석을 가려 둠 (해석에 단어 뜻이 그대로 드러나기 때문)
+const wordFlip = document.getElementById('word-flip');
+const wordBack = document.getElementById('word-back');
+const hanziDisplay = document.getElementById('hanzi-display');
+const btnShowExample = document.getElementById('btn-show-example');
+const btnHideExample = document.getElementById('btn-hide-example');
+const btnSpeakExample = document.getElementById('btn-speak-example');
+const exampleZh = document.getElementById('example-zh');
+const examplePinyin = document.getElementById('example-pinyin');
+const exampleKo = document.getElementById('example-ko');
+
+const exampleCache = {}; // 급수 → Promise<예문 객체>
+let currentExample = null; // [예문, 병음, 해석]
+
+function loadExamples(level) {
+  if (!exampleCache[level]) {
+    exampleCache[level] = fetch(`examples/hsk${level}.json`)
+      .then((res) => (res.ok ? res.json() : {}))
+      .catch((error) => {
+        console.warn('예문 불러오기 실패:', error);
+        delete exampleCache[level]; // 다음에 다시 시도
+        return {};
+      });
+  }
+  return exampleCache[level];
+}
+
+function setWordFlipped(flipped) {
+  wordFlip.classList.toggle('flipped', flipped);
+  wordBack.setAttribute('aria-hidden', String(!flipped));
+  hanziDisplay.setAttribute('aria-hidden', String(flipped));
+}
+
+// 예문에서 공부 중인 단어를 강조
+function renderExampleSentence(sentence, word) {
+  const at = sentence.indexOf(word);
+  if (at < 0) {
+    exampleZh.textContent = sentence;
+    return;
+  }
+  const mark = document.createElement('mark');
+  mark.textContent = word;
+  exampleZh.replaceChildren(sentence.slice(0, at), mark, sentence.slice(at + word.length));
+}
+
+function renderExampleTranslation(show) {
+  if (!currentExample) return;
+  exampleKo.textContent = show ? currentExample[2] : '답을 고르면 해석이 보여요 🙈';
+  exampleKo.classList.toggle('masked', !show);
+}
+
+function prepareExample(q) {
+  setWordFlipped(false);
+  currentExample = null;
+  btnShowExample.disabled = true;
+  btnShowExample.textContent = '📖 예문 보기';
+  loadExamples(q.level).then((examples) => {
+    if (shuffledQuiz[currentIndex] !== q) return; // 그 사이 다음 문제로 넘어감
+    const item = examples[q.hanzi];
+    if (!item) {
+      btnShowExample.textContent = '예문 준비 중';
+      return;
+    }
+    currentExample = item;
+    renderExampleSentence(item[0], q.hanzi);
+    examplePinyin.textContent = item[1];
+    renderExampleTranslation(answered);
+    btnShowExample.disabled = false;
+  });
+}
+
+function revealExampleTranslation() {
+  renderExampleTranslation(true);
+}
+
+btnShowExample.addEventListener('click', () => setWordFlipped(true));
+btnHideExample.addEventListener('click', () => setWordFlipped(false));
+btnSpeakExample.addEventListener('click', () => {
+  if (currentExample) speakHanzi(currentExample[0]);
 });
 
 // ========================================

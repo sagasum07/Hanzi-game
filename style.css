@@ -2712,3 +2712,143 @@ header h1, .header-titles h1 {
 .native-app .site-info {
   display: none;
 }
+
+/* ========================================
+   단어 카드 뒤집기 (앞면: 단어 / 뒷면: 예문)
+   ======================================== */
+.word-flip {
+  width: 100%;
+  perspective: 1200px;
+}
+
+.word-flip-inner {
+  position: relative;
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.word-flip.flipped .word-flip-inner {
+  transform: rotateY(180deg);
+}
+
+/* 두 면을 같은 칸에 겹쳐 두고 뒷면은 보이지 않게 */
+.word-face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.word-flip.flipped .word-front,
+.word-flip:not(.flipped) .word-back {
+  pointer-events: none;
+}
+
+.word-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 18px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-light);
+  text-align: center;
+}
+
+.btn-show-example {
+  margin-top: 4px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn-show-example:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-show-example:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.example-label {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.example-zh {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--text-primary);
+  word-break: keep-all;
+}
+
+.example-zh mark {
+  background: none;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+.example-pinyin {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.example-ko {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.example-ko.masked {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.example-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-example-action {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-card);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.btn-example-action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-flip-inner {
+    transition: none;
+  }
+}
