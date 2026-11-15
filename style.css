@@ -2852,3 +2852,103 @@ header h1, .header-titles h1 {
     transition: none;
   }
 }
+
+/* ========================================
+   단어 퀴즈 2단계 (1단계 중→한 → 2단계 한→중)
+   ======================================== */
+.stage-badge {
+  align-self: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 4px;
+}
+
+.stage-badge.reverse {
+  color: #fff;
+  background: var(--accent);
+}
+
+/* 2단계: 한국어 뜻을 크게 보여 줌 (뜻이 길 수 있어 한자보다 작은 글씨) */
+.meaning-prompt .hanzi-char {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: clamp(1.6rem, 7vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.3;
+  text-align: center;
+  word-break: keep-all;
+  padding: 18px 8px 6px;
+}
+
+.meaning-prompt .hanzi-pinyin:empty {
+  display: none;
+}
+
+.choice-btn .choice-hanzi {
+  display: block;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.choice-btn .choice-pinyin {
+  display: block;
+  margin-top: 4px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.75;
+  min-height: 1.2em;
+}
+
+.choice-btn .choice-pinyin.pinyin-hidden {
+  visibility: hidden;
+}
+
+.choice-btn > span {
+  position: relative; /* ::before 효과 위에 표시 */
+}
+
+/* 1단계 완료 → 2단계 안내 */
+.quiz-card.intro-active > :not(.stage-intro) {
+  display: none !important;
+}
+
+.stage-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 8px;
+  text-align: center;
+}
+
+.stage-intro-icon {
+  font-size: 3rem;
+}
+
+.stage-intro-title {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.stage-intro-score {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stage-intro-text {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+.result-stage-breakdown {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}

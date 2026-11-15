@@ -473,9 +473,10 @@ if ('speechSynthesis' in window) {
 
 if (btnSpeak) {
   btnSpeak.addEventListener('click', () => {
-    if (hanziChar.textContent) {
-      speakHanzi(hanziChar.textContent);
-    }
+    // 한→중 문제에서는 화면에 한국어 뜻이 떠 있으므로 문제의 한자를 읽음
+    const q = shuffledQuiz[currentIndex];
+    const text = q && quizScreen.style.display !== 'none' ? q.hanzi : hanziChar.textContent;
+    if (text) speakHanzi(text);
   });
 }
 
@@ -499,11 +500,38 @@ function generateQuestion(word, level) {
   const choices = shuffle([word.meaning, ...wrongChoices]);
 
   return {
+    direction: 'zh-ko', // 중국어를 보고 한국어 뜻 고르기
     level: level,
     hanzi: word.hanzi,
     pinyin: word.pinyin,
+    meaning: word.meaning,
     answer: word.meaning,
     choices: choices,
+  };
+}
+
+// 2단계(한→중): 한국어 뜻을 보여 주고 같은 급수의 다른 단어 3개와 섞어 중국어를 고르게 함
+function generateReverseQuestion(q) {
+  const pool = (wordsByLevel[q.level] || []).filter((w) => w.hanzi !== q.hanzi && w.meaning !== q.meaning);
+  const seen = new Set([q.hanzi]);
+  const wrongWords = [];
+  for (const w of shuffle(pool)) {
+    if (seen.has(w.hanzi)) continue;
+    seen.add(w.hanzi);
+    wrongWords.push(w);
+    if (wrongWords.length === 3) break;
+  }
+  const choicePinyin = { [q.hanzi]: q.pinyin };
+  wrongWords.forEach((w) => { choicePinyin[w.hanzi] = w.pinyin; });
+  return {
+    direction: 'ko-zh',
+    level: q.level,
+    hanzi: q.hanzi,
+    pinyin: q.pinyin,
+    meaning: q.meaning,
+    answer: q.hanzi,
+    choices: shuffle([q.hanzi, ...wrongWords.map((w) => w.hanzi)]),
+    choicePinyin,
   };
 }
 
@@ -627,12 +655,29 @@ function startQuiz(level) {
 let wrongQuestions = [];
 let wrongSentenceQuestions = [];
 
-function startWordQuiz(level, retryQuestions) {
+// 단어 퀴즈 2단계 진행 상태: 1단계 중→한을 다 풀면 같은 단어로 2단계 한→중을 이어서 풂
+let quizStage = 1;
+let isTwoStageRun = false; // 이번 퀴즈가 2단계까지 이어지는지 (틀린 문제 다시 풀기는 1번만)
+let stageOneQuestions = [];
+const stageScores = { 1: { correct: 0, total: 0 }, 2: { correct: 0, total: 0 } };
+const stageIntro = document.getElementById('stage-intro');
+const stageIntroScore = document.getElementById('stage-intro-score');
+const stageBadge = document.getElementById('stage-badge');
+const resultStageBreakdown = document.getElementById('result-stage-breakdown');
+const STAGE_LABELS = { 'zh-ko': '중국어 → 한국어', 'ko-zh': '한국어 → 중국어' };
+
+function startWordQuiz(level, retryQuestions, isRetry = false) {
   currentIndex = 0;
   correctCount = 0;
   wrongCount = 0;
   answered = false;
   wrongQuestions = [];
+  quizStage = 1;
+  isTwoStageRun = !isRetry && userSettings.reverseStage;
+  stageScores[1] = { correct: 0, total: 0 };
+  stageScores[2] = { correct: 0, total: 0 };
+  stageIntro.style.display = 'none';
+  quizCard.classList.remove('intro-active');
 
   // Update subtitle
   if (isWordbookQuiz) {
@@ -651,6 +696,7 @@ function startWordQuiz(level, retryQuestions) {
   } else {
     shuffledQuiz = generateQuiz(level, quizCount);
   }
+  stageOneQuestions = shuffledQuiz;
   progressTotal.textContent = shuffledQuiz.length;
 
   // Show quiz screen
@@ -675,11 +721,21 @@ function showQuestion() {
   const pct = (currentIndex / shuffledQuiz.length) * 100;
   progressFill.style.width = pct + '%';
 
-  // Display hanzi
-  hanziChar.textContent = q.hanzi;
-  hanziPinyin.textContent = q.pinyin;
+  const isReverse = q.direction === 'ko-zh';
+  stageBadge.style.display = isTwoStageRun || isReverse ? '' : 'none';
+  stageBadge.textContent = isTwoStageRun
+    ? `${isReverse ? 2 : 1}단계 · ${STAGE_LABELS[q.direction]}`
+    : STAGE_LABELS[q.direction];
+  stageBadge.classList.toggle('reverse', isReverse);
+
+  // 1단계: 한자를 크게 / 2단계: 한국어 뜻을 크게 (중국어·병음·발음은 답을 고른 뒤에 공개)
+  hanziDisplay.classList.toggle('meaning-prompt', isReverse);
+  hanziChar.textContent = isReverse ? q.meaning : q.hanzi;
+  hanziChar.lang = isReverse ? 'ko' : 'zh-CN';
+  hanziPinyin.textContent = isReverse ? '' : q.pinyin;
   // 설정에서 병음 보기를 끄면 가려 두고, 누르거나 답을 고르면 보여 줌
-  hanziPinyin.classList.toggle('pinyin-hidden', !userSettings.showPinyin);
+  hanziPinyin.classList.toggle('pinyin-hidden', !isReverse && !userSettings.showPinyin);
+  btnSpeak.style.display = isReverse ? 'none' : '';
   prepareExample(q);
   updateSaveWordButton(q.level, q.hanzi);
 
@@ -688,10 +744,24 @@ function showQuestion() {
 
   // Create choice buttons
   choicesContainer.innerHTML = '';
+  choicesContainer.classList.toggle('hanzi-choices', isReverse);
   shuffledChoices.forEach((choice) => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = choice;
+    btn.dataset.value = choice;
+    if (isReverse) {
+      const zh = document.createElement('span');
+      zh.className = 'choice-hanzi';
+      zh.lang = 'zh-CN';
+      zh.textContent = choice;
+      const py = document.createElement('span');
+      py.className = 'choice-pinyin';
+      py.textContent = q.choicePinyin[choice] || '';
+      py.classList.toggle('pinyin-hidden', !userSettings.showPinyin);
+      btn.append(zh, py);
+    } else {
+      btn.textContent = choice;
+    }
     btn.addEventListener('click', () => handleAnswer(btn, choice, q.answer));
     choicesContainer.appendChild(btn);
   });
@@ -714,9 +784,18 @@ function handleAnswer(selectedBtn, selected, answer) {
   answered = true;
 
   const isCorrect = selected === answer;
+  const q = shuffledQuiz[currentIndex];
+  const isReverse = q.direction === 'ko-zh';
+  if (isReverse) {
+    // 답을 고르면 정답 단어의 중국어·병음·발음 듣기를 보여 줌
+    hanziPinyin.textContent = `${q.hanzi} · ${q.pinyin}`;
+    btnSpeak.style.display = '';
+    choicesContainer.querySelectorAll('.choice-pinyin').forEach((el) => el.classList.remove('pinyin-hidden'));
+  }
   hanziPinyin.classList.remove('pinyin-hidden');
   revealExampleTranslation();
-  const q = shuffledQuiz[currentIndex];
+  stageScores[isReverse ? 2 : 1].total++;
+  if (isCorrect) stageScores[isReverse ? 2 : 1].correct++;
   recordAnswer('words', q.level, q.hanzi, isCorrect);
   // 오답 노트 복습에서 맞힌 단어는 바로 오답 노트에서 뺌
   if (isReviewQuiz && isCorrect) graduateReviewWord(q.level, q.hanzi);
@@ -734,7 +813,7 @@ function handleAnswer(selectedBtn, selected, answer) {
   const allBtns = choicesContainer.querySelectorAll('.choice-btn');
   allBtns.forEach((btn) => {
     btn.disabled = true;
-    if (btn.textContent === answer) {
+    if (btn.dataset.value === answer) {
       btn.classList.add('correct');
     } else if (btn === selectedBtn && !isCorrect) {
       btn.classList.add('wrong');
@@ -746,14 +825,15 @@ function handleAnswer(selectedBtn, selected, answer) {
   // Show feedback message
   const msg = document.createElement('span');
   msg.className = `feedback-msg ${isCorrect ? 'correct' : 'wrong'}`;
-  msg.textContent = isCorrect ? '정답이에요! 🎉' : `아쉬워요! 정답: ${answer}`;
+  const answerText = isReverse ? `${answer} (${q.pinyin})` : answer;
+  msg.textContent = isCorrect ? '정답이에요! 🎉' : `아쉬워요! 정답: ${answerText}`;
   feedbackArea.innerHTML = '';
   feedbackArea.appendChild(msg);
 
   // Show next button (or finish)
   btnNext.style.display = 'inline-block';
   if (currentIndex === shuffledQuiz.length - 1) {
-    btnNext.textContent = '결과 보기 🏆';
+    btnNext.textContent = isTwoStageRun && quizStage === 1 ? '2단계로 →' : '결과 보기 🏆';
   } else {
     btnNext.textContent = '다음 문제 →';
   }
@@ -778,10 +858,34 @@ btnNext.addEventListener('click', () => {
       currentIndex++;
       showQuestion();
     }, 250);
+  } else if (isTwoStageRun && quizStage === 1) {
+    showStageIntro();
   } else {
     showResult();
   }
 });
+
+// 1단계를 마치면 점수와 함께 2단계 안내를 보여 줌
+function showStageIntro() {
+  const s = stageScores[1];
+  stageIntroScore.textContent = `중국어 → 한국어 ${s.total}문제 중 ${s.correct}개 정답`;
+  progressFill.style.width = '100%';
+  quizCard.classList.add('intro-active');
+  stageIntro.style.display = '';
+  btnNext.style.display = 'none';
+}
+
+function startStageTwo() {
+  quizStage = 2;
+  shuffledQuiz = shuffle(stageOneQuestions).map(generateReverseQuestion);
+  currentIndex = 0;
+  progressTotal.textContent = shuffledQuiz.length;
+  stageIntro.style.display = 'none';
+  quizCard.classList.remove('intro-active');
+  showQuestion();
+}
+
+document.getElementById('btn-start-stage2').addEventListener('click', startStageTwo);
 
 // ========================================
 // 단어 카드 예문 (카드 뒤집기)
@@ -854,12 +958,14 @@ function prepareExample(q) {
     renderExampleSentence(item[0], q.hanzi);
     examplePinyin.textContent = item[1];
     renderExampleTranslation(answered);
-    btnShowExample.disabled = false;
+    // 한→중 문제에서는 예문에 정답 단어가 드러나므로 답을 고른 뒤에 열어 줌
+    btnShowExample.disabled = q.direction === 'ko-zh' && !answered;
   });
 }
 
 function revealExampleTranslation() {
   renderExampleTranslation(true);
+  if (currentExample) btnShowExample.disabled = false;
 }
 
 btnShowExample.addEventListener('click', () => setWordFlipped(true));
@@ -1247,8 +1353,15 @@ function showSentenceResult() {
 // Show result screen
 // ========================================
 function showResult() {
-  const total = shuffledQuiz.length;
+  const total = correctCount + wrongCount || 1; // 2단계까지 푼 경우 두 단계를 합산
   const pct = Math.round((correctCount / total) * 100);
+  if (isTwoStageRun) {
+    const [a, b] = [stageScores[1], stageScores[2]];
+    resultStageBreakdown.textContent = `1단계 중→한 ${a.correct}/${a.total} · 2단계 한→중 ${b.correct}/${b.total}`;
+    resultStageBreakdown.style.display = '';
+  } else {
+    resultStageBreakdown.style.display = 'none';
+  }
   updatePlanResult(pct);
   flushRecordSave();
 
@@ -1316,7 +1429,7 @@ document.getElementById('btn-retry-yes').addEventListener('click', () => {
   if (currentMode === 'word') {
     if (currentPlanDay !== null) isPlanRetryRound = true;
     const retryList = [...wrongQuestions];
-    startWordQuiz(currentLevel, retryList);
+    startWordQuiz(currentLevel, retryList, true);
   } else {
     const retryList = [...wrongSentenceQuestions];
     startSentenceQuiz(currentLevel, retryList);
@@ -2423,13 +2536,14 @@ const NICKNAME_MIN = 2;
 const NICKNAME_MAX = 12;
 const NICKNAME_PATTERN = /^[0-9A-Za-z가-힣一-鿿 _-]+$/;
 
-const userSettings = { musicOn: true, volume: DEFAULT_VOLUME, speechSpeed: 'normal', showPinyin: true };
+const userSettings = { musicOn: true, volume: DEFAULT_VOLUME, speechSpeed: 'normal', showPinyin: true, reverseStage: true };
 try {
   const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
   if (typeof saved.musicOn === 'boolean') userSettings.musicOn = saved.musicOn;
   if (typeof saved.volume === 'number' && saved.volume > 0 && saved.volume <= 1) userSettings.volume = saved.volume;
   if (SPEECH_SPEED_FACTORS[saved.speechSpeed]) userSettings.speechSpeed = saved.speechSpeed;
   if (typeof saved.showPinyin === 'boolean') userSettings.showPinyin = saved.showPinyin;
+  if (typeof saved.reverseStage === 'boolean') userSettings.reverseStage = saved.reverseStage;
 } catch (error) {
   // 저장소를 쓸 수 없으면 기본값 사용
 }
@@ -2562,6 +2676,7 @@ const settingsNicknameError = document.getElementById('settings-nickname-error')
 const settingsMusic = document.getElementById('settings-music');
 const settingsVolume = document.getElementById('settings-volume');
 const settingsPinyin = document.getElementById('settings-pinyin');
+const settingsReverseStage = document.getElementById('settings-reverse-stage');
 const settingsAccountStatus = document.getElementById('settings-account-status');
 const btnPreviewSpeech = document.getElementById('btn-preview-speech');
 const speedSegments = document.querySelectorAll('.segment[data-speed]');
@@ -2585,6 +2700,7 @@ function renderSettings() {
     btn.setAttribute('aria-pressed', String(active));
   });
   settingsPinyin.checked = userSettings.showPinyin;
+  settingsReverseStage.checked = userSettings.reverseStage;
 
   settingsAccountStatus.textContent = isGoogle
     ? `${getDisplayName()}님, Google 계정으로 로그인되어 있어요.`
@@ -2652,6 +2768,11 @@ btnPreviewSpeech.addEventListener('click', () => speakHanzi('你好'));
 
 settingsPinyin.addEventListener('change', () => {
   userSettings.showPinyin = settingsPinyin.checked;
+  saveSettings();
+});
+
+settingsReverseStage.addEventListener('change', () => {
+  userSettings.reverseStage = settingsReverseStage.checked;
   saveSettings();
 });
 

@@ -221,6 +221,16 @@
             <span class="switch-slider"></span>
           </label>
         </div>
+        <div class="settings-row">
+          <div>
+            <span class="settings-label">2단계 한→중 퀴즈</span>
+            <p class="settings-note">중→한 퀴즈를 마친 뒤 같은 단어를 한국어 뜻으로 보고 중국어로 골라요</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="settings-reverse-stage">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
       </section>
 
       <section class="settings-card">
@@ -394,6 +404,15 @@
 
       <!-- Quiz Card -->
       <main class="quiz-card" id="quiz-card">
+        <!-- 1단계(중→한)를 마치면 2단계(한→중)로 넘어가기 전에 보여 주는 안내 -->
+        <div class="stage-intro" id="stage-intro" style="display:none;">
+          <div class="stage-intro-icon">🔁</div>
+          <h2 class="stage-intro-title">1단계 완료!</h2>
+          <p class="stage-intro-score" id="stage-intro-score"></p>
+          <p class="stage-intro-text">이번엔 <strong>한국어 뜻</strong>을 보고<br>알맞은 <strong>중국어</strong>를 골라 보세요.</p>
+          <button class="btn-start-quiz" id="btn-start-stage2">2단계 시작 →</button>
+        </div>
+        <div class="stage-badge" id="stage-badge" style="display:none;"></div>
         <!-- 단어 카드: 앞면(단어) / 뒷면(예문) — '예문 보기'를 누르면 뒤집힘 -->
         <div class="word-flip" id="word-flip">
           <div class="word-flip-inner">
@@ -451,6 +470,7 @@
           <span class="stat-label">정답률</span>
         </div>
       </div>
+      <p class="result-stage-breakdown" id="result-stage-breakdown" style="display:none;"></p>
       <p class="result-plan-message" id="result-plan-message" style="display:none;"></p>
       <!-- Retry Wrong Questions Prompt -->
       <div class="retry-prompt" id="retry-prompt" style="display:none;">
