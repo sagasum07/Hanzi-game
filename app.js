@@ -2417,40 +2417,87 @@ function applyVolume() {
   }
 }
 
-// iOS(아이폰·아이패드)만 audio.volume 을 무시하므로 Web Audio 로 음량을 조절함.
-// 컴퓨터·안드로이드는 일반 <audio> 재생을 그대로 써서, 효과음 등 Web Audio 쪽 문제가 배경음악에 번지지 않게 함
+// iOS(아이폰·아이패드)는 audio.volume 을 무시하고, 발음(TTS)이 나오면 <audio> 를 멈춘 뒤
+// 터치 없이는 다시 못 틀게 막음. 그래서 아이폰은 배경음악을 <audio> 대신 Web Audio 로 직접 재생함
+// (음량 조절 가능, 발음 뒤에도 장치만 깨우면 이어서 재생, 효과음과 같은 장치 하나만 사용)
+// 컴퓨터·안드로이드는 일반 <audio> 재생을 그대로 씀
 const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IOS_WEB_BGM = IS_IOS && location.protocol !== 'file:';
 
-// 아이폰(사파리 17+): 소리 세션을 '재생' 으로 지정해서, 무음 스위치나 다른 소리 때문에
-// Web Audio(배경음악 음량 조절·효과음)가 꺼지지 않게 함
-try {
-  if (navigator.audioSession) navigator.audioSession.type = 'playback';
-} catch (error) {
-  // 지원하지 않는 브라우저는 무시
+// 아이폰(사파리 17+): 소리 세션을 '재생' 으로 지정해서 무음 스위치에도 Web Audio 소리가 나게 함
+if (IOS_WEB_BGM) {
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
+  } catch (error) {
+    // 지원하지 않는 브라우저는 무시
+  }
+}
+
+let bgmBuffer = null; // 아이폰: 풀어 둔 배경음악
+let bgmSource = null; // 아이폰: 지금 재생 중인 배경음악
+let bgmLoading = false;
+let bgmWanted = false; // 재생해야 하는 상태인지
+
+function loadBgmBuffer() {
+  if (bgmBuffer || bgmLoading || !audioCtx) return;
+  bgmLoading = true;
+  fetch(bgm.currentSrc || bgm.src)
+    .then((res) => res.arrayBuffer())
+    .then((data) => new Promise((resolve, reject) => audioCtx.decodeAudioData(data, resolve, reject)))
+    .then((decoded) => {
+      // 메모리를 아끼려고 모노로 합침 (배경음악은 모노여도 충분)
+      const mono = audioCtx.createBuffer(1, decoded.length, decoded.sampleRate);
+      const out = mono.getChannelData(0);
+      const left = decoded.getChannelData(0);
+      const right = decoded.numberOfChannels > 1 ? decoded.getChannelData(1) : left;
+      for (let i = 0; i < out.length; i++) out[i] = (left[i] + right[i]) * 0.5;
+      bgmBuffer = mono;
+      if (bgmWanted) startBgmSource();
+    })
+    .catch((error) => console.warn('배경음악을 불러오지 못했어요.', error))
+    .finally(() => { bgmLoading = false; });
+}
+
+function startBgmSource() {
+  if (!audioCtx || !bgmBuffer || bgmSource) return;
+  const src = audioCtx.createBufferSource();
+  src.buffer = bgmBuffer;
+  src.loop = true;
+  src.connect(gainNode);
+  src.start(0);
+  bgmSource = src;
 }
 
 // 사용자 상호작용 안에서 호출해야 AudioContext 가 정상 동작함
 function setupAudioGraph() {
-  if (!IS_IOS || gainNode || location.protocol === 'file:') return;
+  if (!IOS_WEB_BGM || gainNode) return;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return;
   try {
     audioCtx = new AudioCtx();
-    const gain = audioCtx.createGain();
-    audioCtx.createMediaElementSource(bgm).connect(gain);
-    gain.connect(audioCtx.destination);
-    gainNode = gain;
-    bgm.volume = 1; // 실제 음량은 gainNode 가 담당
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+    bgm.pause(); // 아이폰은 <audio> 를 쓰지 않음
     applyVolume();
+    loadBgmBuffer();
   } catch (error) {
-    console.warn('Web Audio 음량 조절을 사용할 수 없어 기본 방식으로 조절합니다.', error);
+    audioCtx = null;
+    gainNode = null;
+    console.warn('Web Audio 를 사용할 수 없어 기본 방식으로 재생합니다.', error);
   }
 }
 
 function playBgm() {
-  // iOS 는 발음(TTS) 재생 뒤 오디오가 'interrupted' 상태가 되기도 하므로 running 이 아니면 모두 다시 깨움
-  if (audioCtx && audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+  if (IOS_WEB_BGM) {
+    bgmWanted = true;
+    if (!audioCtx) return; // 첫 터치 때 장치를 만들고 재생
+    // 발음(TTS) 등으로 'interrupted'·'suspended' 가 되면 다시 깨움 → 버퍼 재생은 그대로 이어짐
+    if (audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+    if (bgmBuffer) startBgmSource();
+    else loadBgmBuffer();
+    return;
+  }
   if (bgm.paused) {
     bgm.play().catch(error => {
       console.log('브라우저 정책으로 인해 자동 재생이 차단되었습니다. 사용자 상호작용 후 재생됩니다.', error);
