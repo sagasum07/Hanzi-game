@@ -152,11 +152,13 @@ for (const level of [1, 2, 3, 4, 5, 6]) {
     const word = wordsByLevel[level].find((w) => w.hanzi === hanzi);
     if (!pyOverride && word && !/[一不儿]/.test(hanzi)) {
       const inSentence = wordPinyinInSentence(zh, hanzi);
+      // 같은 급수의 동형어를 한 카드로 합친 단어는 'guò / guo'처럼 읽기가 여러 개 → 그중 하나와 맞으면 통과
+      const readings = word.pinyin.split('/').map((p) => p.trim());
       // 경성 차이(성조 표시 유무)는 허용하고, 음절 자체가 다르면 확인 요청
-      if (inSentence && toneless(squash(inSentence)) !== toneless(squash(word.pinyin))) {
+      if (inSentence && !readings.some((p) => toneless(squash(inSentence)) === toneless(squash(p)))) {
         console.warn(`🔤 병음 확인 ${src}:${lineNo + 1} ${hanzi}(${word.pinyin}) → 예문 속 ${inSentence} | ${zh}`);
         problems++;
-      } else if (inSentence && squash(inSentence) !== squash(word.pinyin) && hanzi.length === 1) {
+      } else if (inSentence && !readings.some((p) => squash(inSentence) === squash(p)) && hanzi.length === 1) {
         console.warn(`🔤 성조 확인 ${src}:${lineNo + 1} ${hanzi}(${word.pinyin}) → 예문 속 ${inSentence} | ${zh}`);
         problems++;
       }

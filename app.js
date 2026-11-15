@@ -1497,6 +1497,10 @@ const REVIEW_GRADUATE_STREAK = 2; // 일반 퀴즈에서 연속으로 이만큼 
 const REVIEW_MAX_QUESTIONS = 20;
 const RECORD_SAVE_DELAY = 2000;
 
+// 학습 플랜 기록의 단어 기준 버전. HSK 3.0(2025 대강)으로 단어가 바뀌면서 일차별 단어 구성이 달라져
+// 예전(HSK 2.0) 플랜 진도는 새 플랜과 맞지 않으므로 처음부터 다시 시작합니다.
+const PLAN_VERSION = 3;
+
 let userRecord = normalizeRecord(null);
 let recordOwner = null; // { type: 'guest' } 또는 { type: 'google', uid, name }
 let recordSaveBlocked = false; // 저장된 기록을 불러오지 못했을 때 덮어쓰지 않도록 저장을 막음
@@ -1508,10 +1512,12 @@ const reviewCount = document.getElementById('review-count');
 const recordSummary = document.getElementById('record-summary');
 
 function normalizeRecord(data) {
+  const samePlanVersion = data && data.planVersion === PLAN_VERSION;
   return {
     words: (data && data.words) || {},
     sentences: (data && data.sentences) || {},
-    plans: (data && data.plans) || {}, // { 급수: { 일차: { score: 최고 정답률, t: 완료 시각 } } }
+    plans: (samePlanVersion && data.plans) || {}, // { 급수: { 일차: { score: 최고 정답률, t: 완료 시각 } } }
+    planVersion: PLAN_VERSION,
     wordbook: (data && data.wordbook) || {}, // { "급수|한자": 저장한 시각 }
     updatedAt: (data && data.updatedAt) || 0,
   };
@@ -1692,8 +1698,9 @@ btnReview.addEventListener('click', startReviewQuiz);
 // ========================================
 // 각 급수의 단어를 일차별로 고르게 나눠서 하루씩 학습합니다.
 // 그날 퀴즈에서 PLAN_PASS_PERCENT% 이상 맞히면 완료되고, 이전 일차를 완료해야 다음 일차로 넘어갈 수 있습니다.
-const PLAN_DAYS = { 1: 14, 2: 14, 3: 30, 4: 60, 5: 60, 6: 120 };
-const PLAN_LABELS = { 1: '2주', 2: '2주', 3: '한 달', 4: '두 달', 5: '두 달', 6: '네 달' };
+// HSK 3.0 기준 하루 약 15~20개: 1급 300개·2급 200개·3급 500개·4급 1,000개·5급 1,600개·6급 1,800개
+const PLAN_DAYS = { 1: 20, 2: 14, 3: 30, 4: 60, 5: 90, 6: 90 };
+const PLAN_LABELS = { 1: '3주', 2: '2주', 3: '한 달', 4: '두 달', 5: '석 달', 6: '석 달' };
 const PLAN_PASS_PERCENT = 80;
 
 const planTitle = document.getElementById('plan-title');

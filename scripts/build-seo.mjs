@@ -18,17 +18,17 @@ const wordsByLevel = vm.runInNewContext(
 );
 
 const LEVELS = {
-  1: { name: '입문', plan: '2주', days: 14, total: 150,
+  1: { name: '입문', plan: '3주', days: 20, total: 300,
     about: '중국어를 처음 시작하는 단계예요. 인사, 숫자, 가족, 시간처럼 일상에서 가장 자주 쓰는 기초 단어를 익히고, 아주 간단한 문장을 이해하고 말할 수 있게 됩니다.' },
-  2: { name: '초급', plan: '2주', days: 14, total: 300,
+  2: { name: '초급', plan: '2주', days: 14, total: 500,
     about: '간단한 일상 대화를 나눌 수 있는 단계예요. 날씨, 쇼핑, 교통, 음식처럼 생활과 가까운 주제의 단어가 늘어나고, 자기 생각을 짧게 표현할 수 있게 됩니다.' },
-  3: { name: '중급', plan: '한 달', days: 30, total: 600,
+  3: { name: '중급', plan: '한 달', days: 30, total: 1000,
     about: '생활·학습·업무에서 기본적인 의사소통을 할 수 있는 단계예요. 감정을 나타내는 말과 문장을 이어 주는 접속사가 많아지고, 여행지에서 대부분의 상황에 대처할 수 있게 됩니다.' },
-  4: { name: '고급', plan: '두 달', days: 60, total: 1200,
+  4: { name: '고급', plan: '두 달', days: 60, total: 2000,
     about: '여러 주제에 대해 원어민과 비교적 자연스럽게 대화할 수 있는 단계예요. 추상적인 개념을 나타내는 단어와 2음절 동사·형용사가 본격적으로 나옵니다.' },
-  5: { name: '심화', plan: '두 달', days: 60, total: 2500,
+  5: { name: '심화', plan: '석 달', days: 90, total: 3600,
     about: '중국어 신문과 잡지를 읽고 영화나 드라마를 즐길 수 있는 단계예요. 사회, 경제, 문화와 관련된 어휘가 크게 늘어나고, 긴 글의 흐름을 따라갈 수 있게 됩니다.' },
-  6: { name: '마스터', plan: '네 달', days: 120, total: 5000,
+  6: { name: '마스터', plan: '석 달', days: 90, total: 5400,
     about: '중국어로 된 정보를 쉽게 이해하고 자신의 의견을 유창하게 표현할 수 있는 최상위 단계예요. 성어(사자성어)와 문어체 표현이 많이 나옵니다.' },
 };
 
@@ -105,7 +105,7 @@ for (const level of [1, 2, 3, 4, 5, 6]) {
     <div class="level-nav">${levelNav}</div>
     <section class="intro">
       <p>${info.about}</p>
-      <p>HSK ${level}급(${info.name})을 준비하려면 누적 약 ${info.total.toLocaleString()}개 단어를 알아야 해요. 이 페이지에는 <strong>${level}급에서 새로 배우는 단어 ${words.length}개</strong>를 병음 알파벳 순서로 정리했습니다. (예: ${esc(sample)} …)</p>
+      <p>HSK ${level}급(${info.name})을 준비하려면 HSK 3.0 기준 누적 ${info.total.toLocaleString()}개 단어를 알아야 해요. 이 페이지에는 <strong>${level}급에서 새로 배우는 단어 ${words.length}개</strong>를 병음 알파벳 순서로 정리했습니다. (예: ${esc(sample)} …)</p>
       <ul class="stats">
         <li><strong>${words.length}개</strong><span>${level}급 새 단어</span></li>
         <li><strong>${info.plan}</strong><span>학습 플랜</span></li>
@@ -160,7 +160,8 @@ writeFileSync('words/index.html', page({
   body: `    <nav class="breadcrumb"><a href="/">홈</a> › HSK 단어 목록</nav>
     <h1>HSK 1~6급 단어 목록 <small>${totalWords.toLocaleString()}개</small></h1>
     <section class="intro">
-      <p>HSK(汉语水平考试)는 중국어 능력을 평가하는 대표적인 시험이에요. 급수가 올라갈수록 알아야 할 단어가 늘어나서, 6급까지 누적 약 5,000개 단어를 익히게 됩니다.</p>
+      <p>HSK(汉语水平考试)는 중국어 능력을 평가하는 대표적인 시험이에요. 급수가 올라갈수록 알아야 할 단어가 늘어나서, 2026년 12월부터 시행되는 HSK 3.0 기준으로 6급까지 누적 5,400개 단어를 익히게 됩니다.</p>
+      <p>단어 목록은 中外语言交流合作中心이 발표한 《HSK考试大纲》(2025년 11월 발표) 词汇大纲을 따르며, 같은 급수 안에서 글자가 같은 단어는 한 항목으로 묶었어요.</p>
       <p>아래에서 급수를 고르면 그 급수에서 새로 배우는 단어를 한자·병음·뜻과 함께 볼 수 있어요. 목록을 훑어본 뒤 <a href="/">中文学习 게임</a>에서 하루 분량씩 퀴즈로 외워 보세요.</p>
     </section>
     <div class="level-grid">
