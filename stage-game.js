@@ -215,7 +215,158 @@ function openGameMap(level) {
   }
   gameMap.style.display = '';
   renderGameMap();
+  // 처음 들어온 사람에게는 게임 방법을 한 번 보여 줌
+  if (!userRecord.game.tutorialDone) openTutorial();
 }
+
+// ---------- 게임 방법 안내 (튜토리얼) ----------
+const tutorialModal = document.getElementById('tutorial-modal');
+const tutorialArt = document.getElementById('tutorial-art');
+const tutorialTitle = document.getElementById('tutorial-title');
+const tutorialText = document.getElementById('tutorial-text');
+const tutorialStepNo = document.getElementById('tutorial-step-no');
+const tutorialDots = document.getElementById('tutorial-dots');
+const btnTutorialPrev = document.getElementById('btn-tutorial-prev');
+const btnTutorialNext = document.getElementById('btn-tutorial-next');
+let tutorialStep = 0;
+
+const TUTORIAL_STEPS = [
+  {
+    title: '한자 무림에 온 걸 환영해요!',
+    text: '요괴를 물리치며 HSK 단어와 문장을 익히는 모험이에요. 어떻게 싸우는지 차근차근 알려 줄게요.',
+    art: () => `
+      <div class="tut-duo">
+        <div class="tut-fighter tut-monster">${renderMonster('fox')}</div>
+        <div class="tut-vs">對</div>
+        <div class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', gamePlayer().equip)}</div>
+      </div>`,
+  },
+  {
+    title: '관문을 하나씩 넘어요',
+    text: '관문을 클리어하면 다음 관문이 열려요. 여섯 관문을 넘으면 일곱 번째에는 앞에서 배운 단어를 모두 복습하는 <b>요괴 두목</b>이 기다려요.',
+    art: () => `
+      <div class="tut-path">
+        ${HAN_DIGITS.slice(1, 7).map((h, i) => `<span class="tut-coin${i < 2 ? ' done' : i === 2 ? ' now' : ''}">${h}</span>`).join('<i class="tut-link"></i>')}
+        <i class="tut-link"></i><span class="tut-coin boss">${renderMonster('dragon')}<em>두목</em></span>
+      </div>`,
+  },
+  {
+    title: '한자 조각을 맞춰 공격!',
+    text: '몬스터가 말풍선으로 <b>한국어 뜻</b>을 내면, 아래 한자 조각을 <b>순서대로</b> 눌러 중국어를 만들어요. 잘못 놓은 조각은 다시 누르면 빠져요. 챕터마다 4번째 관문부터는 문장 문제도 나와요.',
+    art: () => `
+      <div class="tut-battle">
+        <div class="tut-ask">
+          <span class="tut-mini-monster">${renderMonster('ghost')}</span>
+          <span class="tut-bubble"><small>問 중국어 단어는?</small>과일</span>
+        </div>
+        <div class="tut-slots"><span class="filled">水</span><span class="next"></span></div>
+        <div class="tut-tiles"><span class="used">水</span><span>喝</span><span class="pulse">果</span><span>茶</span></div>
+      </div>`,
+  },
+  {
+    title: '빨리 풀수록 강한 공격',
+    text: '향이 타들어 가듯 시간이 줄어요. <b>×3</b> 눈금 전에 맞히면 데미지 3배, <b>×2</b> 눈금 전이면 2배! 몬스터의 체력을 모두 깎으면 승리예요.',
+    art: () => `
+      <div class="tut-speed">
+        <div class="tut-hp"><span class="tut-mini-monster">${renderMonster('toad', 'hurt')}</span><span class="tut-hp-bar"><i></i></span></div>
+        <div class="tut-timer"><i class="tut-timer-fill"></i><b class="m2">×2</b><b class="m3">×3</b></div>
+        <div class="tut-damage"><span class="x3">×3 크리티컬!</span><span class="x2">×2</span><span class="x1">×1</span></div>
+      </div>`,
+  },
+  {
+    title: '하트 세 개를 지켜요',
+    text: '틀리거나 시간이 다 되면 하트 하나를 잃고 <b>정답을 보여 줘요</b>. 하트를 모두 잃으면 패배지만, 틀린 단어는 오답 노트에 모여요. 별은 남은 하트 수만큼 받아요.',
+    art: () => `
+      <div class="tut-hearts">
+        <div class="tut-heart-row">${uiIcon('heart')}${uiIcon('heart')}<span class="tut-break">${uiIcon('heartbreak')}</span></div>
+        <div class="tut-reveal"><small>정답</small><strong>水果</strong><span>shuǐguǒ · 과일</span></div>
+      </div>`,
+  },
+  {
+    title: '상자를 열어 보상 받기',
+    text: '클리어하면 <b>경험치·코인</b>과 함께 상자를 얻어요. 높은 급수와 두목일수록 좋은 상자가 나와요. 상자를 눌러 열면 경험치·코인·<b>장비</b>가 쏟아져요.',
+    art: () => `
+      <div class="tut-chests">
+        <div class="tut-chest-row">${CHESTS.map((c, i) => `<span class="tut-chest" style="--i:${i}">${renderChest(i)}<em>${c.name}</em></span>`).join('')}</div>
+        <div class="tut-loot"><span>${uiIcon('exp')} 경험치</span><span>${uiIcon('coin')} 코인</span><span class="gear">${renderGearIcon('brush')} 장비</span></div>
+      </div>`,
+  },
+  {
+    title: '장비로 더 강해지기',
+    text: '<b>무기</b>는 빠른 공격(×2·×3)을 더 쉽게, <b>모자</b>는 제한 시간을 늘려 줘요. 지도 위 <b>가방</b>에서 장착하고, <b>꾸미기</b>로 캐릭터를 바꿀 수 있어요. 이 안내는 지도의 ‘게임 방법 보기’로 다시 볼 수 있어요.',
+    art: () => `
+      <div class="tut-gear">
+        <span class="tut-gear-item">${renderGearIcon('dragonbrush')}<em>무기</em></span>
+        <span class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', { weapon: 'goldbrush', hat: 'scholar' })}</span>
+        <span class="tut-gear-item">${renderGearIcon('scholar')}<em>모자</em></span>
+      </div>`,
+  },
+];
+
+function openTutorial() {
+  tutorialStep = 0;
+  renderTutorial();
+  tutorialModal.style.display = '';
+  btnTutorialNext.focus();
+}
+
+function renderTutorial() {
+  const step = TUTORIAL_STEPS[tutorialStep];
+  const last = tutorialStep === TUTORIAL_STEPS.length - 1;
+  tutorialStepNo.textContent = `${tutorialStep + 1} / ${TUTORIAL_STEPS.length}`;
+  tutorialArt.innerHTML = step.art();
+  tutorialTitle.textContent = step.title;
+  tutorialText.innerHTML = step.text;
+  tutorialDots.innerHTML = TUTORIAL_STEPS.map((_, i) => `<i class="${i === tutorialStep ? 'on' : ''}"></i>`).join('');
+  btnTutorialPrev.style.visibility = tutorialStep === 0 ? 'hidden' : '';
+  btnTutorialNext.textContent = last ? '모험 시작!' : '다음 →';
+  document.getElementById('btn-tutorial-skip').style.visibility = last ? 'hidden' : '';
+  // 넘길 때마다 그림·글이 새로 나타나는 연출
+  const card = document.getElementById('tutorial-card');
+  card.classList.remove('turn');
+  void card.offsetWidth;
+  card.classList.add('turn');
+}
+
+function closeTutorial() {
+  tutorialModal.style.display = 'none';
+  if (!userRecord.game) userRecord.game = {};
+  if (!userRecord.game.tutorialDone) {
+    userRecord.game.tutorialDone = true;
+    scheduleRecordSave();
+  }
+}
+
+function moveTutorial(delta) {
+  const next = tutorialStep + delta;
+  if (next < 0) return;
+  if (next >= TUTORIAL_STEPS.length) {
+    closeTutorial();
+    return;
+  }
+  tutorialStep = next;
+  renderTutorial();
+  Sfx.tap();
+}
+
+btnTutorialNext.addEventListener('click', () => moveTutorial(1));
+btnTutorialPrev.addEventListener('click', () => moveTutorial(-1));
+document.getElementById('btn-tutorial-skip').addEventListener('click', closeTutorial);
+document.getElementById('btn-game-help').addEventListener('click', openTutorial);
+tutorialModal.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') moveTutorial(1);
+  else if (e.key === 'ArrowLeft') moveTutorial(-1);
+  else if (e.key === 'Escape') closeTutorial();
+});
+// 휴대폰: 옆으로 밀어서 넘기기
+let tutorialTouchX = null;
+tutorialModal.addEventListener('touchstart', (e) => { tutorialTouchX = e.touches[0].clientX; }, { passive: true });
+tutorialModal.addEventListener('touchend', (e) => {
+  if (tutorialTouchX === null) return;
+  const dx = e.changedTouches[0].clientX - tutorialTouchX;
+  tutorialTouchX = null;
+  if (Math.abs(dx) > 50) moveTutorial(dx < 0 ? 1 : -1);
+}, { passive: true });
 
 function playerDisplayName() {
   const name = typeof getDisplayName === 'function' ? getDisplayName() : '';

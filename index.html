@@ -502,6 +502,24 @@
         </div>
       </div>
 
+      <!-- 게임 방법 안내: 처음 들어오면 한 번 보여 주고, 지도에서 다시 볼 수 있음 (stage-game.js) -->
+      <div class="game-modal tutorial-modal" id="tutorial-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+        <div class="game-modal-card tutorial-card" id="tutorial-card">
+          <div class="tutorial-head">
+            <span class="tutorial-step-no" id="tutorial-step-no"></span>
+            <button class="tutorial-skip" id="btn-tutorial-skip">건너뛰기</button>
+          </div>
+          <div class="tutorial-art" id="tutorial-art" aria-hidden="true"></div>
+          <h3 class="tutorial-title" id="tutorial-title"></h3>
+          <p class="tutorial-text" id="tutorial-text"></p>
+          <div class="tutorial-dots" id="tutorial-dots" aria-hidden="true"></div>
+          <div class="tutorial-nav">
+            <button class="btn-restart" id="btn-tutorial-prev">← 이전</button>
+            <button class="btn-start-quiz" id="btn-tutorial-next">다음 →</button>
+          </div>
+        </div>
+      </div>
+
       <!-- 스테이지 지도 -->
       <div class="game-map" id="game-map">
         <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">武</span>한자 무림</h2>
@@ -519,6 +537,7 @@
           </div>
         </div>
         <p class="game-map-desc">관문을 넘으면 다음 관문이 열려요.<br>여섯 관문마다 일곱 번째는 배운 단어를 모두 복습하는 <strong>요괴 두목</strong>과의 결전이에요.</p>
+        <button class="btn-game-help" id="btn-game-help"><span class="help-seal" aria-hidden="true">法</span>게임 방법 보기</button>
         <div class="game-level-tabs" id="game-level-tabs" role="tablist"></div>
         <p class="game-map-summary" id="game-map-summary"></p>
         <div class="game-chapters" id="game-chapters"></div>

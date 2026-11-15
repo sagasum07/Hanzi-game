@@ -6943,3 +6943,309 @@ header h1, .header-titles h1 {
   }
   .defeat-half { transition: none; }
 }
+
+/* ==========================================================
+   게임 방법 안내 (튜토리얼)
+   ========================================================== */
+.btn-game-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  padding: 6px 16px 6px 6px;
+  border-radius: 999px;
+  border: 1.5px solid var(--gold, #C9A14A);
+  background: var(--paper, #F4EBDD);
+  color: var(--ink, #1F1A17);
+  font-family: var(--serif-ko, serif);
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(31, 26, 23, 0.15);
+}
+
+.btn-game-help:hover { background: #FFF7EA; }
+
+.help-seal {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--cinnabar, #B8332A);
+  color: #FFF6E6;
+  font-family: var(--brush, serif);
+  font-size: 1rem;
+}
+
+.tutorial-modal {
+  background: rgba(31, 26, 23, 0.62);
+  z-index: 60;
+}
+
+.tutorial-card {
+  max-width: 440px;
+  gap: 8px;
+  padding: 16px 18px 18px;
+  overflow-x: hidden;
+}
+
+.tutorial-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tutorial-step-no {
+  font-family: var(--serif-ko, serif);
+  font-size: 0.8rem;
+  color: var(--cinnabar, #B8332A);
+  letter-spacing: 2px;
+}
+
+.tutorial-skip {
+  border: none;
+  background: none;
+  color: var(--ink-soft, #6B5E52);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.tutorial-art {
+  width: 100%;
+  height: 170px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 60%, rgba(255, 255, 255, 0.6), transparent 70%),
+    linear-gradient(180deg, #EFE3CF, #E2D2B8);
+  border: 1px solid rgba(201, 161, 74, 0.5);
+  overflow: hidden;
+}
+
+.tutorial-title {
+  font-family: var(--serif-ko, serif);
+  font-size: 1.3rem;
+  color: var(--ink, #1F1A17);
+  text-align: center;
+  margin-top: 4px;
+}
+
+.tutorial-text {
+  font-size: 0.93rem;
+  line-height: 1.65;
+  color: var(--ink-soft, #4A3F36);
+  text-align: center;
+  word-break: keep-all;
+  min-height: 4.9em;
+}
+
+.tutorial-text b { color: var(--cinnabar, #B8332A); }
+
+.tutorial-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.tutorial-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(31, 26, 23, 0.2);
+  transition: all 0.25s ease;
+}
+
+.tutorial-dots i.on {
+  width: 22px;
+  border-radius: 4px;
+  background: var(--cinnabar, #B8332A);
+}
+
+.tutorial-nav {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.tutorial-nav button {
+  margin: 0;
+  width: 100%;
+}
+
+.tutorial-card.turn .tutorial-art > * { animation: tut-art-in 0.45s cubic-bezier(0.2, 1.3, 0.4, 1); }
+.tutorial-card.turn .tutorial-title,
+.tutorial-card.turn .tutorial-text { animation: tut-text-in 0.4s ease; }
+
+@keyframes tut-art-in {
+  from { transform: translateX(30px) scale(0.9); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@keyframes tut-text-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* 1. 환영 */
+.tut-duo { display: flex; align-items: flex-end; gap: 14px; }
+.tut-fighter .monster-svg { width: 100px; height: 100px; }
+.tut-fighter .avatar-svg { width: 96px; height: auto; }
+.tut-monster { animation: tut-bob 1.6s ease-in-out infinite; }
+.tut-vs {
+  align-self: center;
+  font-family: var(--brush, serif);
+  font-size: 2.2rem;
+  color: var(--cinnabar, #B8332A);
+  text-shadow: 2px 2px 0 rgba(31, 26, 23, 0.2);
+  animation: tut-pulse 1.2s ease-in-out infinite;
+}
+
+/* 2. 지도 */
+.tut-path { display: flex; align-items: center; flex-wrap: nowrap; padding: 0 6px; }
+.tut-coin {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-family: var(--brush, serif);
+  font-size: 1rem;
+  color: #F4EBDD;
+  background: radial-gradient(circle at 35% 30%, #CFC6BA, #9C9389 70%);
+  border: 2px solid #8C8278;
+}
+.tut-coin.done { background: radial-gradient(circle at 35% 30%, #F1D58A, #C9A14A 70%); border-color: #9C7A2E; color: #5A3E12; }
+.tut-coin.now { background: radial-gradient(circle at 35% 30%, #E0624F, #B8332A 70%); border-color: #8E241D; animation: tut-pulse 1.1s ease-in-out infinite; }
+.tut-coin.boss { width: 54px; height: 54px; background: radial-gradient(circle at 35% 30%, #5A4A6E, #2B2236 70%); border-color: var(--gold, #C9A14A); }
+.tut-coin.boss .monster-svg { width: 46px; height: 46px; }
+.tut-coin.boss em {
+  position: absolute;
+  bottom: -20px;
+  font-style: normal;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.72rem;
+  color: var(--cinnabar, #B8332A);
+  white-space: nowrap;
+}
+.tut-link { flex: none; width: 8px; height: 3px; background: rgba(31, 26, 23, 0.3); }
+
+/* 3. 전투 */
+.tut-battle { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.tut-ask { display: flex; align-items: center; gap: 6px; }
+.tut-mini-monster .monster-svg { width: 52px; height: 52px; }
+.tut-bubble {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 14px 6px;
+  border-radius: 12px;
+  background: var(--ink, #1F1A17);
+  color: #FFF6E6;
+  font-family: var(--serif-ko, serif);
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+.tut-bubble small { font-size: 0.65rem; color: var(--gold, #C9A14A); }
+.tut-slots, .tut-tiles { display: flex; gap: 6px; }
+.tut-slots span, .tut-tiles span {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.tut-slots span { border: 1.5px dashed rgba(184, 51, 42, 0.6); background: rgba(255, 255, 255, 0.5); color: var(--ink, #1F1A17); }
+.tut-slots span.filled { border-style: solid; background: #FFF9EE; }
+.tut-slots span.next { animation: tut-pulse 1s ease-in-out infinite; }
+.tut-tiles span { background: #FFF9EE; border: 1.5px solid var(--ink-soft, #6B5E52); box-shadow: 0 3px 0 var(--jade, #3F7D6B); color: var(--ink, #1F1A17); }
+.tut-tiles span.used { opacity: 0.25; }
+.tut-tiles span.pulse { position: relative; animation: tut-press 1.4s ease-in-out infinite; }
+.tut-tiles span.pulse::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 10px;
+  border: 2px solid var(--cinnabar, #B8332A);
+  animation: tut-ring 1.4s ease-out infinite;
+}
+
+/* 4. 속도 */
+.tut-speed { width: 86%; display: flex; flex-direction: column; gap: 12px; }
+.tut-hp { display: flex; align-items: center; gap: 8px; }
+.tut-hp-bar { flex: 1; height: 10px; border-radius: 5px; background: rgba(31, 26, 23, 0.15); overflow: hidden; }
+.tut-hp-bar i { display: block; height: 100%; background: linear-gradient(90deg, #B8332A, #E0624F); animation: tut-hp 2.8s ease-in-out infinite; }
+.tut-timer { position: relative; height: 10px; border-radius: 5px; background: rgba(31, 26, 23, 0.15); }
+.tut-timer-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: linear-gradient(90deg, #8A6A3A, #E3A92B); animation: tut-burn 2.8s linear infinite; }
+.tut-timer b { position: absolute; top: -18px; font-size: 0.75rem; color: var(--cinnabar, #B8332A); transform: translateX(-50%); }
+.tut-timer b::after { content: ''; position: absolute; left: 50%; top: 16px; width: 2px; height: 14px; background: var(--ink, #1F1A17); }
+.tut-timer .m3 { left: 75%; }
+.tut-timer .m2 { left: 45%; }
+.tut-damage { display: flex; justify-content: space-between; font-family: var(--serif-ko, serif); }
+.tut-damage span { padding: 2px 10px; border-radius: 999px; font-size: 0.85rem; background: rgba(255, 255, 255, 0.6); }
+.tut-damage .x3 { background: var(--cinnabar, #B8332A); color: #FFF6E6; font-weight: 700; animation: tut-pulse 1s ease-in-out infinite; }
+.tut-damage .x2 { background: var(--gold, #C9A14A); color: #3B2A10; }
+
+/* 5. 하트 */
+.tut-hearts { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tut-heart-row { display: flex; gap: 6px; }
+.tut-heart-row .ui-icon { width: 32px; height: 32px; }
+.tut-break { animation: tut-shake 1.6s ease-in-out infinite; }
+.tut-reveal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 22px;
+  border-radius: 10px;
+  background: #FFF9EE;
+  border: 1.5px solid var(--gold, #C9A14A);
+}
+.tut-reveal small { font-size: 0.7rem; color: var(--cinnabar, #B8332A); }
+.tut-reveal strong { font-family: 'Noto Serif SC', serif; font-size: 1.5rem; color: var(--ink, #1F1A17); }
+.tut-reveal span { font-size: 0.78rem; color: var(--ink-soft, #6B5E52); }
+
+/* 6. 상자 */
+.tut-chests { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.tut-chest-row { display: flex; gap: 4px; align-items: flex-end; }
+.tut-chest { display: flex; flex-direction: column; align-items: center; animation: tut-art-in 0.4s ease both; animation-delay: calc(var(--i) * 0.08s); }
+.tut-chest svg { width: 52px; height: 52px; }
+.tut-chest em { font-style: normal; font-size: 0.62rem; color: var(--ink-soft, #6B5E52); white-space: nowrap; }
+.tut-loot { display: flex; gap: 8px; }
+.tut-loot span { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.7); font-size: 0.8rem; color: var(--ink, #1F1A17); }
+.tut-loot .ui-icon, .tut-loot svg { width: 18px; height: 18px; }
+
+/* 7. 장비 */
+.tut-gear { display: flex; align-items: center; gap: 14px; }
+.tut-gear .avatar-svg { width: 100px; height: auto; }
+.tut-gear-item { display: flex; flex-direction: column; align-items: center; gap: 2px; animation: tut-bob 1.8s ease-in-out infinite; }
+.tut-gear-item svg { width: 48px; height: 48px; }
+.tut-gear-item em { font-style: normal; font-family: var(--serif-ko, serif); font-size: 0.75rem; color: var(--cinnabar, #B8332A); }
+
+@keyframes tut-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes tut-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+@keyframes tut-press { 0%, 60%, 100% { transform: none; } 70% { transform: translateY(3px); } }
+@keyframes tut-ring { 0% { transform: scale(0.8); opacity: 1; } 100% { transform: scale(1.4); opacity: 0; } }
+@keyframes tut-burn { 0% { width: 100%; } 100% { width: 0; } }
+@keyframes tut-hp { 0%, 20% { width: 100%; } 45%, 100% { width: 35%; } }
+@keyframes tut-shake { 0%, 70%, 100% { transform: none; } 75% { transform: translateX(-4px) rotate(-8deg); } 85% { transform: translateX(4px) rotate(8deg); } }
+
+@media (min-width: 720px) {
+  .game-wide .tutorial-card { max-width: 520px; }
+  .game-wide .tutorial-art { height: 200px; }
+  .game-wide .tut-coin { width: 40px; height: 40px; }
+  .game-wide .tut-coin.boss { width: 64px; height: 64px; }
+  .game-wide .tut-link { width: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutorial-modal *,
+  .tutorial-card.turn .tutorial-art > * { animation: none !important; }
+}
