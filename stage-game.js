@@ -974,10 +974,45 @@ function showAnswerReveal(q, timedOut, built) {
   }
   revealZh.classList.toggle('sentence', q.type === 'sentence');
   revealMine.textContent = !timedOut && built ? `내 답: ${built}` : '';
+  renderSentenceExplain(q, timedOut);
   btnRevealNext.textContent = battle.hearts <= 0 ? '결과 보기 →' : '확인, 다음 문제 →';
   battle.revealing = q;
   answerReveal.style.display = '';
-  btnRevealNext.focus();
+  answerReveal.scrollTop = 0; // 해설이 길어도 맨 위(정답)부터 보이게
+  btnRevealNext.focus({ preventScroll: true });
+}
+
+// 문장 문제를 틀렸을 때: 내 답(맞은 자리 초록·틀린 자리 빨강) → 정답 → 왜 틀렸는지 → 관련 문법 노트
+const revealExplain = document.getElementById('reveal-explain');
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+
+function renderSentenceExplain(q, timedOut) {
+  if (q.type !== 'sentence' || typeof GrammarNotes === 'undefined') {
+    revealExplain.style.display = 'none';
+    revealExplain.replaceChildren();
+    return;
+  }
+  const userTiles = q.filled.map((i) => q.tiles[i]);
+  const { marks, reasons, points } = GrammarNotes.explainSentence(q.answer, userTiles, timedOut);
+  const tileRow = (items) => items.map(({ tile, ok }) => `<span class="ex-tile ${ok ? 'ok' : 'bad'}">${escapeHtml(tile)}</span>`).join('');
+  const highlight = (tokens) => q.answer.map((t) => (tokens.includes(t)
+    ? `<mark>${escapeHtml(t)}</mark>` : escapeHtml(t))).join('');
+  revealMine.textContent = '';
+  revealExplain.innerHTML = `
+    ${userTiles.length ? `<div class="ex-row"><span class="ex-label">내 답</span><span class="ex-tiles" lang="zh-CN">${tileRow(marks)}</span></div>` : ''}
+    <div class="ex-row"><span class="ex-label">정답</span><span class="ex-tiles" lang="zh-CN">${tileRow(q.answer.map((tile) => ({ tile, ok: true })))}</span></div>
+    <div class="ex-why">
+      <strong class="ex-heading"><i aria-hidden="true">解</i>왜 틀렸을까?</strong>
+      <ul>${reasons.map((r) => `<li>${escapeHtml(r)}</li>`).join('')}</ul>
+    </div>
+    ${points.map((p) => `
+      <div class="ex-note">
+        <strong class="ex-heading"><i aria-hidden="true">法</i>${escapeHtml(p.title)}</strong>
+        <span class="ex-formula">${escapeHtml(p.formula)}</span>
+        <p>${escapeHtml(p.desc)}</p>
+        <p class="ex-example" lang="zh-CN">${highlight(p.tokens)}</p>
+      </div>`).join('')}`;
+  revealExplain.style.display = '';
 }
 
 btnRevealNext.addEventListener('click', () => {

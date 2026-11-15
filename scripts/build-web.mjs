@@ -9,6 +9,7 @@ const FILES = [
   'art.js',
   'avatar.js',
   'rewards.js',
+  'grammar.js',
   'stage-game.js',
   'style.css',
   'firebase.js',

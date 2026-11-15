@@ -7558,3 +7558,162 @@ header h1, .header-titles h1 {
   font-size: 0.9rem;
   line-height: 1.3;
 }
+
+/* ==========================================================
+   문장 문제 해설 (틀렸을 때)
+   ========================================================== */
+/* 해설이 길면 창 전체(바깥)가 스크롤되고, 두루마리 막대(::before/::after)는 카드 끝에 그대로 붙어 있게 */
+.answer-reveal {
+  align-items: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: 22px;
+  padding-bottom: 22px;
+}
+
+.answer-reveal-card {
+  margin: auto 0;
+  flex: none;
+}
+
+.answer-reveal-card:has(.reveal-explain:not([style*="none"])) {
+  max-width: 400px;
+}
+
+.reveal-explain {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  text-align: left;
+}
+
+.ex-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ex-label {
+  flex: none;
+  width: 34px;
+  padding-top: 5px;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.75rem;
+  color: var(--ink-soft, #6B5E52);
+}
+
+.ex-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ex-tile {
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.3;
+  border: 1.5px solid;
+}
+
+.ex-tile.ok {
+  color: #2C5E50;
+  border-color: #5E9C8E;
+  background: #EAF4F1;
+}
+
+.ex-tile.bad {
+  color: #8E241D;
+  border-color: #D9533F;
+  background: #FCEAE6;
+  text-decoration: underline wavy rgba(217, 83, 63, 0.7);
+  text-underline-offset: 3px;
+}
+
+.ex-why,
+.ex-note {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(201, 161, 74, 0.45);
+}
+
+.ex-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.92rem;
+  color: var(--ink, #1F1A17);
+}
+
+.ex-heading i {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--cinnabar, #B8332A);
+  color: #FFF6E6;
+  font-style: normal;
+  font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+  font-size: 0.8rem;
+}
+
+.ex-note .ex-heading i {
+  background: var(--jade, #3F7D6B);
+}
+
+.ex-why ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--ink-soft, #4A3F36);
+  word-break: keep-all;
+}
+
+.ex-why li + li {
+  margin-top: 3px;
+}
+
+.ex-formula {
+  display: inline-block;
+  margin: 6px 0 2px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #F4EBDD;
+  border: 1px dashed rgba(63, 125, 107, 0.6);
+  font-size: 0.8rem;
+  color: #2C5E50;
+}
+
+.ex-note p {
+  margin: 4px 0 0;
+  font-size: 0.83rem;
+  line-height: 1.55;
+  color: var(--ink-soft, #4A3F36);
+  word-break: keep-all;
+}
+
+.ex-note .ex-example {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 0.95rem;
+  color: var(--ink, #1F1A17);
+}
+
+.ex-example mark {
+  background: linear-gradient(transparent 55%, rgba(242, 194, 48, 0.6) 55%);
+  color: var(--cinnabar-dark, #8E241D);
+  font-weight: 700;
+  padding: 0 1px;
+}
+
+@media (min-width: 720px) {
+  .game-wide .answer-reveal-card:has(.reveal-explain:not([style*="none"])) { max-width: 520px; }
+  .game-wide .ex-why ul,
+  .game-wide .ex-note p { font-size: 0.92rem; }
+}
