@@ -3873,3 +3873,296 @@ header h1, .header-titles h1 {
     animation: none;
   }
 }
+
+/* ---- 정답 확인 창 (틀렸을 때) ---- */
+.answer-reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 24, 52, 0.55);
+  padding: 16px;
+  z-index: 4;
+}
+
+.answer-reveal-card {
+  width: 100%;
+  max-width: 340px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-top: 6px solid var(--wrong);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: monster-appear 0.3s ease;
+}
+
+.reveal-title {
+  font-size: 1.1rem;
+  color: var(--wrong);
+  margin-bottom: 4px;
+}
+
+.reveal-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.reveal-zh {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.reveal-zh.sentence {
+  font-size: 1.4rem;
+  line-height: 1.5;
+}
+
+.reveal-pinyin {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.reveal-meaning {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  word-break: keep-all;
+}
+
+.reveal-mine {
+  font-size: 0.85rem;
+  color: var(--wrong);
+  min-height: 0;
+}
+
+.reveal-mine:empty {
+  display: none;
+}
+
+.reveal-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.reveal-buttons > * {
+  margin: 0;
+}
+
+.reveal-buttons .btn-restart {
+  flex: 0 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.reveal-buttons .btn-start-quiz {
+  flex: 1;
+}
+
+/* ---- 컴퓨터 화면: 게임 화면을 넓고 크게 ---- */
+@media (min-width: 720px) {
+  .app-container.game-wide {
+    max-width: 820px;
+  }
+
+  .game-wide .game-map-title {
+    font-size: 2rem;
+  }
+
+  .game-wide .game-map-desc {
+    font-size: 1rem;
+  }
+
+  .game-wide .game-level-tab {
+    padding: 9px 20px;
+    font-size: 1rem;
+  }
+
+  .game-wide .game-chapters {
+    max-height: 62vh;
+  }
+
+  .game-wide .stage-path {
+    gap: 12px;
+  }
+
+  .game-wide .stage-node {
+    aspect-ratio: 1 / 1.1;
+    border-radius: 18px;
+  }
+
+  .game-wide .stage-node-icon {
+    font-size: 1.6rem;
+  }
+
+  .game-wide .stage-node-label {
+    font-size: 0.85rem;
+  }
+
+  .game-wide .stage-node-stars {
+    font-size: 0.85rem;
+  }
+
+  .game-wide .my-avatar {
+    width: 72px;
+    height: 82px;
+  }
+
+  .game-wide .my-avatar .avatar-svg {
+    width: 72px;
+  }
+
+  .game-wide .avatar-preview {
+    width: 200px;
+    height: 260px;
+  }
+
+  .game-wide .avatar-preview .avatar-svg {
+    width: 180px;
+  }
+
+  .game-wide .avatar-mini,
+  .game-wide .avatar-mini .avatar-svg {
+    width: 64px;
+  }
+
+  .game-wide .avatar-mini {
+    height: 64px;
+  }
+
+  .game-wide .game-battle {
+    padding: 18px 22px 24px;
+    gap: 14px;
+  }
+
+  .game-wide .battle-title {
+    font-size: 1.2rem;
+  }
+
+  .game-wide .battle-stage {
+    padding: 16px 18px 0;
+    gap: 10px;
+  }
+
+  .game-wide .speech {
+    padding: 12px 18px;
+  }
+
+  .game-wide .bubble-kind {
+    font-size: 0.9rem;
+  }
+
+  .game-wide .bubble-text {
+    font-size: 1.45rem;
+  }
+
+  .game-wide .player-bubble-text {
+    font-size: 1.4rem;
+  }
+
+  .game-wide .player-bubble-sub {
+    font-size: 0.95rem;
+  }
+
+  .game-wide .fighters {
+    padding: 10px 24px 10px;
+  }
+
+  .game-wide .fighter-name {
+    font-size: 0.95rem;
+  }
+
+  .game-wide .fighter-hp {
+    height: 12px;
+  }
+
+  .game-wide .fighter-hearts {
+    font-size: 1.1rem;
+    height: 12px;
+    line-height: 12px;
+  }
+
+  .game-wide .monster {
+    font-size: 7rem;
+  }
+
+  .game-wide .boss-battle .monster {
+    font-size: 8.5rem;
+  }
+
+  .game-wide .battle-avatar {
+    width: 150px;
+    height: 200px;
+  }
+
+  .game-wide .battle-avatar .avatar-svg {
+    width: 150px;
+  }
+
+  .game-wide .damage-pop {
+    font-size: 1.6rem;
+  }
+
+  .game-wide .battle-timer {
+    height: 12px;
+  }
+
+  .game-wide .answer-slots {
+    min-height: 76px;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .game-wide .tile-pool {
+    gap: 12px;
+  }
+
+  .game-wide .answer-slot {
+    min-width: 62px;
+    height: 62px;
+    font-size: 1.9rem;
+  }
+
+  .game-wide .pool-tile {
+    min-width: 66px;
+    height: 66px;
+    font-size: 2rem;
+    padding: 0 14px;
+  }
+
+  .game-wide .sentence .answer-slot,
+  .game-wide .sentence .pool-tile {
+    font-size: 1.4rem;
+    height: 54px;
+    min-width: 54px;
+  }
+
+  .game-wide .answer-reveal-card,
+  .game-wide .battle-result-card {
+    max-width: 440px;
+    padding: 26px 24px;
+  }
+
+  .game-wide .reveal-zh {
+    font-size: 3.4rem;
+  }
+
+  .game-wide .reveal-zh.sentence {
+    font-size: 1.8rem;
+  }
+
+  .game-wide .reveal-pinyin,
+  .game-wide .reveal-meaning {
+    font-size: 1.15rem;
+  }
+}

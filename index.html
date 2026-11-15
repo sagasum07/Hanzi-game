@@ -536,6 +536,22 @@
         <div class="tile-pool" id="tile-pool"></div>
         <div class="battle-feedback" id="battle-feedback" aria-live="polite"></div>
 
+        <!-- 틀렸을 때 정답 확인 창 (확인을 눌러야 다음 문제로) -->
+        <div class="answer-reveal" id="answer-reveal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="reveal-title">
+          <div class="answer-reveal-card">
+            <h3 class="reveal-title" id="reveal-title"></h3>
+            <span class="reveal-label">정답</span>
+            <p class="reveal-zh" id="reveal-zh" lang="zh-CN"></p>
+            <p class="reveal-pinyin" id="reveal-pinyin"></p>
+            <p class="reveal-meaning" id="reveal-meaning"></p>
+            <p class="reveal-mine" id="reveal-mine"></p>
+            <div class="reveal-buttons">
+              <button class="btn-restart" id="btn-reveal-speak">🔊 듣기</button>
+              <button class="btn-start-quiz" id="btn-reveal-next">확인 →</button>
+            </div>
+          </div>
+        </div>
+
         <div class="battle-result" id="battle-result" style="display:none;">
           <div class="battle-result-card">
             <div class="battle-result-icon" id="battle-result-icon"></div>

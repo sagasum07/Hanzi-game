@@ -19,7 +19,7 @@ const PLAYER_HEARTS = 3;
 const MONSTER_HP = { normal: 12, boss: 20 }; // 크리티컬(2)을 섞어 학습 스테이지는 문제 8~12개쯤
 const SENTENCE_RATE = { normal: 0.3, boss: 0.45 }; // 문장 조립 문제가 나올 확률
 const MAX_SENTENCE_TILES = 8;
-const REVEAL_MS = { correct: 1300, wrong: 2300 }; // 답을 보여 주는 시간
+const REVEAL_MS = { correct: 1300 }; // 맞혔을 때 답을 보여 주는 시간 (틀리면 확인 창에서 직접 넘김)
 
 const MONSTERS = [
   { icon: '👾', name: '꼬마 외계인' },
@@ -76,6 +76,15 @@ const playerBubbleSub = document.getElementById('player-bubble-sub');
 const myAvatarEl = document.getElementById('my-avatar');
 const myAvatarName = document.getElementById('my-avatar-name');
 const ATTACK_MS = 260; // 주먹이 닿는 시점 (CSS 애니메이션과 맞춤)
+const REVEAL_DELAY_MS = 900; // 오답 모션이 끝난 뒤 정답 확인 창을 띄우는 시점
+const appContainer = document.querySelector('.app-container');
+const answerReveal = document.getElementById('answer-reveal');
+const revealTitle = document.getElementById('reveal-title');
+const revealZh = document.getElementById('reveal-zh');
+const revealPinyin = document.getElementById('reveal-pinyin');
+const revealMeaning = document.getElementById('reveal-meaning');
+const revealMine = document.getElementById('reveal-mine');
+const btnRevealNext = document.getElementById('btn-reveal-next');
 
 let gameLevel = 1;
 let battle = null; // 진행 중인 전투 상태
@@ -272,6 +281,7 @@ async function startBattle(level, stageNo) {
   gameMap.style.display = 'none';
   gameBattle.style.display = '';
   battleResult.style.display = 'none';
+  answerReveal.style.display = 'none';
   gameBattle.classList.toggle('boss-battle', stage.boss);
   battleTitle.textContent = stage.boss ? `챕터 ${stage.chapter} 보스` : `스테이지 ${stage.chapter}-${stage.pos}`;
   monsterName.textContent = `${monster.name}${stage.boss ? ' 👑' : ''}`;
@@ -423,6 +433,7 @@ function checkAnswer() {
 
 function resolveQuestion(correct, timedOut) {
   const q = battle.question;
+  const built = q.filled.map((i) => q.tiles[i]).join(q.type === 'sentence' ? ' ' : '');
   battle.busy = true;
   const remainRatio = stopBattleTimer();
   renderTiles();
@@ -471,15 +482,57 @@ function resolveQuestion(correct, timedOut) {
       showDamage(playerPop, '-❤️');
       renderBattleStatus();
     }, ATTACK_MS);
+    // 틀리면 정답 확인 창을 띄우고, 사용자가 확인을 눌러야 다음으로 넘어감
+    setTimeout(() => {
+      if (battle !== current) return;
+      showAnswerReveal(q, timedOut, built);
+    }, REVEAL_DELAY_MS);
+    return;
   }
 
   setTimeout(() => {
     if (battle !== current) return; // 그사이 나갔거나 다른 스테이지를 시작함
-    if (battle.hp <= 0) finishBattle(true);
-    else if (battle.hearts <= 0) finishBattle(false);
-    else nextQuestion();
-  }, correct ? REVEAL_MS.correct : REVEAL_MS.wrong);
+    continueBattle();
+  }, REVEAL_MS.correct);
 }
+
+// 다음 문제로 넘어가거나, 승패가 났으면 결과를 보여 줌
+function continueBattle() {
+  if (battle.hp <= 0) finishBattle(true);
+  else if (battle.hearts <= 0) finishBattle(false);
+  else nextQuestion();
+}
+
+function showAnswerReveal(q, timedOut, built) {
+  revealTitle.textContent = timedOut ? '⏰ 시간이 다 됐어요' : '💥 아쉬워요, 틀렸어요';
+  if (q.type === 'word') {
+    revealZh.textContent = q.word.hanzi;
+    revealPinyin.textContent = q.word.pinyin;
+    revealMeaning.textContent = q.word.meaning;
+  } else {
+    revealZh.textContent = q.sentence.zh;
+    revealPinyin.textContent = q.sentence.pinyin;
+    revealMeaning.textContent = q.sentence.ko;
+  }
+  revealZh.classList.toggle('sentence', q.type === 'sentence');
+  revealMine.textContent = !timedOut && built ? `내 답: ${built}` : '';
+  btnRevealNext.textContent = battle.hearts <= 0 ? '결과 보기 →' : '확인, 다음 문제 →';
+  battle.revealing = q;
+  answerReveal.style.display = '';
+  btnRevealNext.focus();
+}
+
+btnRevealNext.addEventListener('click', () => {
+  if (!battle || !battle.revealing) return;
+  battle.revealing = null;
+  answerReveal.style.display = 'none';
+  continueBattle();
+});
+
+document.getElementById('btn-reveal-speak').addEventListener('click', () => {
+  const q = battle && battle.revealing;
+  if (q) speakHanzi(q.type === 'word' ? q.word.hanzi : q.sentence.zh);
+});
 
 function showDamage(el, text) {
   el.textContent = text;
@@ -623,5 +676,7 @@ showScreen = function (name) {
     stopBattleTimer();
     battle = null;
   }
+  // 게임 화면에서는 컴퓨터 화면에 맞게 넓게 표시
+  appContainer.classList.toggle('game-wide', name === 'game');
   _showScreenForGame(name);
 };
