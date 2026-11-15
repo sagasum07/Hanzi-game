@@ -44,11 +44,11 @@ try {
   // 로그아웃 후 다시 로그인할 때 다른 계정을 고를 수 있게 항상 계정 선택 창을 띄움
   provider.setCustomParameters({ prompt: 'select_account' });
 
-  const { doc, getDoc, getDocs, setDoc, deleteDoc, collection, query, where, runTransaction, writeBatch, serverTimestamp } = firestoreSdk;
+  const { doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, collection, query, where, runTransaction, writeBatch, serverTimestamp } = firestoreSdk;
   const userDoc = (uid) => doc(db, 'users', uid);
 
   // ---------- 프로필 · 닉네임 · 고유 번호 ----------
-  // profiles/{uid}: { nickname, userCode } — 친구 찾기를 위해 로그인한 사용자 누구나 읽을 수 있음
+  // profiles/{uid}: { nickname, userCode, title? } — 친구 찾기를 위해 로그인한 사용자 누구나 읽을 수 있음
   // nicknames/{n_닉네임 소문자}, userCodes/{8자리}: 점유 표시 (보안 규칙이 중복 생성을 막음)
   const profileDoc = (uid) => doc(db, 'profiles', uid);
   const nicknameKey = (nickname) => 'n_' + nickname.toLowerCase();
@@ -97,8 +97,10 @@ try {
           }
           if (!nickSnap.exists()) tx.set(nicknameDoc(nickname), { uid });
           if (prev && nicknameKey(prev.nickname) !== nicknameKey(nickname)) tx.delete(nicknameDoc(prev.nickname));
-          tx.set(profileDoc(uid), { nickname, userCode, updatedAt: serverTimestamp() });
-          return { nickname, userCode };
+          // 닉네임을 바꿔도 착용한 칭호는 그대로 둠
+          const title = prev && prev.title ? prev.title : null;
+          tx.set(profileDoc(uid), { nickname, userCode, updatedAt: serverTimestamp(), ...(title ? { title } : {}) });
+          return { nickname, userCode, title };
         });
       } catch (error) {
         if (error.code !== 'code-taken') throw error; // 번호가 겹치면 다른 번호로 다시 시도
@@ -262,6 +264,8 @@ try {
     removeFriend: (friendUid) => deleteDoc(friendshipDoc(myUid(), friendUid)),
     countIncomingRequests: countIncomingRequests,
     getFriendData: getFriendData,
+    // 착용한 칭호를 공개 프로필에 저장 (친구 목록에 보임). 없으면 null
+    setProfileTitle: (title) => updateDoc(profileDoc(myUid()), { title: title || null, updatedAt: serverTimestamp() }),
   };
 
   // 개발용: 에뮬레이터에서는 가짜 구글 계정으로 로그인 (sub 가 같으면 같은 사용자)

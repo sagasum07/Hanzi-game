@@ -407,6 +407,26 @@ function refreshTitleDisplays() {
   const badge = titleBadgeHtml();
   welcomeTitle.innerHTML = badge;
   welcomeTitle.style.display = badge ? '' : 'none';
+  syncProfileTitle();
+}
+
+// 착용한 칭호를 친구들이 볼 수 있게 공개 프로필에 저장 (로그인 + 닉네임이 있을 때만, 바뀌었을 때만)
+let titleSyncing = false;
+let titleSyncFailed = false; // 한 번 실패하면 이번 접속에서는 다시 시도하지 않음 (헛된 요청 반복 방지)
+function syncProfileTitle() {
+  if (titleSyncing || titleSyncFailed || typeof userProfile === 'undefined' || !userProfile || !window.hanziFirebase
+    || !window.hanziFirebase.setProfileTitle || !userRecord || !userRecord.game) return;
+  const want = gamePlayer().equip.title || null;
+  if ((userProfile.title || null) === want) return;
+  titleSyncing = true;
+  const profile = userProfile;
+  window.hanziFirebase.setProfileTitle(want)
+    .then(() => { profile.title = want; })
+    .catch((error) => {
+      titleSyncFailed = true;
+      console.warn('칭호를 프로필에 저장하지 못했어요.', error);
+    })
+    .finally(() => { titleSyncing = false; });
 }
 
 function setPlayerMood(mood) {
@@ -1267,6 +1287,7 @@ function finishBattle(won) {
     // 마왕을 물리치면 칭호
     const earned = stage.final ? grantMasterTitle(level) : [];
     showTitleEarned(earned);
+    if (earned.length) syncProfileTitle();
     showRewards(makeStageRewards(level, stage, stars, replay), replay);
   } else {
     showTitleEarned([]);

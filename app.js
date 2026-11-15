@@ -2951,10 +2951,21 @@ function createFriendItem(person, actions) {
   const nickname = document.createElement('span');
   nickname.className = 'friend-nickname';
   nickname.textContent = person.nickname;
+  // 친구가 착용한 칭호 (게임 모드에서 마왕을 물리치면 얻음)
+  const titleBadge = typeof titleBadgeHtml === 'function' && person.title && TITLE_BY_ID[person.title]
+    ? titleBadgeHtml(TITLE_BY_ID[person.title]) : '';
   const code = document.createElement('span');
   code.className = 'friend-code';
   code.textContent = `@${person.userCode}`;
-  names.append(nickname, code);
+  names.append(nickname);
+  // 닉네임이 길어도 칭호가 잘리지 않게 닉네임 아래 줄에 따로 둠
+  if (titleBadge) {
+    const titleLine = document.createElement('span');
+    titleLine.className = 'friend-title';
+    titleLine.innerHTML = titleBadge;
+    names.append(titleLine);
+  }
+  names.append(code);
 
   const buttons = document.createElement('div');
   buttons.className = 'friend-actions';
@@ -3041,6 +3052,12 @@ function openFriends() {
 
   myAvatar.textContent = Array.from(userProfile.nickname)[0];
   myNickname.textContent = userProfile.nickname;
+  const oldTitle = document.getElementById('my-friend-title');
+  if (oldTitle) oldTitle.remove();
+  if (typeof equippedTitle === 'function' && userRecord && userRecord.game) {
+    const t = equippedTitle();
+    if (t) myNickname.insertAdjacentHTML('afterend', `<span class="friend-title" id="my-friend-title">${titleBadgeHtml(t)}</span>`);
+  }
   myUserCode.textContent = `@${userProfile.userCode} 📋`;
   loadFriends();
 }

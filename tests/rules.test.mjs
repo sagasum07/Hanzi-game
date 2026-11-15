@@ -8,7 +8,7 @@ import {
   assertFails,
 } from '@firebase/rules-unit-testing';
 import {
-  doc, getDoc, setDoc, deleteDoc, writeBatch, serverTimestamp,
+  doc, getDoc, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp,
   collection, query, where, getDocs,
 } from 'firebase/firestore';
 
@@ -87,6 +87,18 @@ test('닉네임 바꾸기: 새 닉네임 점유 + 예전 닉네임 해제 → �
   await assertSucceeds(profileBatch(db('carol'), 'carol', 'alice', '33333333'));
   // 남의 닉네임 점유는 지울 수 없음
   await assertFails(deleteDoc(doc(db('bob'), 'nicknames/n_alice')));
+});
+
+test('칭호: 게임에 있는 칭호만 내 프로필에 달 수 있음', async () => {
+  const setTitle = (uid, owner, title) => updateDoc(doc(db(uid), 'profiles', owner), { title, updatedAt: serverTimestamp() });
+  await assertSucceeds(setTitle('alice', 'alice', 'hsk3'));
+  await assertSucceeds(setTitle('alice', 'alice', 'allmaster'));
+  await assertSucceeds(setTitle('alice', 'alice', null));
+  await assertFails(setTitle('alice', 'alice', 'hsk7'));
+  await assertFails(setTitle('alice', 'alice', '전설의 해커'));
+  await assertFails(setTitle('bob', 'alice', 'hsk1')); // 남의 프로필은 안 됨
+  // 다른 필드는 여전히 못 넣음
+  await assertFails(updateDoc(doc(db('alice'), 'profiles', 'alice'), { badge: 'x' }));
 });
 
 test('프로필 읽기: 로그인한 사용자만', async () => {

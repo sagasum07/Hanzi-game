@@ -7550,3 +7550,11 @@ header h1, .header-titles h1 {
   .title-earned-row,
   .title-earned-row .title-badge { animation: none; }
 }
+
+/* 친구 목록: 닉네임 아래 칭호 */
+.friend-title {
+  display: block;
+  margin: 1px 0;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}

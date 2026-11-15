@@ -4,7 +4,7 @@ rules_version = '2';
 // Firebase 콘솔 → Firestore Database → 규칙 탭에 이 내용을 붙여넣고 "게시"하세요.
 //
 // users/{uid}            학습 기록 (본인만 읽기/쓰기)
-// profiles/{uid}         공개 프로필: 닉네임 + 고유 번호 (로그인한 사용자 누구나 읽기, 본인만 쓰기)
+// profiles/{uid}         공개 프로필: 닉네임 + 고유 번호 + 착용한 칭호 (로그인한 사용자 누구나 읽기, 본인만 쓰기)
 // nicknames/{n_닉네임}    닉네임 점유 표시 → 같은 닉네임은 한 명만 (이미 있으면 만들 수 없음)
 // userCodes/{8자리 번호}  고유 번호 점유 표시 → 같은 번호는 한 명만
 // friendRequests/{보낸uid_받는uid}  친구 요청
@@ -43,7 +43,11 @@ service cloud.firestore {
       allow read: if signedIn();
 
       allow create, update: if isMe(uid)
-        && request.resource.data.keys().hasOnly(['nickname', 'userCode', 'updatedAt'])
+        && request.resource.data.keys().hasOnly(['nickname', 'userCode', 'updatedAt', 'title'])
+        // 칭호: 없거나, 게임에 있는 칭호 이름 중 하나 (HSK 1~6급 마스터, 한자 무림 맹주)
+        && (!('title' in request.resource.data)
+          || request.resource.data.title == null
+          || (request.resource.data.title is string && request.resource.data.title.matches('^(hsk[1-6]|allmaster)$')))
         && request.resource.data.nickname is string
         && request.resource.data.nickname.size() >= 2
         && request.resource.data.nickname.size() <= 12
