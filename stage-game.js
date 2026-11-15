@@ -17,7 +17,13 @@ const STAGE_WORDS = 10; // 학습 스테이지 하나에 나오는 단어 수
 const STAGES_PER_CHAPTER = 6; // 보스 전까지의 학습 스테이지 수
 const PLAYER_HEARTS = 3;
 const MONSTER_HP = { normal: 12, boss: 20 }; // 크리티컬(2)을 섞어 학습 스테이지는 문제 8~12개쯤
-const SENTENCE_RATE = { normal: 0.3, boss: 0.45 }; // 문장 조립 문제가 나올 확률
+// 문장 조립 문제가 나올 확률: 챕터마다 1~3번째 스테이지는 단어 문제만,
+// 4번째부터 조금씩 늘어나고 두목전에서 가장 많이 나옴 (단어를 먼저 익힌 뒤 문장으로)
+const SENTENCE_RATE_BY_POS = { 1: 0, 2: 0, 3: 0, 4: 0.15, 5: 0.25, 6: 0.35 };
+const SENTENCE_RATE_BOSS = 0.4;
+function sentenceRate(stage) {
+  return stage.boss ? SENTENCE_RATE_BOSS : (SENTENCE_RATE_BY_POS[stage.pos] || 0);
+}
 const MAX_SENTENCE_TILES = 8;
 const REVEAL_MS = { correct: 1300 }; // 맞혔을 때 답을 보여 주는 시간 (틀리면 확인 창에서 직접 넘김)
 
@@ -393,14 +399,15 @@ function sentenceQuestion(word, sentence) {
     prompt: sentence.ko,
     answer: sentence.tiles,
     tiles: shuffle([...sentence.tiles, ...traps]),
-    seconds: Math.min(32, 8 + sentence.tiles.length * 3) + timeBonus(),
+    // 문장은 읽고 어순을 생각할 시간이 필요하므로 단어보다 넉넉하게 (카드 3장 26초 ~ 8장 46초)
+    seconds: Math.min(46, 14 + sentence.tiles.length * 4) + timeBonus(),
   };
 }
 
 function nextQuestion() {
   if (!battle) return;
   const word = nextWord();
-  const sentence = Math.random() < SENTENCE_RATE[battle.kind] ? sentenceFor(word) : null;
+  const sentence = Math.random() < sentenceRate(battle.stage) ? sentenceFor(word) : null;
   const q = sentence ? sentenceQuestion(word, sentence) : wordQuestion(word);
   battle.question = q;
   battle.busy = false;
