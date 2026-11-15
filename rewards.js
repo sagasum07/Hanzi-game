@@ -49,6 +49,18 @@ const GEAR = [
   { id: 'crown', slot: 'hat', rarity: 4, name: '황금 왕관', time: 4 },
 ];
 const GEAR_BY_ID = Object.fromEntries(GEAR.map((g) => [g.id, g]));
+
+// 칭호: 급수별 마왕성을 깨면 'HSK n급 마스터', 여섯 급수를 모두 깨면 특별 칭호
+// 착용하면 닉네임 옆에 붙음 (지도 카드·전투 이름표·처음 화면 인사)
+const TITLES = [
+  ...[1, 2, 3, 4, 5, 6].map((n) => ({
+    id: `hsk${n}`, level: n, name: `HSK ${n}급 마스터`, han: '一二三四五六'[n - 1],
+    how: `HSK ${n}급 마왕성의 마왕을 물리치면 얻어요`,
+    color: ['#A0652E', '#3DAA6D', '#4A7FD9', '#8A5CC0', '#E3A92B', '#B8332A'][n - 1],
+  })),
+  { id: 'allmaster', level: 0, name: '한자 무림 맹주', han: '盟', how: '여섯 급수의 마왕을 모두 물리치면 얻어요', color: '#1F1A17', special: true },
+];
+const TITLE_BY_ID = Object.fromEntries(TITLES.map((t) => [t.id, t]));
 const DUPLICATE_COINS = [30, 60, 120, 250, 500]; // 같은 장비가 또 나오면 등급별로 바꿔 주는 코인
 
 // ---------- 플레이어 기록 ----------
@@ -60,7 +72,11 @@ function gamePlayer() {
     coins: Number(p.coins) || 0,
     items: p.items && typeof p.items === 'object' ? p.items : {},
     equip: p.equip && typeof p.equip === 'object' ? p.equip : { weapon: null, hat: null },
+    titles: p.titles && typeof p.titles === 'object' ? p.titles : {},
   };
+  // 착용한 칭호가 없어졌거나 얻지 못한 칭호면 해제
+  const t = userRecord.game.player.equip.title;
+  if (t && (!TITLE_BY_ID[t] || !userRecord.game.player.titles[t])) userRecord.game.player.equip.title = null;
   // 저장된 장착 장비가 목록에 없거나 가지고 있지 않으면 해제
   for (const slot of ['weapon', 'hat']) {
     const id = userRecord.game.player.equip[slot];
@@ -225,8 +241,39 @@ function gearEffectText(g) {
   return g.slot === 'weapon' ? `빠른 공격 판정 +${Math.round(g.crit * 100)}%` : `제한 시간 +${g.time}초`;
 }
 
+// ---------- 칭호 ----------
+function equippedTitle() {
+  const id = gamePlayer().equip.title;
+  return id ? TITLE_BY_ID[id] : null;
+}
+
+// 칭호 배지 HTML (닉네임 옆에 붙임)
+function titleBadgeHtml(title = equippedTitle()) {
+  if (!title) return '';
+  return `<span class="title-badge${title.special ? ' special' : ''}" style="--title-color:${title.color}"><i aria-hidden="true">${title.han}</i>${title.name}</span>`;
+}
+
+// 마왕을 물리치면 칭호를 줌. 새로 얻은 칭호 목록을 돌려줌 (처음 얻은 칭호는 자동 착용)
+function grantMasterTitle(level) {
+  const p = gamePlayer();
+  const earned = [];
+  const give = (id) => {
+    if (p.titles[id]) return;
+    p.titles[id] = true;
+    earned.push(TITLE_BY_ID[id]);
+  };
+  give(`hsk${level}`);
+  if ([1, 2, 3, 4, 5, 6].every((n) => p.titles[`hsk${n}`])) give('allmaster');
+  if (earned.length && !p.equip.title) p.equip.title = earned[earned.length - 1].id;
+  if (earned.length) scheduleRecordSave();
+  return earned;
+}
+
+let bagTab = 'gear';
+
 function openBag(onClose) {
   onBagClose = onClose;
+  bagTab = 'gear';
   renderBag();
   bagModal.style.display = '';
 }
@@ -235,7 +282,17 @@ function renderBag() {
   const p = gamePlayer();
   bagPreview.innerHTML = renderAvatar(getAvatar(), 'normal', p.equip);
   const eq = equippedGear();
-  bagStats.innerHTML = `${eq.weapon ? `${renderGearIcon(eq.weapon.id)} ${eq.weapon.name}` : '맨손'} · ${eq.hat ? `${renderGearIcon(eq.hat.id)} ${eq.hat.name}` : '모자 없음'}`;
+  bagStats.innerHTML = `${eq.weapon ? `${renderGearIcon(eq.weapon.id)} ${eq.weapon.name}` : '맨손'} · ${eq.hat ? `${renderGearIcon(eq.hat.id)} ${eq.hat.name}` : '모자 없음'}`
+    + `<span class="bag-title-line">${titleBadgeHtml() || '<span class="bag-no-title">칭호 없음</span>'}</span>`;
+  document.querySelectorAll('.bag-tab').forEach((b) => {
+    const on = b.dataset.tab === bagTab;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  if (bagTab === 'title') {
+    renderTitleList(p);
+    return;
+  }
   const owned = GEAR.filter((g) => p.items[g.id]);
   if (owned.length === 0) {
     const empty = document.createElement('p');
@@ -271,6 +328,51 @@ function renderBag() {
     return row;
   }));
 }
+
+// 칭호 칸: 얻은 칭호는 착용·해제, 아직 못 얻은 칭호는 얻는 방법을 보여 줌
+function renderTitleList(p) {
+  const count = TITLES.filter((t) => p.titles[t.id]).length;
+  const head = document.createElement('p');
+  head.className = 'bag-title-count';
+  head.textContent = `모은 칭호 ${count} / ${TITLES.length}`;
+  bagList.replaceChildren(head, ...TITLES.map((t) => {
+    const owned = !!p.titles[t.id];
+    const equipped = p.equip.title === t.id;
+    const row = document.createElement('div');
+    row.className = 'bag-item title-item' + (equipped ? ' equipped' : '') + (owned ? '' : ' locked');
+    row.style.setProperty('--rarity', owned ? t.color : '#C9C1B6');
+    const icon = document.createElement('span');
+    icon.className = 'bag-item-icon title-seal-icon';
+    icon.style.setProperty('--title-color', t.color);
+    icon.innerHTML = owned ? t.han : uiIcon('lock');
+    const info = document.createElement('span');
+    info.className = 'bag-item-info';
+    const name = document.createElement('strong');
+    name.textContent = t.name;
+    const meta = document.createElement('small');
+    meta.textContent = owned ? (t.special ? '모든 급수 정복의 증표' : `HSK ${t.level}급 마왕성 정복의 증표`) : t.how;
+    info.append(name, meta);
+    row.append(icon, info);
+    if (owned) {
+      const btn = document.createElement('button');
+      btn.className = 'bag-item-btn';
+      btn.textContent = equipped ? '해제' : '착용';
+      btn.addEventListener('click', () => {
+        p.equip.title = equipped ? null : t.id;
+        scheduleRecordSave();
+        renderBag();
+        if (typeof refreshTitleDisplays === 'function') refreshTitleDisplays();
+      });
+      row.append(btn);
+    }
+    return row;
+  }));
+}
+
+document.querySelectorAll('.bag-tab').forEach((b) => b.addEventListener('click', () => {
+  bagTab = b.dataset.tab;
+  renderBag();
+}));
 
 document.getElementById('btn-bag-close').addEventListener('click', () => {
   bagModal.style.display = 'none';

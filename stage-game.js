@@ -387,6 +387,28 @@ function playerDisplayName() {
   return name && name !== '게스트' ? name : '나';
 }
 
+// 닉네임 + 착용한 칭호 배지
+function setNameWithTitle(el, name) {
+  el.textContent = name;
+  const badge = titleBadgeHtml();
+  if (badge) el.insertAdjacentHTML('beforeend', ` ${badge}`);
+}
+
+// 칭호를 바꾸면 보이는 곳을 모두 다시 그림
+function refreshTitleDisplays() {
+  const welcomeTitleEl = document.getElementById('welcome-title');
+  if (typeof userRecord === 'undefined' || !userRecord || !userRecord.game) {
+    welcomeTitleEl.style.display = 'none';
+    return;
+  }
+  if (myAvatarName) setNameWithTitle(myAvatarName, playerDisplayName());
+  if (battle) setNameWithTitle(playerNameEl, playerDisplayName());
+  const welcomeTitle = document.getElementById('welcome-title');
+  const badge = titleBadgeHtml();
+  welcomeTitle.innerHTML = badge;
+  welcomeTitle.style.display = badge ? '' : 'none';
+}
+
 function setPlayerMood(mood) {
   playerAvatarEl.innerHTML = renderAvatar(getAvatar(), mood, gamePlayer().equip);
 }
@@ -396,7 +418,7 @@ function renderPlayerCard() {
   const p = gamePlayer();
   const info = levelInfo(p.exp);
   myAvatarEl.innerHTML = renderAvatar(getAvatar(), 'normal', p.equip);
-  myAvatarName.textContent = playerDisplayName();
+  setNameWithTitle(myAvatarName, playerDisplayName());
   document.getElementById('player-level').textContent = `Lv.${info.level}`;
   document.getElementById('exp-bar-fill').style.width = `${(info.exp / info.need) * 100}%`;
   document.getElementById('exp-text').textContent = `${info.exp.toLocaleString()} / ${info.need.toLocaleString()} EXP`;
@@ -538,7 +560,7 @@ async function startBattle(level, stageNo) {
   battle.monsterArt = monster.art;
   monsterFighter.className = 'fighter monster-side';
   playerFighter.className = 'fighter player-side';
-  playerNameEl.textContent = playerDisplayName();
+  setNameWithTitle(playerNameEl, playerDisplayName());
   setPlayerMood('normal');
   showScreen('game');
   renderBattleStatus();
@@ -1242,8 +1264,12 @@ function finishBattle(won) {
   const replay = stage.no <= gameProgress(level).cleared; // 이미 클리어했던 스테이지
   if (won) {
     saveStageClear(level, stage.no, stars);
+    // 마왕을 물리치면 칭호
+    const earned = stage.final ? grantMasterTitle(level) : [];
+    showTitleEarned(earned);
     showRewards(makeStageRewards(level, stage, stars, replay), replay);
   } else {
+    showTitleEarned([]);
     rewardArea.style.display = 'none';
     resultButtons.style.display = '';
   }
@@ -1287,6 +1313,25 @@ const levelUpEl = document.getElementById('level-up');
 const lootButtons = document.getElementById('loot-buttons');
 let pendingRewards = null;
 const LOOT_GAP_MS = 380; // 보상이 하나씩 튀어나오는 간격
+
+// 결과 창: 새로 얻은 칭호를 두루마리처럼 펼쳐 보여 줌
+function showTitleEarned(earned) {
+  const el = document.getElementById('title-earned');
+  if (!earned.length) {
+    el.style.display = 'none';
+    el.replaceChildren();
+    return;
+  }
+  const equippedId = gamePlayer().equip.title;
+  el.innerHTML = earned.map((t) => `
+    <div class="title-earned-row">
+      <span class="title-earned-label">칭호 획득!</span>
+      ${titleBadgeHtml(t)}
+      <small>${equippedId === t.id ? '닉네임 옆에 달았어요 · 가방 › 칭호에서 바꿀 수 있어요' : '가방 › 칭호에서 착용할 수 있어요'}</small>
+    </div>`).join('');
+  el.style.display = '';
+  Sfx.levelUp();
+}
 
 function showRewards(rewards, replay) {
   pendingRewards = rewards;
@@ -1518,5 +1563,6 @@ showScreen = function (name) {
   }
   // 게임 화면에서는 컴퓨터 화면에 맞게 넓게 표시
   appContainer.classList.toggle('game-wide', name === 'game');
+  if (name === 'start') refreshTitleDisplays();
   _showScreenForGame(name);
 };

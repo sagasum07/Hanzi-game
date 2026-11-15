@@ -99,6 +99,7 @@
         </button>
       </div>
       <p class="welcome-message" id="welcome-message"></p>
+      <p class="welcome-title" id="welcome-title" style="display:none;"></p>
       <p class="record-summary" id="record-summary"></p>
       <p class="start-hint">원하는 학습 모드를 선택하세요!</p>
     </div>
@@ -497,6 +498,10 @@
           <h3 class="game-modal-title" id="bag-title"><span class="title-seal small" aria-hidden="true">囊</span>가방</h3>
           <div class="bag-preview" id="bag-preview" aria-hidden="true"></div>
           <p class="bag-stats" id="bag-stats"></p>
+          <div class="bag-tabs" role="tablist">
+            <button class="bag-tab active" data-tab="gear" role="tab" aria-selected="true">장비</button>
+            <button class="bag-tab" data-tab="title" role="tab" aria-selected="false">칭호</button>
+          </div>
           <div class="bag-list" id="bag-list"></div>
           <button class="btn-start-quiz" id="btn-bag-close">닫기</button>
         </div>
@@ -671,6 +676,8 @@
             <h2 class="battle-result-title" id="battle-result-title"></h2>
             <div class="battle-result-stars" id="battle-result-stars"></div>
             <p class="battle-result-text" id="battle-result-text"></p>
+            <!-- 마왕을 물리치면 얻는 칭호 -->
+            <div class="title-earned" id="title-earned" style="display:none;"></div>
             <!-- 클리어 보상: 기본 경험치·코인 + 보상 상자 -->
             <!-- 클리어 보상: 기본 경험치·코인 + 얻은 상자 (여는 건 다음 화면에서) -->
             <div class="reward-area" id="reward-area" style="display:none;">
