@@ -20,6 +20,20 @@ const wordsByLevel = {
   6: hsk6Words,
 };
 
+// 급수 버튼에 그 급수의 새 단어 수와 1급부터의 누적 단어 수를 실제 데이터 개수로 표시
+// (데이터가 바뀌어도 자동으로 맞춰짐)
+document.querySelectorAll('.difficulty-card[data-level]').forEach((card) => {
+  const level = Number(card.dataset.level);
+  const words = wordsByLevel[level];
+  if (!words) return;
+  let total = 0;
+  for (let l = 1; l <= level; l++) total += (wordsByLevel[l] || []).length;
+  const desc = card.querySelector('.difficulty-desc');
+  const totalEl = card.querySelector('.difficulty-total');
+  if (desc) desc.textContent = `새 단어 ${words.length.toLocaleString()}개`;
+  if (totalEl) totalEl.textContent = `누적 ${total.toLocaleString()}개`;
+});
+
 // ========================================
 // HSK Sentence Data (문장 작문 게임용)
 // ========================================
