@@ -163,6 +163,7 @@ const settingsScreen = document.getElementById('settings-screen');
 const friendsScreen = document.getElementById('friends-screen');
 const quizScreen = document.getElementById('quiz-screen');
 const sentenceScreen = document.getElementById('sentence-screen'); // New
+const gameScreen = document.getElementById('game-screen'); // 게임 모드 (game.js)
 const btnModeWord = document.getElementById('btn-mode-word'); // New
 const btnModeSentence = document.getElementById('btn-mode-sentence'); // New
 const btnBackToStart = document.getElementById('btn-back-to-start');
@@ -233,6 +234,7 @@ function showScreen(screenName) {
   friendsScreen.style.display = 'none';
   quizScreen.style.display = 'none';
   sentenceScreen.style.display = 'none';
+  gameScreen.style.display = 'none';
   resultScreen.style.display = 'none';
 
   if (screenName === 'login') {
@@ -258,6 +260,9 @@ function showScreen(screenName) {
     feedbackSection.style.display = '';
   } else if (screenName === 'nickname') {
     nicknameScreen.style.display = '';
+    feedbackSection.style.display = 'none';
+  } else if (screenName === 'game') {
+    gameScreen.style.display = '';
     feedbackSection.style.display = 'none';
   } else if (screenName === 'friends') {
     friendsScreen.style.display = '';
@@ -1533,6 +1538,7 @@ function normalizeRecord(data) {
     plans: (samePlanVersion && data.plans) || {}, // { 급수: { 일차: { score: 최고 정답률, t: 완료 시각 } } }
     planVersion: PLAN_VERSION,
     wordbook: (data && data.wordbook) || {}, // { "급수|한자": 저장한 시각 }
+    game: (data && data.game) || {}, // 게임 모드 { 급수: { cleared: 클리어한 마지막 스테이지, stars: { 스테이지: 별 } } }
     updatedAt: (data && data.updatedAt) || 0,
   };
 }
@@ -2525,7 +2531,9 @@ function isShown(el) {
 }
 
 function handleBackButton() {
-  if (isShown(quizScreen) || isShown(sentenceScreen)) {
+  if (isShown(gameScreen)) {
+    gameHandleBack(); // game.js: 전투 중이면 스테이지 목록으로, 목록이면 처음 화면으로
+  } else if (isShown(quizScreen) || isShown(sentenceScreen)) {
     // 퀴즈 중이거나 결과 화면이면, 시작했던 곳으로 돌아감
     if (currentPlanDay !== null) {
       openPlan(currentLevel);

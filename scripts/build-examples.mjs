@@ -1,11 +1,12 @@
 // 단어 예문 데이터를 만듭니다.
 //   입력: examples/src/hsk1.tsv ~ hsk6.tsv   (한자 \t 중국어 예문 \t 한국어 해석 [\t 예문 병음 직접 지정])
-//   출력: examples/hsk1.json ~ hsk6.json     ({ 한자: [예문, 예문 병음, 해석] })
+//   출력: examples/hsk1.json ~ hsk6.json     ({ 한자: [예문, 예문 병음, 해석, 단어 카드 목록] })
+// 단어 카드 목록은 게임 모드의 문장 조립 문제에 쓰며, HSK 단어 사전으로 앞에서부터 가장 긴 단어를 잘라 만듭니다.
 // 예문 병음은 pinyin-pro 로 자동 생성하고, HSK 단어 사전·얼화(儿)·문맥 규칙으로 보정합니다.
 // 실행: npm run build:examples
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import vm from 'node:vm';
-import { pinyin, addDict, customPinyin } from 'pinyin-pro';
+import { pinyin, addDict, customPinyin, segment, OutputFormat } from 'pinyin-pro';
 import CompleteDict from '@pinyin-pro/data/complete';
 
 addDict(CompleteDict);
@@ -130,6 +131,68 @@ const wordsByLevel = vm.runInNewContext(
   `${dataCode}\n({ 1: hsk1Words, 2: hsk2Words, 3: hsk3Words, 4: hsk4Words, 5: hsk5Words, 6: hsk6Words })`
 );
 
+// 문장을 단어 카드로 나누기 (문장부호는 빼고, 공부하는 단어는 한 장으로 유지)
+const lexicon = new Set(Object.keys(hskDict));
+for (const level of [1, 2, 3, 4, 5, 6]) wordsByLevel[level].forEach((w) => lexicon.add(w.hanzi));
+const isZh = (ch) => /[\u4e00-\u9fff]/.test(ch);
+// HSK 사전에 없는 일반 단어(牛肉面·一个 등)는 pinyin-pro 분절 결과로 보충
+// (조사가 붙어 잘못 묶인 '电影吧' 같은 덩어리는 제외)
+const PARTICLE = new Set(['了', '吧', '的', '吗', '呢', '啊', '着', '过', '得', '地', '和', '也', '都', '就', '在', '是']);
+function addSegmentWords(sentence) {
+  for (const tok of segment(sentence, { format: OutputFormat.ZhSegment })) {
+    const chars = Array.from(tok);
+    if (chars.length < 2 || chars.length > 4 || !chars.every(isZh)) continue;
+    if (PARTICLE.has(chars[0]) || PARTICLE.has(chars[chars.length - 1])) continue;
+    lexicon.add(tok);
+  }
+}
+for (const level of [1, 2, 3, 4, 5, 6]) {
+  const src = `examples/src/hsk${level}.tsv`;
+  if (!existsSync(src)) continue;
+  for (const line of readFileSync(src, 'utf8').split('\n')) {
+    const zh = (line.split('\t')[1] || '').trim();
+    if (zh) addSegmentWords(zh);
+  }
+}
+const MAX_WORD = Math.max(...[...lexicon].map((w) => Array.from(w).length));
+
+function splitRun(run) {
+  // run: 문장부호 없는 연속 문자열 → 사전 최장 일치
+  const chars = Array.from(run);
+  const out = [];
+  let i = 0;
+  while (i < chars.length) {
+    if (!isZh(chars[i])) {
+      let j = i;
+      while (j < chars.length && !isZh(chars[j])) j++;
+      out.push(chars.slice(i, j).join('').trim());
+      i = j;
+      continue;
+    }
+    let len = Math.min(MAX_WORD, chars.length - i);
+    while (len > 1 && !lexicon.has(chars.slice(i, i + len).join(''))) len--;
+    out.push(chars.slice(i, i + len).join(''));
+    i += len;
+  }
+  return out.filter(Boolean);
+}
+
+function sentenceTiles(sentence, word) {
+  const runs = sentence.split(/[，。！？、：；“”‘’《》（）,.!?:;"'()…\s—]+/).filter(Boolean);
+  const tiles = [];
+  let kept = false;
+  for (const run of runs) {
+    const at = kept ? -1 : run.indexOf(word);
+    if (at < 0) {
+      tiles.push(...splitRun(run));
+      continue;
+    }
+    kept = true;
+    tiles.push(...splitRun(run.slice(0, at)), word, ...splitRun(run.slice(at + word.length)));
+  }
+  return tiles;
+}
+
 let problems = 0;
 for (const level of [1, 2, 3, 4, 5, 6]) {
   const src = `examples/src/hsk${level}.tsv`;
@@ -163,7 +226,7 @@ for (const level of [1, 2, 3, 4, 5, 6]) {
         problems++;
       }
     }
-    examples[hanzi] = [zh, py, ko];
+    examples[hanzi] = [zh, py, ko, sentenceTiles(zh, hanzi)];
   }
 
   const missing = wordsByLevel[level].map((w) => w.hanzi).filter((h) => !examples[h]);
