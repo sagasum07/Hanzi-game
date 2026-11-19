@@ -9174,3 +9174,423 @@ header h1, .header-titles h1 {
   height: 100%;
   overflow: visible;
 }
+
+/* ==========================================================================
+   동양풍 전체 테마 (중국풍 한지 · 먹 · 주홍 · 금)
+   — 게임 모드 밖의 모든 화면(로그인·처음·학습·퀴즈·결과·설정·친구·단어장)에 적용
+   ========================================================================== */
+:root {
+  --bg-primary: #F3EAD9;
+  --bg-card: #FFFBF3;
+  --bg-card-shadow: rgba(74, 58, 44, 0.14);
+  --accent: #B8332A;
+  --accent-light: #F6E0D6;
+  --accent-hover: #8E241D;
+  --correct: #3F7D6B;
+  --correct-bg: #E3F0EB;
+  --wrong: #C0392B;
+  --wrong-bg: #F9E3DE;
+  --text-primary: #1F1A17;
+  --text-secondary: #6B5E52;
+  --text-muted: #A89A86;
+  --border: #DCC9A6;
+  --radius: 10px;
+  --radius-sm: 8px;
+  --o-ink: #1F1A17;
+  --o-paper: #FFFBF3;
+  --o-paper-2: #F4EBDD;
+  --o-gold: #C9A14A;
+  --o-gold-light: #E8CF8A;
+  --o-cinnabar: #B8332A;
+  --o-cinnabar-dark: #8E241D;
+  --o-jade: #3F7D6B;
+  --o-serif: 'Noto Serif KR', 'Song Myung', 'Noto Sans KR', serif;
+  --o-title: 'Song Myung', 'Noto Serif KR', serif;
+  --o-brush: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+}
+
+/* 한지 바탕 + 아래쪽 옅은 수묵 산수 + 위쪽 구름 무늬 */
+body {
+  font-family: var(--o-serif);
+  background-color: var(--bg-primary);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 260' preserveAspectRatio='xMidYMax slice'%3E%3Cpath d='M0 260 L0 170 L90 120 L160 150 L250 80 L330 140 L410 110 L500 160 L600 60 L690 130 L780 100 L860 150 L950 90 L1040 140 L1120 110 L1200 150 L1200 260Z' fill='%231F1A17' opacity='0.07'/%3E%3Cpath d='M0 260 L0 210 L120 170 L230 200 L340 160 L470 205 L590 150 L720 200 L850 170 L980 210 L1100 180 L1200 200 L1200 260Z' fill='%231F1A17' opacity='0.06'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='90' viewBox='0 0 160 90'%3E%3Cpath d='M20 40 q10 -14 22 -4 q6 -12 18 -2 q10 -4 10 8 q-6 8 -16 4 q-8 8 -18 2 q-12 4 -16 -8z' fill='none' stroke='%23C9A14A' stroke-width='1.2' opacity='0.18'/%3E%3Cpath d='M100 72 q8 -10 16 -3 q5 -9 13 -1 q8 -3 8 6 q-5 6 -12 3 q-6 6 -13 1 q-9 3 -12 -6z' fill='none' stroke='%23C9A14A' stroke-width='1' opacity='0.14'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 15% 8%, rgba(184, 51, 42, 0.06), transparent 45%),
+    radial-gradient(circle at 85% 95%, rgba(201, 161, 74, 0.08), transparent 50%);
+  background-repeat: no-repeat, repeat, no-repeat, no-repeat;
+  background-position: bottom center, 0 0, 0 0, 0 0;
+  background-size: 100% 220px, 160px 90px, auto, auto;
+  background-attachment: fixed, scroll, scroll, scroll;
+}
+
+/* 화면 묶음 (게임 모드는 이미 따로 꾸며져 있어서 제외) */
+:is(.login-screen, .start-screen, .nickname-screen, .friends-screen, .settings-screen, .difficulty-screen,
+  .count-screen, .plan-screen, .wordbook-screen, #quiz-screen, #sentence-screen, .result-screen) {
+  font-family: var(--o-serif);
+  color: var(--o-ink);
+}
+
+/* ---- 제목 ---- */
+.start-screen .start-title,
+.login-screen .login-title {
+  font-family: var(--o-brush);
+  font-weight: 400;
+  color: var(--o-ink);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  letter-spacing: 6px;
+  text-shadow: 2px 3px 0 rgba(201, 161, 74, 0.35);
+  position: relative;
+}
+
+.start-screen .start-title::after {
+  content: '學';
+  position: absolute;
+  right: -34px;
+  top: 6px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--o-cinnabar);
+  color: #FFF6E6;
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-shadow: none;
+  transform: rotate(-6deg);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 246, 230, 0.6);
+}
+
+.start-screen .start-subtitle,
+.login-screen .login-subtitle {
+  font-family: var(--o-title);
+  color: var(--text-secondary);
+  letter-spacing: 2px;
+}
+
+.start-screen .start-hanzi-bg,
+.login-screen .login-hanzi-bg {
+  font-family: var(--o-brush);
+  color: var(--o-ink);
+  opacity: 0.06;
+}
+
+:is(.plan-title, .difficulty-title, .count-title, .notebook-title, .settings-heading, .feedback-title, .stage-intro-title) {
+  font-family: var(--o-title);
+  font-weight: 400;
+  color: var(--o-ink);
+  letter-spacing: 1px;
+}
+
+:is(.plan-title, .difficulty-title, .count-title) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+:is(.plan-title, .difficulty-title, .count-title)::before,
+:is(.plan-title, .difficulty-title, .count-title)::after {
+  content: '';
+  width: 28px;
+  height: 8px;
+  background:
+    radial-gradient(circle at 4px 4px, var(--o-cinnabar) 3px, transparent 3.5px),
+    linear-gradient(90deg, transparent 9px, var(--o-gold) 9px) center / 100% 1.5px no-repeat;
+}
+
+:is(.plan-title, .difficulty-title, .count-title)::after {
+  transform: scaleX(-1);
+}
+
+.settings-heading {
+  color: var(--o-cinnabar) !important;
+  border-bottom: 1px solid rgba(201, 161, 74, 0.5);
+  padding-bottom: 4px;
+}
+
+/* ---- 상자(카드): 금테 두른 한지 카드 ---- */
+:is(.start-screen .btn-mode, .start-screen .btn-review, .difficulty-card, .settings-card, .plan-day-card,
+  .quiz-card, .sentence-card, .result-screen .stat-item, .friend-item, .feedback-section, .count-display,
+  .stage-intro, .notebook-page, .result-stage-breakdown) {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.7), transparent 45%),
+    linear-gradient(180deg, #FFFCF5, #FBF3E4);
+  border: 1.5px solid #D9C4A0;
+  border-radius: 10px;
+  box-shadow:
+    inset 0 0 0 3px #FFFCF5,
+    inset 0 0 0 4px rgba(201, 161, 74, 0.45),
+    0 4px 12px rgba(74, 58, 44, 0.1);
+  color: var(--o-ink);
+}
+
+:is(.start-screen .btn-mode, .start-screen .btn-review, .difficulty-card):hover {
+  border-color: var(--o-cinnabar);
+  box-shadow:
+    inset 0 0 0 3px #FFFCF5,
+    inset 0 0 0 4px rgba(184, 51, 42, 0.45),
+    0 8px 18px rgba(74, 58, 44, 0.16);
+}
+
+:is(.mode-text, .review-text, .difficulty-label, .plan-day-title) {
+  font-family: var(--o-title);
+  font-weight: 400;
+  color: var(--o-ink);
+}
+
+.mode-divider {
+  font-family: var(--o-title);
+  color: var(--o-cinnabar);
+  letter-spacing: 3px;
+}
+
+.mode-divider::before,
+.mode-divider::after {
+  background: linear-gradient(90deg, transparent, var(--o-gold), transparent);
+}
+
+/* 낙관(도장) 아이콘 */
+.seal-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.8em;
+  height: 1.8em;
+  border-radius: 5px;
+  background: var(--o-cinnabar);
+  color: #FFF6E6;
+  font-family: var(--o-brush);
+  font-size: 1rem;
+  line-height: 1;
+  transform: rotate(-5deg);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 246, 230, 0.55), 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+
+.seal-icon.jade { background: var(--o-jade); }
+.seal-icon.ink { background: var(--o-ink); }
+
+.btn-settings {
+  background: var(--o-paper) !important;
+  border: 1.5px solid #D9C4A0 !important;
+}
+
+.btn-settings .seal-icon {
+  font-size: 0.95rem;
+}
+
+.review-icon.seal-icon {
+  font-size: 0.95rem;
+}
+
+/* 급수 카드: 먹으로 쓴 숫자 낙관 */
+.level-numeral {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin: 2px auto;
+  border-radius: 50%;
+  border: 2px solid var(--o-ink);
+  background: radial-gradient(circle at 40% 35%, #FFFDF7, #F1E6D2);
+  color: var(--o-ink);
+  font-family: var(--o-brush);
+  font-size: 1.7rem;
+  line-height: 1;
+  box-shadow: inset 0 0 0 3px #FFFDF7, inset 0 0 0 4px rgba(184, 51, 42, 0.5);
+}
+
+.difficulty-card[data-level="5"] .level-numeral,
+.difficulty-card[data-level="6"] .level-numeral {
+  background: radial-gradient(circle at 40% 35%, #D9533F, #8E241D);
+  color: #FFF6E6;
+  border-color: #5E1A14;
+  box-shadow: inset 0 0 0 3px rgba(255, 246, 230, 0.2), 0 0 10px rgba(184, 51, 42, 0.35);
+}
+
+.difficulty-badge {
+  background: var(--o-ink) !important;
+  color: #F2D58A !important;
+  font-family: var(--o-title);
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* ---- 버튼 ---- */
+/* 주요 버튼: 주홍 칠기 + 금테 */
+:is(.login-screen, .start-screen, .nickname-screen, .friends-screen, .settings-screen, .difficulty-screen,
+  .count-screen, .plan-screen, .wordbook-screen, #quiz-screen, #sentence-screen, .result-screen)
+  :is(.btn-start-quiz, .btn-next, .btn-retry-yes, .btn-send, .btn-settings-save, .btn-google) {
+  font-family: var(--o-title);
+  font-weight: 400;
+  letter-spacing: 1px;
+  background: linear-gradient(180deg, #C9442F 0%, var(--o-cinnabar) 50%, var(--o-cinnabar-dark) 100%);
+  border: 2px solid var(--o-gold);
+  color: #FFF6E6;
+  box-shadow: 0 0 0 2px var(--o-cinnabar-dark), 0 5px 12px rgba(142, 36, 29, 0.3);
+}
+
+:is(.login-screen, .start-screen, .nickname-screen, .friends-screen, .settings-screen, .difficulty-screen,
+  .count-screen, .plan-screen, .wordbook-screen, #quiz-screen, #sentence-screen, .result-screen)
+  :is(.btn-start-quiz, .btn-next, .btn-retry-yes, .btn-send, .btn-settings-save, .btn-google):hover:not(:disabled) {
+  background: linear-gradient(180deg, #D9533F 0%, #C23A2E 50%, var(--o-cinnabar-dark) 100%);
+}
+
+/* 보조 버튼: 한지 + 먹 테두리 */
+:is(.login-screen, .start-screen, .nickname-screen, .friends-screen, .settings-screen, .difficulty-screen,
+  .count-screen, .plan-screen, .wordbook-screen, #quiz-screen, #sentence-screen, .result-screen)
+  :is(.btn-restart, .btn-home, .btn-retry-no, .btn-guest, .btn-check-nickname, .btn-action, .btn-speak,
+    .btn-show-example, .btn-example-action, .btn-save-word, .friend-btn, .count-preset-btn, .sort-btn,
+    .btn-top-home, .pager-btn, .btn-logout, .btn-feedback, .btn-photo-remove) {
+  font-family: var(--o-title);
+  font-weight: 400;
+  background: var(--o-paper);
+  border: 1.5px solid #8C7A5B;
+  color: var(--o-ink);
+  box-shadow: 0 2px 0 rgba(74, 58, 44, 0.25);
+}
+
+:is(.count-preset-btn, .sort-btn).active {
+  background: var(--o-ink) !important;
+  color: #F2D58A !important;
+  border-color: var(--o-ink) !important;
+}
+
+:is(.login-screen, .start-screen, .nickname-screen, .friends-screen, .settings-screen, .difficulty-screen,
+  .count-screen, .plan-screen, .wordbook-screen, #quiz-screen, #sentence-screen, .result-screen) .btn-back {
+  font-family: var(--o-title);
+  color: var(--text-secondary);
+}
+
+/* ---- 퀴즈 ---- */
+#quiz-screen .hanzi-char {
+  font-family: var(--o-brush);
+  font-weight: 400;
+  color: var(--o-ink);
+  text-shadow: 2px 2px 0 rgba(201, 161, 74, 0.3);
+}
+
+#quiz-screen .hanzi-pinyin,
+#quiz-screen .example-pinyin {
+  color: var(--o-cinnabar);
+  font-family: 'Noto Serif KR', serif;
+}
+
+#quiz-screen .example-zh {
+  font-family: 'Noto Serif SC', serif;
+  color: var(--o-ink);
+}
+
+:is(#quiz-screen, #sentence-screen) .choice-btn,
+#sentence-screen .word-bank button {
+  font-family: var(--o-serif);
+  background: linear-gradient(180deg, #FFFCF5, #F7EEDD);
+  border: 1.5px solid #CDB68C;
+  color: var(--o-ink);
+  box-shadow: 0 3px 0 rgba(140, 122, 91, 0.45);
+}
+
+:is(#quiz-screen, #sentence-screen) .choice-btn:hover:not(:disabled) {
+  border-color: var(--o-cinnabar);
+  background: #FFF6E6;
+}
+
+:is(#quiz-screen, #sentence-screen) .choice-btn.correct {
+  background: var(--correct-bg);
+  border-color: var(--correct);
+  color: #24493F;
+}
+
+:is(#quiz-screen, #sentence-screen) .choice-btn.wrong {
+  background: var(--wrong-bg);
+  border-color: var(--wrong);
+  color: #7A1F16;
+}
+
+:is(#quiz-screen, #sentence-screen) .korean-prompt {
+  font-family: var(--o-title);
+  color: var(--o-ink);
+}
+
+:is(.progress-bar, .plan-progress-bar) {
+  background: rgba(140, 122, 91, 0.2) !important;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+:is(.progress-fill, .plan-progress-fill) {
+  background: linear-gradient(90deg, var(--o-cinnabar), var(--o-gold)) !important;
+}
+
+:is(.stage-badge, .score-display) {
+  font-family: var(--o-title);
+}
+
+/* ---- 결과 ---- */
+.result-screen .result-icon {
+  font-family: var(--o-brush);
+}
+
+.result-screen .stat-number {
+  font-family: var(--o-title);
+  color: var(--o-cinnabar);
+}
+
+/* ---- 설정 · 친구 · 단어장 ---- */
+:is(.nickname-input, .feedback-input) {
+  font-family: var(--o-serif);
+  background: #FFFDF7;
+  border: 1.5px solid #CDB68C;
+  border-radius: 8px;
+}
+
+:is(.nickname-input, .feedback-input):focus {
+  border-color: var(--o-cinnabar);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(184, 51, 42, 0.15);
+}
+
+.friend-avatar,
+.profile-photo {
+  background: radial-gradient(circle at 40% 35%, #D9533F, var(--o-cinnabar-dark));
+  font-family: var(--o-brush);
+  font-weight: 400;
+}
+
+:is(.user-code, .friend-code) {
+  font-family: 'Noto Serif KR', serif;
+}
+
+.notebook-page {
+  background:
+    repeating-linear-gradient(180deg, transparent 0 31px, rgba(201, 161, 74, 0.25) 31px 32px),
+    linear-gradient(180deg, #FFFCF5, #FBF3E4) !important;
+}
+
+/* 음량 조절 */
+.volume-control-wrapper {
+  background: var(--o-paper);
+  border: 1.5px solid #D9C4A0;
+  box-shadow: 0 4px 12px rgba(74, 58, 44, 0.15);
+}
+
+.feedback-toast {
+  font-family: var(--o-serif);
+  background: var(--o-ink);
+  color: #F4EBDD;
+  border: 1px solid var(--o-gold);
+}
+
+/* 학습용 한자는 또렷한 명조체(宋體)로 — 붓글씨체는 획이 달라 보일 수 있음 */
+#quiz-screen .hanzi-char {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 900;
+}
+
+@media (max-width: 420px) {
+  .plan-title::before,
+  .plan-title::after {
+    display: none;
+  }
+}

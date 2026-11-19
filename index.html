@@ -18,7 +18,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"中文学习","alternateName":"중국어 학습 게임","url":"https://www.zhongwenxuexi-app.com/","description":"HSK 1~6급 중국어 단어와 작문 문장을 일차별 학습 플랜과 퀴즈로 공부하는 무료 학습 게임","applicationCategory":"EducationalApplication","operatingSystem":"Web, Android","inLanguage":"ko","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+SC:wght@700;900&family=Nanum+Pen+Script&family=Song+Myung&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Serif+SC:wght@700;900&family=Nanum+Pen+Script&family=Song+Myung&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <!-- adsense:start (웹사이트 전용 — 앱용 파일을 만들 때 scripts/build-web.mjs 가 자동으로 제거) -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8544888666744598" crossorigin="anonymous"></script>
@@ -56,7 +56,7 @@
 
     <!-- ===== Start Screen ===== -->
     <div class="start-screen" id="start-screen" style="display:none;">
-      <button class="btn-settings" id="btn-settings" aria-label="설정" title="설정">⚙️</button>
+      <button class="btn-settings" id="btn-settings" aria-label="설정" title="설정"><span class="seal-icon" aria-hidden="true">設</span></button>
       <div class="start-decoration">
         <span class="start-hanzi-bg">中</span>
       </div>
@@ -87,23 +87,32 @@
           <span class="mode-text">단어 맞추기</span>
         </button>
         <button class="btn-mode" id="btn-mode-sentence">
-          <span class="mode-icon">✍️</span>
+          <span class="mode-icon mode-icon-svg" aria-hidden="true"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 14 H46 V56 H8 Z" fill="#FFFDF7" stroke="#1F1A17" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M14 22 H40 M14 30 H40 M14 38 H32" stroke="#C9A14A" stroke-width="2" stroke-linecap="round"/>
+            <path d="M18 47 q4 -6 8 0 q4 6 8 0" stroke="#1F1A17" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M58 6 L36 42" stroke="#1F1A17" stroke-width="6" stroke-linecap="round"/>
+            <path d="M58 6 L36 42" stroke="#8B5A2B" stroke-width="3.5" stroke-linecap="round"/>
+            <path d="M38 38 Q30 46 32 52 Q38 50 42 41 Z" fill="#1F1A17"/>
+            <rect x="48" y="44" width="12" height="12" rx="2" fill="#B8332A" transform="rotate(-6 54 50)"/>
+            <text x="54" y="54" text-anchor="middle" font-size="9" fill="#FFF6E6" font-family="'Ma Shan Zheng', serif" transform="rotate(-6 54 50)">文</text>
+          </svg></span>
           <span class="mode-text">문장 작문하기</span>
         </button>
       </div>
       <div class="sub-mode-row">
         <button class="btn-review" id="btn-review" disabled>
-          <span class="review-icon">📒</span>
+          <span class="review-icon seal-icon" aria-hidden="true">錯</span>
           <span class="review-text">오답 노트</span>
           <span class="review-count" id="review-count">0</span>
         </button>
         <button class="btn-review btn-wordbook" id="btn-wordbook">
-          <span class="review-icon">⭐</span>
+          <span class="review-icon seal-icon jade" aria-hidden="true">詞</span>
           <span class="review-text">단어장</span>
           <span class="review-count wordbook-count" id="wordbook-count">0</span>
         </button>
         <button class="btn-review btn-friends" id="btn-friends">
-          <span class="review-icon">👥</span>
+          <span class="review-icon seal-icon ink" aria-hidden="true">友</span>
           <span class="review-text">친구</span>
           <span class="review-count friend-request-count" id="friend-request-count" style="display:none;">0</span>
         </button>
@@ -133,7 +142,7 @@
 
     <!-- ===== Friends Screen ===== -->
     <div class="friends-screen" id="friends-screen" style="display:none;">
-      <h2 class="plan-title">👥 친구</h2>
+      <h2 class="plan-title">친구</h2>
 
       <section class="settings-card" id="friends-guest">
         <p class="settings-note">친구 기능은 구글로 로그인해야 쓸 수 있어요. 로그인하면 닉네임과 고유 번호가 생기고, 친구를 찾아 추가할 수 있어요.</p>
@@ -184,7 +193,7 @@
 
     <!-- ===== Settings Screen ===== -->
     <div class="settings-screen" id="settings-screen" style="display:none;">
-      <h2 class="plan-title">⚙️ 설정</h2>
+      <h2 class="plan-title">설정</h2>
 
       <section class="settings-card">
         <h3 class="settings-heading">프로필</h3>
@@ -295,42 +304,42 @@
       <div class="difficulty-cards">
         <button class="difficulty-card" data-level="1" id="btn-hsk1">
           <span class="difficulty-badge">HSK 1급</span>
-          <span class="difficulty-emoji">🌱</span>
+          <span class="difficulty-emoji level-numeral" aria-hidden="true">一</span>
           <span class="difficulty-label">입문</span>
           <span class="difficulty-desc">새 단어 300개</span>
           <span class="difficulty-total">누적 300개</span>
         </button>
         <button class="difficulty-card" data-level="2" id="btn-hsk2">
           <span class="difficulty-badge">HSK 2급</span>
-          <span class="difficulty-emoji">🌿</span>
+          <span class="difficulty-emoji level-numeral" aria-hidden="true">二</span>
           <span class="difficulty-label">초급</span>
           <span class="difficulty-desc">새 단어 198개</span>
           <span class="difficulty-total">누적 498개</span>
         </button>
         <button class="difficulty-card" data-level="3" id="btn-hsk3">
           <span class="difficulty-badge">HSK 3급</span>
-          <span class="difficulty-emoji">🌳</span>
+          <span class="difficulty-emoji level-numeral" aria-hidden="true">三</span>
           <span class="difficulty-label">중급</span>
           <span class="difficulty-desc">새 단어 499개</span>
           <span class="difficulty-total">누적 997개</span>
         </button>
         <button class="difficulty-card" data-level="4" id="btn-hsk4">
           <span class="difficulty-badge">HSK 4급</span>
-          <span class="difficulty-emoji">🌲</span>
+          <span class="difficulty-emoji level-numeral" aria-hidden="true">四</span>
           <span class="difficulty-label">고급</span>
           <span class="difficulty-desc">새 단어 997개</span>
           <span class="difficulty-total">누적 1,994개</span>
         </button>
         <button class="difficulty-card" data-level="5" id="btn-hsk5">
           <span class="difficulty-badge">HSK 5급</span>
-          <span class="difficulty-emoji">🏔️</span>
+          <span class="difficulty-emoji level-numeral" aria-hidden="true">五</span>
           <span class="difficulty-label">심화</span>
           <span class="difficulty-desc">새 단어 1,595개</span>
           <span class="difficulty-total">누적 3,589개</span>
         </button>
         <button class="difficulty-card" data-level="6" id="btn-hsk6">
           <span class="difficulty-badge">HSK 6급</span>
-          <span class="difficulty-emoji">🐉</span>
+          <span class="difficulty-emoji level-numeral" aria-hidden="true">六</span>
           <span class="difficulty-label">마스터</span>
           <span class="difficulty-desc">새 단어 1,794개</span>
           <span class="difficulty-total">누적 5,383개</span>

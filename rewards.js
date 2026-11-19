@@ -255,39 +255,90 @@ function applyRewards(rewards) {
 
 // ---------- 상자 그림 ----------
 // 등급마다 색·장식이 다른 보물상자 SVG (고정 도형만 사용)
+// 중국식 보물함(寶箱): 칠기 몸통 + 놋쇠 여의(如意) 구름 모서리 장식 + 둥근 면엽판에 걸린 가로 자물쇠(글자)
+// 낡은 상자는 나뭇결·쇠붙이·새끼줄, 등급이 오를수록 붉은 칠기 → 비취 → 금박 → 수정
+const CHEST_STYLE = [
+  { body: '#8B6A48', dark: '#4A3828', metal: '#6E757D', metalDark: '#3F4449', lock: '', inner: '#2B1F16' },
+  { body: '#A8342B', dark: '#5E1A14', metal: '#D4A83A', metalDark: '#8E6A1E', lock: '福', inner: '#3A1410' },
+  { body: '#2F6F60', dark: '#173B33', metal: '#E3E8EC', metalDark: '#8A9199', lock: '玉', inner: '#10261F' },
+  { body: '#E3B341', dark: '#8E6A1E', metal: '#B8332A', metalDark: '#6E1A12', lock: '寶', inner: '#4A2E0E' },
+  { body: '#8FD9EA', dark: '#2E7A8C', metal: '#FFFFFF', metalDark: '#7ADCEB', lock: '珍', inner: '#163E48' },
+];
+
 function renderChest(tier, open = false) {
   const c = CHESTS[tier];
-  const dark = shade(c.color, 0.3);
+  const st = CHEST_STYLE[tier];
+  // 모서리 여의 구름 장식 (왼쪽 위 기준, 나머지는 뒤집어서)
+  const corner = `<path d="M18 58 H32 Q33 62 29 63 Q32 67 27 69 Q24 72 18 70 Z" fill="${st.metal}" stroke="${st.metalDark}" stroke-width="1.5" stroke-linejoin="round"/>`;
+  const corners = `${corner}
+    <g transform="translate(120 0) scale(-1 1)">${corner}</g>
+    <g transform="translate(0 156) scale(1 -1)">${corner}</g>
+    <g transform="translate(120 156) scale(-1 -1)">${corner}</g>`;
+  // 회문(回紋) 띠
+  const fret = Array.from({ length: 9 }, (_, i) => {
+    const x = 24 + i * 8;
+    return `<path d="M${x} 93 h6 v-4 h-4 v2" stroke="${st.metalDark}" stroke-width="1.2" fill="none" opacity="0.8"/>`;
+  }).join('');
+  const grain = tier === 0
+    ? '<path d="M24 66 q18 -3 36 0 t36 0 M24 74 q20 3 40 0 t32 0 M24 84 q16 -3 32 0 t40 0" stroke="#5C4430" stroke-width="1.2" fill="none" opacity="0.6"/><path d="M36 64 l5 9 -3 6 M84 70 l-4 8 3 5" stroke="#2B1F16" stroke-width="1.8" fill="none"/>'
+    : '';
+  const rope = tier === 0
+    ? '<path d="M18 76 Q60 84 102 76" stroke="#C9A27A" stroke-width="3.2" fill="none"/><path d="M18 76 Q60 84 102 76" stroke="#8C6A44" stroke-width="1" stroke-dasharray="3 3" fill="none"/><circle cx="60" cy="80" r="3" fill="#C9A27A" stroke="#8C6A44"/>'
+    : '';
+  const shine = tier === 4
+    ? '<path d="M26 62 L34 62 L28 94 L22 94 Z M40 62 L44 62 L38 94 L35 94 Z" fill="#FFFFFF" opacity="0.35"/>'
+    : tier >= 2 ? '<path d="M26 62 L32 62 L27 92 L23 92 Z" fill="#FFFFFF" opacity="0.18"/>' : '';
+  // 둥근 면엽판 + 가로 자물쇠 (글자)
+  const lockFace = tier === 0
+    ? `<rect x="54" y="66" width="12" height="10" rx="2" fill="${st.metal}" stroke="${st.metalDark}" stroke-width="1.5"/><circle cx="60" cy="71" r="1.8" fill="#2B2321"/>`
+    : `<circle cx="60" cy="68" r="10" fill="${st.metal}" stroke="${st.metalDark}" stroke-width="1.8"/>
+       <circle cx="60" cy="68" r="6.5" fill="none" stroke="${st.metalDark}" stroke-width="1" opacity="0.7"/>
+       <path d="M54 74 v-3 a6 6 0 0 1 12 0 v3" fill="none" stroke="${st.metalDark}" stroke-width="2"/>
+       <rect x="49" y="74" width="22" height="11" rx="3" fill="${st.metal}" stroke="${st.metalDark}" stroke-width="1.8"/>
+       <text x="60" y="83" text-anchor="middle" font-size="8.5" fill="${st.metalDark}" font-family="'Ma Shan Zheng', 'Noto Serif SC', serif">${st.lock}</text>`;
+  const gem = tier === 4
+    ? '<path d="M60 61 l4 4 -4 5 -4 -5z" fill="#DFF9FF" stroke="#2E7A8C" stroke-width="1"/>'
+    : tier === 3 ? '<circle cx="60" cy="65" r="2.6" fill="#7FD3C0" stroke="#FFF0B3" stroke-width="1"/>' : '';
   const sparkle = tier >= 2
     ? `<g class="chest-sparkles" fill="#fff">
-        <path d="M18 18 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z"/><path d="M104 12 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z"/>
-        <path d="M110 70 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z"/></g>`
+        <path d="M14 22 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z"/><path d="M106 14 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z"/>
+        <path d="M110 72 l1.5 4.5 4.5 1.5 -4.5 1.5 -1.5 4.5 -1.5 -4.5 -4.5 -1.5 4.5 -1.5z"/></g>`
     : '';
-  const cracks = tier === 0
-    ? '<path d="M34 70 l6 8 -3 7 M86 64 l-5 9 4 6" stroke="#3B2A1A" stroke-width="2" fill="none"/><path d="M28 44 l8 4" stroke="#3B2A1A" stroke-width="2"/>'
-    : '';
-  // 자물쇠판 가운데 장식: 수정 · 홍옥 · 열쇠 구멍
-  const gem = tier === 4
-    ? '<path d="M60 71 l8 7 -8 10 -8 -10z" fill="#DFF9FF" stroke="#fff" stroke-width="1.5"/><path d="M52 78 h16" stroke="#7ADCEB" stroke-width="1.2"/>'
-    : tier === 3
-      ? '<circle cx="60" cy="80" r="6" fill="#B8332A" stroke="#FFF0B3" stroke-width="2"/>'
-      : '<circle cx="60" cy="77" r="3" fill="' + dark + '"/><path d="M58.5 79 h3 l1 7 h-5z" fill="' + dark + '"/>';
-  // 처마처럼 끝이 들린 뚜껑
+  // 뚜껑: 닫힘 = 비스듬히 깎인 평뚜껑 + 손잡이 고리 / 열림 = 뒤로 젖힌 뚜껑 + 안쪽 원보(元寶)와 빛
   const lid = open
-    ? `<g class="chest-lid open"><path d="M12 30 Q20 34 26 26 Q60 10 94 26 Q100 34 108 30 L102 40 Q60 22 18 40 Z" fill="${c.color}" stroke="${dark}" stroke-width="3" stroke-linejoin="round"/></g>`
-    : `<g class="chest-lid"><path d="M12 54 Q20 56 24 46 Q60 30 96 46 Q100 56 108 54 L102 60 L18 60 Z" fill="${c.color}" stroke="${dark}" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M24 52 Q60 40 96 52" stroke="${c.trim}" stroke-width="3" fill="none"/></g>`;
-  const light = open ? `<path d="M30 58 L10 0 L110 0 L90 58 Z" fill="url(#chestLight${tier})" opacity="0.9"/>` : '';
-  return `<svg viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg" class="chest-svg tier-${c.id}">
+    ? `<g class="chest-lid open">
+        <path d="M20 40 L26 14 H94 L100 40 Z" fill="${st.dark}" stroke="${st.dark}" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M24 38 L29 18 H91 L96 38 Z" fill="${st.body}" opacity="0.55"/>
+        <path d="M26 14 H94" stroke="${st.metal}" stroke-width="3"/>
+       </g>
+       <rect x="18" y="44" width="84" height="14" fill="${st.inner}" stroke="${st.dark}" stroke-width="2.5"/>
+       <g class="chest-ingots">
+        <path d="M34 56 q1 -7 8 -5 q4 -6 8 0 q7 -2 8 5 z" fill="#F2C230" stroke="#8E6A1E" stroke-width="1.2"/>
+        <path d="M62 56 q1 -8 9 -6 q4 -6 9 0 q7 -2 8 6 z" fill="#F2C230" stroke="#8E6A1E" stroke-width="1.2"/>
+        <circle cx="56" cy="53" r="4" fill="#E3B341" stroke="#8E6A1E" stroke-width="1"/><rect x="54.5" y="51.5" width="3" height="3" fill="#8E6A1E"/>
+       </g>`
+    : `<g class="chest-lid">
+        <path d="M14 58 L20 40 H100 L106 58 Z" fill="${st.body}" stroke="${st.dark}" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M20 40 H100" stroke="${st.metal}" stroke-width="3"/>
+        <path d="M17 51 H103" stroke="${st.metal}" stroke-width="2.2" opacity="0.9"/>
+        <path d="M50 40 q10 -10 20 0" stroke="${st.metal}" stroke-width="3" fill="none"/>
+        <circle cx="50" cy="40" r="2.2" fill="${st.metalDark}"/><circle cx="70" cy="40" r="2.2" fill="${st.metalDark}"/>
+       </g>`;
+  const light = open ? `<path d="M26 50 L4 0 L116 0 L94 50 Z" fill="url(#chestLight${tier})" opacity="0.9"/>` : '';
+  return `<svg viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg" class="chest-svg tier-${c.id}" overflow="visible">
   <defs><linearGradient id="chestLight${tier}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF6C9" stop-opacity="1"/><stop offset="1" stop-color="#FFF6C9" stop-opacity="0"/></linearGradient></defs>
-  <ellipse cx="60" cy="102" rx="44" ry="6" fill="rgba(0,0,0,0.2)"/>
+  <ellipse cx="60" cy="104" rx="46" ry="5.5" fill="rgba(0,0,0,0.22)"/>
   ${light}
-  <rect x="20" y="58" width="80" height="42" rx="3" fill="${c.color}" stroke="${dark}" stroke-width="3"/>
-  <path d="M20 68 L100 68" stroke="${dark}" stroke-width="2" opacity="0.35"/>
-  <path d="M20 58 h12 v8 h-4 v-4 h-8z M100 58 h-12 v8 h4 v-4 h8z M20 100 h12 v-8 h-4 v4 h-8z M100 100 h-12 v-8 h4 v4 h8z" fill="${c.trim}"/>
-  <circle cx="60" cy="80" r="13" fill="${c.trim}" stroke="${dark}" stroke-width="2"/>
-  ${cracks}
+  <path d="M22 96 h10 l-2 8 h-6 z M88 96 h10 l-2 8 h-6 z" fill="${st.dark}"/>
+  <rect x="18" y="56" width="84" height="42" rx="2" fill="${st.body}" stroke="${st.dark}" stroke-width="3"/>
+  <rect x="23" y="61" width="74" height="26" rx="2" fill="none" stroke="${st.dark}" stroke-width="1.4" opacity="0.45"/>
+  ${grain}
+  ${shine}
+  ${fret}
+  ${corners}
+  ${rope}
   ${lid}
+  ${lockFace}
   ${gem}
   ${sparkle}
 </svg>`;
