@@ -288,12 +288,50 @@ const MONSTER_ART = {
   },
 };
 
+// 그림풍(동양화) 몬스터: 붓으로 그은 듯 살짝 흔들리는 먹선 + 한지 결 + 빛과 그늘 + 뒤에 번진 먹물
+// (눈은 표정이 또렷하게 보이도록 필터 밖에 그림)
+let monsterPaintSeq = 0;
 function renderMonster(id, mood = 'normal') {
   const art = MONSTER_ART[id] || MONSTER_ART.ghost;
-  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="monster-svg" overflow="visible">
-  ${art.body}
+  const n = ++monsterPaintSeq;
+  const seed = (id.length * 13 + 7) % 97;
+  const body = `${art.body}${art.front || ''}`;
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="monster-svg painted" overflow="visible">
+  <defs>
+    <filter id="mp-brush-${n}" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="${seed}" result="warp"/>
+      <feDisplacementMap in="SourceGraphic" in2="warp" scale="3.2" xChannelSelector="R" yChannelSelector="G" result="brushed"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${seed + 5}" result="grain"/>
+      <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.36  0 0 0 0 0.26  0 0 0 -0.9 0.42" result="grainInk"/>
+      <feComposite in="grainInk" in2="brushed" operator="in" result="grainIn"/>
+      <feBlend in="grainIn" in2="brushed" mode="multiply" result="textured"/>
+      <!-- 실루엣 둘레에 굵기가 고르지 않은 먹선 (동양화의 윤곽선) -->
+      <feMorphology in="SourceAlpha" operator="dilate" radius="1.4" result="fat"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="1" seed="${seed + 2}" result="warp2"/>
+      <feDisplacementMap in="fat" in2="warp2" scale="4" xChannelSelector="R" yChannelSelector="G" result="fatWarp"/>
+      <feFlood flood-color="#1F1A17" flood-opacity="0.92"/>
+      <feComposite in2="fatWarp" operator="in" result="inkLine"/>
+      <feMerge><feMergeNode in="inkLine"/><feMergeNode in="textured"/></feMerge>
+    </filter>
+    <filter id="mp-white-${n}" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/>
+    </filter>
+    <filter id="mp-wash-${n}" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="3" seed="${seed + 11}" result="w"/>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="18" xChannelSelector="R" yChannelSelector="G"/>
+      <feGaussianBlur stdDeviation="3.5"/>
+    </filter>
+    <radialGradient id="mp-shade-${n}" cx="34%" cy="22%" r="90%">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.38"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="1" stop-color="#1F1A17" stop-opacity="0.38"/>
+    </radialGradient>
+    <mask id="mp-mask-${n}" maskUnits="userSpaceOnUse" x="-30" y="-30" width="180" height="180"><g filter="url(#mp-white-${n})">${body}</g></mask>
+  </defs>
+  <ellipse class="ink-wash" cx="60" cy="72" rx="48" ry="40" fill="#1F1A17" opacity="0.09" filter="url(#mp-wash-${n})"/>
+  <g filter="url(#mp-brush-${n})">${body}</g>
+  <rect x="-30" y="-30" width="180" height="180" fill="url(#mp-shade-${n})" mask="url(#mp-mask-${n})" style="mix-blend-mode:multiply"/>
   ${monsterEyes(art.eyes, mood, art.glow)}
-  ${art.front || ''}
 </svg>`;
 }
 
