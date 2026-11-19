@@ -1946,6 +1946,22 @@ document.getElementById('btn-battle-exit').addEventListener('click', () => {
   openGameMap();
 });
 document.getElementById('btn-game-home').addEventListener('click', () => showScreen('start'));
+// 지도 맨 위 제목을 누르면 처음 화면으로
+document.getElementById('btn-game-title-home').addEventListener('click', () => showScreen('start'));
+
+// 빈 곳(창 바깥)을 누르면: 상점·가방은 닫고, 꾸미기는 저장하고 돌아감
+shopModal.addEventListener('click', (e) => {
+  if (e.target === shopModal) document.getElementById('btn-shop-close').click();
+});
+bagModal.addEventListener('click', (e) => {
+  if (e.target === bagModal) document.getElementById('btn-bag-close').click();
+});
+const MAKER_EMPTY = ['avatar-maker', 'maker-pane', 'avatar-maker-buttons', 'game-screen', 'gear-dex', 'dex-sections', 'tap-out-hint'];
+document.getElementById('game-screen').addEventListener('click', (e) => {
+  if (avatarMaker.style.display === 'none' || !getAvatar()) return; // 처음 만들 때는 '완료'로만
+  if (!MAKER_EMPTY.some((c) => e.target.classList && e.target.classList.contains(c))) return;
+  document.getElementById('btn-avatar-done').click();
+});
 // 캐릭터를 아직 안 만들고 '뒤로'를 누르면 처음 화면으로
 document.getElementById('btn-avatar-back').addEventListener('click', () => {
   if (!getAvatar()) showScreen('start');

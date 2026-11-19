@@ -514,7 +514,8 @@
           <div class="dex-detail" id="dex-detail"></div>
           <div class="dex-sections" id="dex-sections"></div>
         </div>
-        <button class="btn-back" id="btn-avatar-back">← 뒤로</button>
+        <p class="tap-out-hint" id="avatar-tap-hint">빈 곳을 누르면 저장하고 돌아가요</p>
+        <button class="btn-back" id="btn-avatar-back" hidden>← 뒤로</button>
       </div>
 
       <!-- 상점: 엽전으로 전투 아이템 구매 (rewards.js) -->
@@ -533,7 +534,8 @@
             <p class="shop-coins" id="shop-coins"></p>
             <div class="shop-items" id="shop-items"></div>
           </div>
-          <button class="btn-start-quiz" id="btn-shop-close">나가기</button>
+          <p class="tap-out-hint">빈 곳을 누르면 상점을 나가요</p>
+          <button class="btn-start-quiz" id="btn-shop-close" hidden>나가기</button>
         </div>
       </div>
 
@@ -548,7 +550,8 @@
             <button class="bag-tab" data-tab="title" role="tab" aria-selected="false">칭호</button>
           </div>
           <div class="bag-list" id="bag-list"></div>
-          <button class="btn-start-quiz" id="btn-bag-close">닫기</button>
+          <p class="tap-out-hint">빈 곳을 누르면 닫혀요</p>
+          <button class="btn-start-quiz" id="btn-bag-close" hidden>닫기</button>
         </div>
       </div>
 
@@ -572,7 +575,7 @@
 
       <!-- 스테이지 지도 -->
       <div class="game-map" id="game-map">
-        <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">武</span>한자 무림</h2>
+        <h2 class="game-map-title home-title"><button class="home-title-btn" id="btn-game-title-home" title="처음 화면으로" aria-label="한자 무림 — 눌러서 처음 화면으로"><span class="title-seal" aria-hidden="true">武</span>한자 무림<small aria-hidden="true">처음으로</small></button></h2>
         <div class="my-avatar-card">
           <div class="my-avatar" id="game-my-avatar" aria-hidden="true"></div>
           <div class="my-avatar-info">
@@ -594,7 +597,7 @@
         <!-- 친구 진행 상황: 이 급수에서 친구가 도전 중인 스테이지 (지도 위에도 얼굴이 뜸) -->
         <div class="friend-progress" id="friend-progress" style="display:none;"></div>
         <div class="game-chapters" id="game-chapters"></div>
-        <button class="btn-back" id="btn-game-home">← 처음으로</button>
+        <button class="btn-back" id="btn-game-home" hidden>← 처음으로</button>
       </div>
 
       <!-- 전투 -->

@@ -360,7 +360,8 @@ let avatarMakerDone = null; // 완료 후 실행할 함수
 function openAvatarMaker(onDone) {
   draftAvatar = { ...(getAvatar() || randomAvatar()) };
   avatarMakerDone = onDone;
-  document.getElementById('btn-avatar-back').style.display = getAvatar() ? '' : 'none';
+  // 뒤로 버튼 대신 빈 곳을 누르면 저장하고 돌아감 (처음 만들 때는 '완료'로만)
+  document.getElementById('avatar-tap-hint').style.display = getAvatar() ? '' : 'none';
   // 처음 캐릭터를 만들 때는 도감 탭 없이 꾸미기만
   if (typeof resetMakerTabs === 'function') resetMakerTabs(Boolean(getAvatar()));
   renderAvatarMaker();

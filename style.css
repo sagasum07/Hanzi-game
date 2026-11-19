@@ -8997,3 +8997,53 @@ header h1, .header-titles h1 {
   .loot-item.rarity-legendary.shine::before,
   .loot-item.rarity-legendary.shine .loot-front::after { animation: none !important; display: none; }
 }
+
+/* ==========================================================
+   빈 곳 누르기 안내 · 제목으로 처음 화면 가기
+   ========================================================== */
+.tap-out-hint {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: var(--ink-soft, #8C8278);
+  text-align: center;
+  opacity: 0.8;
+  cursor: pointer;
+}
+
+.shop-modal .tap-out-hint,
+.bag-modal .tap-out-hint {
+  margin-top: 4px;
+}
+
+.home-title-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.home-title-btn small {
+  align-self: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(107, 94, 82, 0.4);
+  font-family: var(--serif-ko, serif);
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--ink-soft, #6B5E52);
+  letter-spacing: 0;
+}
+
+.home-title-btn:hover {
+  background: rgba(201, 161, 74, 0.15);
+}
+
+.home-title-btn:active {
+  transform: scale(0.97);
+}
