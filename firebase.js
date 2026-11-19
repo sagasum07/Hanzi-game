@@ -101,8 +101,9 @@ try {
           if (prev && nicknameKey(prev.nickname) !== nicknameKey(nickname)) tx.delete(nicknameDoc(prev.nickname));
           // 닉네임을 바꿔도 착용한 칭호는 그대로 둠
           const title = prev && prev.title ? prev.title : null;
-          tx.set(profileDoc(uid), { nickname, userCode, updatedAt: serverTimestamp(), ...(title ? { title } : {}) });
-          return { nickname, userCode, title };
+          const photo = prev && prev.photo ? prev.photo : null;
+          tx.set(profileDoc(uid), { nickname, userCode, updatedAt: serverTimestamp(), ...(title ? { title } : {}), ...(photo ? { photo } : {}) });
+          return { nickname, userCode, title, photo };
         });
       } catch (error) {
         if (error.code !== 'code-taken') throw error; // 번호가 겹치면 다른 번호로 다시 시도
@@ -275,6 +276,8 @@ try {
       const snaps = await Promise.all(uids.map((uid) => getDoc(progressDoc(uid)).catch(() => null)));
       return snaps.filter((s) => s && s.exists()).map((s) => ({ uid: s.id, ...s.data() }));
     },
+    // 프로필 사진 저장 (작게 줄인 data URL) / 지우기 (null)
+    setProfilePhoto: (photo) => updateDoc(profileDoc(myUid()), { photo: photo || null, updatedAt: serverTimestamp() }),
     setProfileTitle: (title) => updateDoc(profileDoc(myUid()), { title: title || null, updatedAt: serverTimestamp() }),
   };
 

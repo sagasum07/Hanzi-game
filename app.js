@@ -2799,6 +2799,7 @@ function renderSettings() {
     settingsNicknameInput.value = getDisplayName();
   }
   settingsUserCode.textContent = userProfile ? `@${userProfile.userCode} 📋` : '닉네임을 정하면 생겨요';
+  if (isGoogle) renderSettingsPhoto();
 
   settingsMusic.checked = !isMuted;
   settingsVolume.value = currentVolume || DEFAULT_VOLUME;
@@ -2937,14 +2938,120 @@ async function refreshFriendRequestBadge() {
   }
 }
 
-// 친구 한 명: 아바타(닉네임 첫 글자) + 닉네임 + @고유번호 + 버튼들
+// ---------- 프로필 사진 ----------
+// 앱이 만든 작은 이미지(data URL)만 사진으로 인정 (그 밖의 값은 무시하고 첫 글자로 표시)
+const PHOTO_PATTERN = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+function validPhoto(photo) {
+  return typeof photo === 'string' && photo.length < 100000 && PHOTO_PATTERN.test(photo) ? photo : null;
+}
+
+// 동그란 프로필: 사진이 있으면 사진, 없으면 닉네임 첫 글자
+function fillProfilePhoto(el, photo, nickname) {
+  const src = validPhoto(photo);
+  el.replaceChildren();
+  el.classList.toggle('has-photo', Boolean(src));
+  if (src) {
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    img.decoding = 'async';
+    el.appendChild(img);
+  } else {
+    el.textContent = Array.from(nickname || '?')[0];
+  }
+}
+
+// 고른 사진을 가운데 정사각형으로 잘라 160×160 JPEG 로 줄임 (보통 10~30KB)
+function shrinkPhoto(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) {
+      reject(new Error('not-image'));
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const size = 160;
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF'; // 투명한 PNG 도 흰 바탕으로
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, size, size);
+      let quality = 0.85;
+      let data = canvas.toDataURL('image/jpeg', quality);
+      while (data.length > 60000 && quality > 0.4) {
+        quality -= 0.15;
+        data = canvas.toDataURL('image/jpeg', quality);
+      }
+      resolve(data);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('decode-failed'));
+    };
+    img.src = url;
+  });
+}
+
+const settingsPhoto = document.getElementById('settings-photo');
+const settingsPhotoInput = document.getElementById('settings-photo-input');
+const settingsPhotoNote = document.getElementById('settings-photo-note');
+const btnPhotoRemove = document.getElementById('btn-photo-remove');
+const btnPhotoPick = document.querySelector('.btn-photo-pick');
+
+function renderSettingsPhoto() {
+  fillProfilePhoto(settingsPhoto, userProfile && userProfile.photo, getDisplayName());
+  const hasProfile = Boolean(userProfile);
+  btnPhotoRemove.style.display = userProfile && validPhoto(userProfile.photo) ? '' : 'none';
+  btnPhotoPick.classList.toggle('disabled', !hasProfile);
+  settingsPhotoInput.disabled = !hasProfile;
+  if (!hasProfile) settingsPhotoNote.textContent = '닉네임을 먼저 정하면 프로필 사진을 올릴 수 있어요.';
+}
+
+async function saveProfilePhoto(photo) {
+  if (!userProfile || !window.hanziFirebase) return;
+  settingsPhotoNote.textContent = photo ? '사진을 저장하는 중…' : '사진을 지우는 중…';
+  try {
+    await window.hanziFirebase.setProfilePhoto(photo);
+    userProfile.photo = photo;
+    settingsPhotoNote.textContent = photo ? '프로필 사진을 바꿨어요. 친구 목록과 게임 지도에 보여요.' : '프로필 사진을 지웠어요.';
+    showToast(photo ? '프로필 사진을 바꿨어요 📷' : '프로필 사진을 지웠어요');
+  } catch (error) {
+    console.warn('프로필 사진 저장 실패:', error);
+    settingsPhotoNote.textContent = '사진을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
+  }
+  renderSettingsPhoto();
+}
+
+settingsPhotoInput.addEventListener('change', async () => {
+  const file = settingsPhotoInput.files && settingsPhotoInput.files[0];
+  settingsPhotoInput.value = ''; // 같은 사진을 다시 골라도 change 가 오도록
+  if (!file) return;
+  try {
+    const photo = await shrinkPhoto(file);
+    fillProfilePhoto(settingsPhoto, photo, getDisplayName()); // 저장 전에 미리 보여 줌
+    await saveProfilePhoto(photo);
+  } catch (error) {
+    settingsPhotoNote.textContent = '이 파일은 사진으로 쓸 수 없어요. 다른 사진을 골라 주세요.';
+  }
+});
+
+btnPhotoRemove.addEventListener('click', () => {
+  if (confirm('프로필 사진을 지울까요?')) saveProfilePhoto(null);
+});
+
+// 친구 한 명: 프로필 사진(없으면 닉네임 첫 글자) + 닉네임 + @고유번호 + 버튼들
 function createFriendItem(person, actions) {
   const li = document.createElement('li');
   li.className = 'friend-item';
 
   const avatar = document.createElement('span');
   avatar.className = 'friend-avatar';
-  avatar.textContent = Array.from(person.nickname)[0];
+  fillProfilePhoto(avatar, person.photo, person.nickname);
 
   const names = document.createElement('div');
   names.className = 'friend-names';
@@ -3050,7 +3157,7 @@ function openFriends() {
   showScreen('friends');
   if (!usable) return;
 
-  myAvatar.textContent = Array.from(userProfile.nickname)[0];
+  fillProfilePhoto(myAvatar, userProfile.photo, userProfile.nickname);
   myNickname.textContent = userProfile.nickname;
   const oldTitle = document.getElementById('my-friend-title');
   if (oldTitle) oldTitle.remove();

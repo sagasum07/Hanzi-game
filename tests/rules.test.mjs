@@ -101,6 +101,16 @@ test('칭호: 게임에 있는 칭호만 내 프로필에 달 수 있음', async
   await assertFails(updateDoc(doc(db('alice'), 'profiles', 'alice'), { badge: 'x' }));
 });
 
+test('프로필 사진: 작은 이미지 data URL 만', async () => {
+  const setPhoto = (uid, owner, photo) => updateDoc(doc(db(uid), 'profiles', owner), { photo, updatedAt: serverTimestamp() });
+  await assertSucceeds(setPhoto('alice', 'alice', 'data:image/jpeg;base64,/9j/4AAQSkZJRg=='));
+  await assertSucceeds(setPhoto('alice', 'alice', null));
+  await assertFails(setPhoto('alice', 'alice', 'javascript:alert(1)'));
+  await assertFails(setPhoto('alice', 'alice', 'data:image/svg+xml;base64,PHN2Zz4='));
+  await assertFails(setPhoto('alice', 'alice', 'data:image/jpeg;base64,' + 'A'.repeat(100000)));
+  await assertFails(setPhoto('bob', 'alice', 'data:image/jpeg;base64,AAAA'));
+});
+
 test('게임 진행 상황: 본인만 쓰고, 본인과 친구만 읽음', async () => {
   const progress = (uid, owner, data) => setDoc(doc(db(uid), 'gameProgress', owner), { ...data, updatedAt: serverTimestamp() });
   const ok = { avatar: { gender: 'f', hair: 'bob', hairColor: '#2B2321', face: 'smile', skin: '#F6D3B3', outfit: '#4A90D9' }, hat: 'crown', cleared: { 1: 12, 2: 3 } };

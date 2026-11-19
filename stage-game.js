@@ -265,6 +265,7 @@ async function loadFriendProgress(force = false) {
     friendProgress = progress.map((p) => ({
       uid: p.uid,
       nickname: (byUid.get(p.uid) || {}).nickname || '친구',
+      photo: (byUid.get(p.uid) || {}).photo || null,
       avatar: validAvatar(p.avatar) || DEFAULT_AVATAR,
       hat: GEAR_BY_ID[p.hat] && GEAR_BY_ID[p.hat].slot === 'hat' ? p.hat : null,
       cleared: p.cleared && typeof p.cleared === 'object' ? p.cleared : {},
@@ -284,6 +285,18 @@ function friendStageNo(friend, level, total) {
   const cleared = Math.max(0, Math.min(total, Math.floor(Number(friend.cleared[level]) || 0)));
   if (cleared === 0) return 0; // 이 급수를 아직 시작하지 않음
   return Math.min(cleared + 1, total);
+}
+
+// 친구 얼굴: 프로필 사진이 있으면 사진, 없으면 게임 캐릭터 얼굴
+function fillFriendFace(el, f) {
+  if (typeof validPhoto === 'function' && validPhoto(f.photo)) {
+    const img = document.createElement('img');
+    img.src = f.photo;
+    img.alt = '';
+    el.appendChild(img);
+  } else {
+    el.innerHTML = renderAvatarFace(f.avatar, f.hat);
+  }
 }
 
 function renderFriendPins() {
@@ -308,7 +321,7 @@ function renderFriendPins() {
     list.slice(0, 3).forEach((f) => {
       const pin = document.createElement('span');
       pin.className = 'friend-pin';
-      pin.innerHTML = renderAvatarFace(f.avatar, f.hat);
+      fillFriendFace(pin, f);
       pins.appendChild(pin);
     });
     if (list.length > 3) {
@@ -338,7 +351,7 @@ function renderFriendPins() {
     chip.className = 'friend-chip';
     const face = document.createElement('span');
     face.className = 'friend-pin';
-    face.innerHTML = renderAvatarFace(f.avatar, f.hat);
+    fillFriendFace(face, f);
     const name = document.createElement('span');
     name.className = 'friend-chip-name';
     name.textContent = f.nickname;
