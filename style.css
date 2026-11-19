@@ -9160,3 +9160,17 @@ header h1, .header-titles h1 {
 @media (max-width: 380px) {
   .btn-game-mode.main .game-mode-text strong { font-size: 1.35rem; }
 }
+
+/* 단어 맞추기: 한자 카드 그림 */
+.mode-icon-svg {
+  display: inline-grid;
+  place-items: center;
+  width: 3.1rem;
+  height: 3.1rem;
+}
+
+.mode-icon-svg svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
