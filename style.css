@@ -7844,3 +7844,116 @@ header h1, .header-titles h1 {
   .fx-guard,
   .player-side.guard .battle-avatar { animation: none; }
 }
+
+/* ==========================================================
+   친구 진행 상황 (지도)
+   ========================================================== */
+.game-screen .stage-node {
+  position: relative;
+}
+
+.friend-pins {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.friend-pin {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #FFF6E6;
+  background: radial-gradient(circle at 50% 35%, #FFF9EE, #E9DCC4);
+  box-shadow: 0 1px 4px rgba(31, 26, 23, 0.35);
+}
+
+.friend-pins .friend-pin + .friend-pin {
+  margin-left: -9px;
+}
+
+.friend-pins .friend-pin:first-child {
+  animation: friend-bob 2.2s ease-in-out infinite;
+}
+
+.friend-pin .avatar-face {
+  width: 100%;
+  height: 100%;
+}
+
+.friend-pin.more {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #FFF6E6;
+  background: var(--jade, #3F7D6B);
+}
+
+@keyframes friend-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.friend-progress {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 6px;
+  scrollbar-width: thin;
+}
+
+.friend-progress-title {
+  flex: none;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.8rem;
+  color: var(--cinnabar, #B8332A);
+}
+
+.friend-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px 3px 3px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(201, 161, 74, 0.6);
+  background: #FFF9EE;
+  font-size: 0.8rem;
+  color: var(--ink, #1F1A17);
+}
+
+.friend-chip .friend-pin {
+  width: 26px;
+  height: 26px;
+  border-color: rgba(201, 161, 74, 0.6);
+  box-shadow: none;
+}
+
+.friend-chip-name {
+  max-width: 7em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.friend-chip small {
+  color: var(--jade, #3F7D6B);
+  font-weight: 700;
+}
+
+@media (min-width: 720px) {
+  .game-wide .friend-pin { width: 30px; height: 30px; }
+  .game-wide .friend-pins { top: -16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .friend-pins .friend-pin:first-child { animation: none; }
+}

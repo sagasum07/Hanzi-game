@@ -9,6 +9,7 @@ rules_version = '2';
 // userCodes/{8자리 번호}  고유 번호 점유 표시 → 같은 번호는 한 명만
 // friendRequests/{보낸uid_받는uid}  친구 요청
 // friendships/{작은uid_큰uid}       친구 관계 (요청을 받은 사람이 수락할 때만 생성)
+// gameProgress/{uid}    게임 모드 진행 상황: 캐릭터 얼굴 + 급수별 클리어 단계 (본인과 친구만 읽기, 본인만 쓰기)
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
@@ -110,6 +111,31 @@ service cloud.firestore {
       // 보낸 사람은 취소, 받은 사람은 거절·수락 때 삭제
       allow delete: if signedIn()
         && (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+    }
+
+    // ---------- 게임 모드 진행 상황 (친구 지도에 표시) ----------
+    match /gameProgress/{uid} {
+      // 친구 관계 문서 id 는 '작은uid_큰uid' 라서 두 순서를 모두 확인
+      function isFriendOf(other) {
+        return signedIn()
+          && (exists(/databases/$(database)/documents/friendships/$(request.auth.uid + '_' + other))
+            || exists(/databases/$(database)/documents/friendships/$(other + '_' + request.auth.uid)));
+      }
+
+      allow read: if isMe(uid) || isFriendOf(uid);
+
+      allow create, update: if isMe(uid)
+        && request.resource.data.keys().hasOnly(['avatar', 'hat', 'cleared', 'updatedAt'])
+        && request.resource.data.cleared is map
+        && request.resource.data.cleared.size() <= 6
+        && (!('avatar' in request.resource.data) || request.resource.data.avatar == null
+          || (request.resource.data.avatar is map
+            && request.resource.data.avatar.keys().hasOnly(['gender', 'hair', 'hairColor', 'face', 'skin', 'outfit'])))
+        && (!('hat' in request.resource.data) || request.resource.data.hat == null
+          || (request.resource.data.hat is string && request.resource.data.hat.size() <= 20))
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if isMe(uid);
     }
 
     // ---------- 친구 관계 ----------

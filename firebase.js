@@ -57,6 +57,8 @@ try {
   const requestDoc = (from, to) => doc(db, 'friendRequests', `${from}_${to}`);
   const pairId = (a, b) => (a < b ? `${a}_${b}` : `${b}_${a}`);
   const friendshipDoc = (a, b) => doc(db, 'friendships', pairId(a, b));
+  // gameProgress/{uid}: 게임 모드 진행 상황 (본인과 친구만 읽을 수 있음)
+  const progressDoc = (uid) => doc(db, 'gameProgress', uid);
   const randomUserCode = () => String(Math.floor(10000000 + Math.random() * 90000000));
   const socialError = (code, message) => Object.assign(new Error(message), { code });
 
@@ -180,6 +182,7 @@ try {
     ]);
     const batch = writeBatch(db);
     [...incoming.docs, ...outgoing.docs, ...friendships.docs].forEach((d) => batch.delete(d.ref));
+    batch.delete(progressDoc(uid));
     if (profileSnap.exists()) {
       const { nickname, userCode } = profileSnap.data();
       batch.delete(nicknameDoc(nickname));
@@ -265,6 +268,13 @@ try {
     countIncomingRequests: countIncomingRequests,
     getFriendData: getFriendData,
     // 착용한 칭호를 공개 프로필에 저장 (친구 목록에 보임). 없으면 null
+    // 내 게임 진행 상황 저장 { avatar, hat, cleared: { 급수: 클리어한 스테이지 번호 } }
+    saveGameProgress: (data) => setDoc(progressDoc(myUid()), { ...data, updatedAt: serverTimestamp() }),
+    // 친구들의 게임 진행 상황 (아직 게임을 안 했거나 읽을 수 없으면 빠짐)
+    getFriendsProgress: async (uids) => {
+      const snaps = await Promise.all(uids.map((uid) => getDoc(progressDoc(uid)).catch(() => null)));
+      return snaps.filter((s) => s && s.exists()).map((s) => ({ uid: s.id, ...s.data() }));
+    },
     setProfileTitle: (title) => updateDoc(profileDoc(myUid()), { title: title || null, updatedAt: serverTimestamp() }),
   };
 

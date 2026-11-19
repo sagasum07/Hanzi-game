@@ -81,6 +81,14 @@ function saveAvatar(avatar) {
   if (!userRecord.game) userRecord.game = {};
   userRecord.game.avatar = avatar;
   scheduleRecordSave();
+  if (typeof syncMyProgress === 'function') syncMyProgress();
+}
+
+// 작은 얼굴 그림 (친구 표시용): 전신 그림에서 머리 부분만 잘라 보여 줌
+function renderAvatarFace(avatar, hat = null) {
+  return renderAvatar(avatar, 'normal', { hat })
+    .replace('viewBox="0 0 120 160"', 'viewBox="24 4 72 72"')
+    .replace('class="avatar-svg"', 'class="avatar-svg avatar-face"');
 }
 
 function randomAvatar() {

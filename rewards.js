@@ -449,6 +449,7 @@ document.querySelectorAll('.bag-tab').forEach((b) => b.addEventListener('click',
 }));
 
 document.getElementById('btn-bag-close').addEventListener('click', () => {
+  if (typeof syncMyProgress === 'function') syncMyProgress(); // 바꾼 모자·투구를 친구 지도에도
   bagModal.style.display = 'none';
   if (onBagClose) onBagClose();
 });

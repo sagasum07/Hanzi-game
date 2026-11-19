@@ -228,8 +228,154 @@ function openGameMap(level) {
   }
   gameMap.style.display = '';
   renderGameMap();
+  loadFriendProgress();
+  syncMyProgress();
   // 처음 들어온 사람에게는 게임 방법을 한 번 보여 줌
   if (!userRecord.game.tutorialDone) openTutorial();
+}
+
+// ---------- 친구 진행 상황 ----------
+// 로그인해서 닉네임이 있으면, 내 진행 상황(캐릭터 얼굴·투구·급수별 클리어 단계)을 서버에 올리고
+// 친구들의 진행 상황을 받아 지도의 스테이지 위에 친구 얼굴을 띄움
+const friendProgressEl = document.getElementById('friend-progress');
+let friendProgress = []; // [{ uid, nickname, avatar, hat, cleared }]
+let friendProgressAt = 0;
+let friendProgressLoading = false;
+const FRIEND_PROGRESS_TTL = 60 * 1000; // 1분 동안은 다시 받지 않음
+
+function socialReady() {
+  return typeof recordOwner !== 'undefined' && recordOwner && recordOwner.type === 'google'
+    && typeof userProfile !== 'undefined' && userProfile && window.hanziFirebase
+    && window.hanziFirebase.getFriendsProgress;
+}
+
+// 친구 진행 상황 받아 오기 (친구 목록 → 각 친구의 gameProgress)
+async function loadFriendProgress(force = false) {
+  if (!socialReady()) {
+    friendProgress = [];
+    renderFriendPins();
+    return;
+  }
+  if (friendProgressLoading || (!force && Date.now() - friendProgressAt < FRIEND_PROGRESS_TTL)) return;
+  friendProgressLoading = true;
+  try {
+    const { friends } = await window.hanziFirebase.getFriendData();
+    const progress = friends.length ? await window.hanziFirebase.getFriendsProgress(friends.map((f) => f.uid)) : [];
+    const byUid = new Map(friends.map((f) => [f.uid, f]));
+    friendProgress = progress.map((p) => ({
+      uid: p.uid,
+      nickname: (byUid.get(p.uid) || {}).nickname || '친구',
+      avatar: validAvatar(p.avatar) || DEFAULT_AVATAR,
+      hat: GEAR_BY_ID[p.hat] && GEAR_BY_ID[p.hat].slot === 'hat' ? p.hat : null,
+      cleared: p.cleared && typeof p.cleared === 'object' ? p.cleared : {},
+    }));
+    friendProgressAt = Date.now();
+  } catch (error) {
+    console.warn('친구 진행 상황을 불러오지 못했어요.', error);
+    friendProgressAt = Date.now(); // 실패해도 1분 동안은 다시 시도하지 않음
+  } finally {
+    friendProgressLoading = false;
+  }
+  if (gameMap.style.display !== 'none') renderFriendPins();
+}
+
+// 이 급수에서 친구가 있는 스테이지: 클리어한 다음 스테이지 (모두 깼으면 마왕성)
+function friendStageNo(friend, level, total) {
+  const cleared = Math.max(0, Math.min(total, Math.floor(Number(friend.cleared[level]) || 0)));
+  if (cleared === 0) return 0; // 이 급수를 아직 시작하지 않음
+  return Math.min(cleared + 1, total);
+}
+
+function renderFriendPins() {
+  gameChapters.querySelectorAll('.friend-pins').forEach((el) => el.remove());
+  const total = levelStages(gameLevel).length;
+  const here = friendProgress
+    .map((f) => ({ ...f, no: friendStageNo(f, gameLevel, total) }))
+    .filter((f) => f.no > 0)
+    .sort((a, b) => b.no - a.no);
+  // 스테이지별로 묶어서 얼굴 띄우기 (최대 3명 + 나머지 수)
+  const byStage = new Map();
+  here.forEach((f) => {
+    if (!byStage.has(f.no)) byStage.set(f.no, []);
+    byStage.get(f.no).push(f);
+  });
+  byStage.forEach((list, no) => {
+    const node = gameChapters.querySelector(`.stage-node[data-no="${no}"]`);
+    if (!node) return;
+    const pins = document.createElement('span');
+    pins.className = 'friend-pins';
+    pins.setAttribute('aria-hidden', 'true');
+    list.slice(0, 3).forEach((f) => {
+      const pin = document.createElement('span');
+      pin.className = 'friend-pin';
+      pin.innerHTML = renderAvatarFace(f.avatar, f.hat);
+      pins.appendChild(pin);
+    });
+    if (list.length > 3) {
+      const more = document.createElement('span');
+      more.className = 'friend-pin more';
+      more.textContent = `+${list.length - 3}`;
+      pins.appendChild(more);
+    }
+    node.appendChild(pins);
+    node.title = `친구: ${list.map((f) => f.nickname).join(', ')}`;
+    node.setAttribute('aria-label', `${node.getAttribute('aria-label')}, 여기 있는 친구 ${list.map((f) => f.nickname).join(', ')}`);
+  });
+
+  // 지도 위쪽: 이 급수의 친구 목록 (누가 어디까지 왔는지)
+  if (!here.length) {
+    friendProgressEl.style.display = 'none';
+    friendProgressEl.replaceChildren();
+    return;
+  }
+  const stages = levelStages(gameLevel);
+  const title = document.createElement('span');
+  title.className = 'friend-progress-title';
+  title.textContent = '친구 진행';
+  const chips = here.map((f) => {
+    const s = stages[f.no - 1];
+    const chip = document.createElement('span');
+    chip.className = 'friend-chip';
+    const face = document.createElement('span');
+    face.className = 'friend-pin';
+    face.innerHTML = renderAvatarFace(f.avatar, f.hat);
+    const name = document.createElement('span');
+    name.className = 'friend-chip-name';
+    name.textContent = f.nickname;
+    const where = document.createElement('small');
+    const allClear = (Number(f.cleared[gameLevel]) || 0) >= stages.length;
+    where.textContent = allClear ? '마왕 격파!' : s.final ? '마왕성' : s.boss ? `${s.chapter}장 두목` : `${s.chapter}-${s.pos}`;
+    chip.append(face, name, where);
+    return chip;
+  });
+  friendProgressEl.replaceChildren(title, ...chips);
+  friendProgressEl.style.display = '';
+}
+
+// 내 진행 상황 올리기: 바뀌었을 때만, 잠깐 모아서 한 번에
+let progressSyncTimer = null;
+let lastProgressJson = '';
+let progressSyncFailed = false;
+function syncMyProgress() {
+  if (progressSyncFailed || !socialReady() || !userRecord || !userRecord.game) return;
+  clearTimeout(progressSyncTimer);
+  progressSyncTimer = setTimeout(() => {
+    if (!socialReady()) return;
+    const cleared = {};
+    for (let l = 1; l <= 6; l++) {
+      const prog = userRecord.game[l];
+      if (prog && prog.cleared > 0) cleared[l] = prog.cleared;
+    }
+    const data = { avatar: getAvatar(), hat: gamePlayer().equip.hat || null, cleared };
+    const json = JSON.stringify(data);
+    if (json === lastProgressJson) return;
+    window.hanziFirebase.saveGameProgress(data)
+      .then(() => { lastProgressJson = json; })
+      .catch((error) => {
+        progressSyncFailed = true; // 이번 접속에서는 다시 시도하지 않음
+        console.warn('게임 진행 상황을 저장하지 못했어요.', error);
+      });
+  }, 1500);
 }
 
 // ---------- 게임 방법 안내 (튜토리얼) ----------
@@ -495,6 +641,7 @@ function renderGameMap() {
     path.className = 'stage-path';
     stages.filter((s) => s.chapter === c).forEach((s) => {
       const node = document.createElement('button');
+      node.dataset.no = String(s.no);
       const cleared = s.no <= prog.cleared;
       const open = s.no === nextNo;
       node.className = 'stage-node' + (s.boss ? ' boss' : '') + (cleared ? ' cleared' : '') + (open ? ' current' : '') + (!cleared && !open ? ' locked' : '');
@@ -530,6 +677,8 @@ function renderGameMap() {
     chapters.push(card);
   }
   gameChapters.replaceChildren(...chapters);
+
+  renderFriendPins();
 
   // 지금 도전할 스테이지가 보이도록 스크롤
   const current = gameChapters.querySelector('.stage-node.current');
@@ -1341,6 +1490,7 @@ function finishBattle(won) {
   const replay = stage.no <= gameProgress(level).cleared; // 이미 클리어했던 스테이지
   if (won) {
     saveStageClear(level, stage.no, stars);
+    syncMyProgress();
     // 마왕을 물리치면 칭호
     const earned = stage.final ? grantMasterTitle(level) : [];
     showTitleEarned(earned);

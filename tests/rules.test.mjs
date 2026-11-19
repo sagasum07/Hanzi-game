@@ -101,6 +101,17 @@ test('칭호: 게임에 있는 칭호만 내 프로필에 달 수 있음', async
   await assertFails(updateDoc(doc(db('alice'), 'profiles', 'alice'), { badge: 'x' }));
 });
 
+test('게임 진행 상황: 본인만 쓰고, 본인과 친구만 읽음', async () => {
+  const progress = (uid, owner, data) => setDoc(doc(db(uid), 'gameProgress', owner), { ...data, updatedAt: serverTimestamp() });
+  const ok = { avatar: { gender: 'f', hair: 'bob', hairColor: '#2B2321', face: 'smile', skin: '#F6D3B3', outfit: '#4A90D9' }, hat: 'crown', cleared: { 1: 12, 2: 3 } };
+  await assertSucceeds(progress('alice', 'alice', ok));
+  await assertFails(progress('bob', 'alice', ok)); // 남의 기록은 못 씀
+  await assertFails(progress('alice', 'alice', { ...ok, coins: 999 })); // 정해진 필드만
+  await assertFails(progress('alice', 'alice', { ...ok, avatar: { evil: '<script>' } }));
+  await assertSucceeds(getDoc(doc(db('alice'), 'gameProgress/alice')));
+  await assertFails(getDoc(doc(db(null), 'gameProgress/alice')));
+});
+
 test('프로필 읽기: 로그인한 사용자만', async () => {
   await assertSucceeds(getDoc(doc(db('bob'), 'profiles/alice')));
   await assertSucceeds(getDoc(doc(db('bob'), 'userCodes/12345678')));
@@ -148,8 +159,13 @@ test('친구 관계 읽기·삭제: 두 사람만', async () => {
   await assertFails(getDoc(doc(db('carol'), 'friendships/alice_bob')));
   await assertSucceeds(getDocs(query(collection(db('alice'), 'friendships'), where('members', 'array-contains', 'alice'))));
   await assertFails(getDocs(query(collection(db('carol'), 'friendships'), where('members', 'array-contains', 'alice'))));
+  // 친구는 서로의 게임 진행 상황을 읽을 수 있고, 친구가 아니면 못 읽음
+  await assertSucceeds(getDoc(doc(db('bob'), 'gameProgress/alice')));
+  await assertFails(getDoc(doc(db('carol'), 'gameProgress/alice')));
   await assertFails(deleteDoc(doc(db('carol'), 'friendships/alice_bob')));
   await assertSucceeds(deleteDoc(doc(db('alice'), 'friendships/alice_bob')));
+  // 친구를 끊으면 더 이상 못 읽음
+  await assertFails(getDoc(doc(db('bob'), 'gameProgress/alice')));
 });
 
 test('요청 취소·거절: 보낸 사람·받은 사람만 삭제', async () => {
