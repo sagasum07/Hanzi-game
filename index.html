@@ -496,11 +496,23 @@
       <div class="avatar-maker" id="avatar-maker" style="display:none;">
         <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">人</span>나의 무인(武人)</h2>
         <p class="game-map-desc">요괴와 겨룰 나만의 무인을 꾸며 보세요.</p>
-        <div class="avatar-preview" id="avatar-preview" aria-hidden="true"></div>
-        <div class="avatar-options" id="avatar-options"></div>
-        <div class="avatar-maker-buttons">
-          <button class="btn-restart" id="btn-avatar-random">랜덤</button>
-          <button class="btn-start-quiz" id="btn-avatar-done">완료 →</button>
+        <!-- 캐릭터 꾸미기 / 장비 도감 (도감은 rewards.js) -->
+        <div class="bag-tabs maker-tabs" id="maker-tabs" role="tablist">
+          <button class="bag-tab active" data-tab="avatar" role="tab" aria-selected="true">캐릭터</button>
+          <button class="bag-tab" data-tab="dex" role="tab" aria-selected="false">장비 도감</button>
+        </div>
+        <div class="maker-pane" id="maker-avatar-pane">
+          <div class="avatar-preview" id="avatar-preview" aria-hidden="true"></div>
+          <div class="avatar-options" id="avatar-options"></div>
+          <div class="avatar-maker-buttons">
+            <button class="btn-restart" id="btn-avatar-random">랜덤</button>
+            <button class="btn-start-quiz" id="btn-avatar-done">완료 →</button>
+          </div>
+        </div>
+        <div class="maker-pane gear-dex" id="maker-dex-pane" style="display:none;">
+          <p class="dex-progress" id="dex-progress"></p>
+          <div class="dex-detail" id="dex-detail"></div>
+          <div class="dex-sections" id="dex-sections"></div>
         </div>
         <button class="btn-back" id="btn-avatar-back">← 뒤로</button>
       </div>

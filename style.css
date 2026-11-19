@@ -8038,3 +8038,212 @@ header h1, .header-titles h1 {
 .photo-note {
   margin: 0;
 }
+
+/* ==========================================================
+   꾸미기: 캐릭터 / 장비 도감
+   ========================================================== */
+.maker-tabs {
+  max-width: 420px;
+}
+
+.maker-pane {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.gear-dex {
+  max-width: 520px;
+  align-items: stretch;
+}
+
+.dex-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.95rem;
+  color: var(--ink, #1F1A17);
+}
+
+.dex-progress strong {
+  color: var(--cinnabar, #B8332A);
+  font-size: 1.1rem;
+}
+
+.dex-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(31, 26, 23, 0.12);
+  overflow: hidden;
+}
+
+.dex-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #C9A14A, #F2C230);
+}
+
+/* 위쪽 상세 칸 */
+.dex-detail {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 2px solid var(--rarity);
+  background:
+    radial-gradient(circle at 15% 50%, color-mix(in srgb, var(--rarity) 22%, transparent), transparent 60%),
+    #FFF9EE;
+}
+
+.dex-detail.locked {
+  border-color: #8C8278;
+  background: #E9E2D3;
+}
+
+.dex-detail-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dex-detail-info strong {
+  font-family: var(--serif-ko, serif);
+  font-size: 1.05rem;
+  color: var(--ink, #1F1A17);
+}
+
+.dex-detail-info small {
+  font-size: 0.78rem;
+  color: var(--ink-soft, #6B5E52);
+  word-break: keep-all;
+}
+
+.dex-how {
+  color: var(--jade, #3F7D6B) !important;
+  font-weight: 700;
+}
+
+.dex-detail.locked .dex-how {
+  color: #6B5E52 !important;
+}
+
+/* 장비 칸 */
+.dex-section-title {
+  margin: 4px 0 6px;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.9rem;
+  color: var(--cinnabar, #B8332A);
+  border-bottom: 1px solid rgba(201, 161, 74, 0.5);
+  padding-bottom: 3px;
+}
+
+.dex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: 8px;
+}
+
+.dex-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px 6px;
+  border-radius: 12px;
+  border: 2px solid var(--rarity);
+  background: #FFF9EE;
+  cursor: pointer;
+  font: inherit;
+}
+
+.dex-card.owned {
+  box-shadow: 0 0 10px color-mix(in srgb, var(--rarity) 45%, transparent);
+}
+
+.dex-card.locked {
+  border-color: #6B6460;
+  background: #3A3530;
+}
+
+.dex-card.selected {
+  outline: 3px solid var(--cinnabar, #B8332A);
+  outline-offset: 1px;
+}
+
+.dex-card.equipped::after {
+  content: '장착';
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--cinnabar, #B8332A);
+  color: #FFF6E6;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.dex-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+}
+
+.dex-icon.big {
+  flex: none;
+  width: 64px;
+  height: 64px;
+}
+
+.dex-icon .gear-icon {
+  width: 100%;
+  height: 100%;
+}
+
+/* 못 얻은 장비: 어둡게 + 자물쇠 */
+.dex-card.locked .dex-icon .gear-icon,
+.dex-detail.locked .dex-icon .gear-icon {
+  filter: grayscale(1) brightness(0.3);
+  opacity: 0.85;
+}
+
+.dex-lock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.dex-lock .ui-icon {
+  width: 22px;
+  height: 22px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.dex-icon.big .dex-lock .ui-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.dex-name {
+  font-size: 0.68rem;
+  line-height: 1.2;
+  color: var(--ink, #1F1A17);
+  text-align: center;
+  word-break: keep-all;
+}
+
+.dex-card.locked .dex-name {
+  color: #9C9389;
+}

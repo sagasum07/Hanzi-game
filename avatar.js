@@ -361,6 +361,8 @@ function openAvatarMaker(onDone) {
   draftAvatar = { ...(getAvatar() || randomAvatar()) };
   avatarMakerDone = onDone;
   document.getElementById('btn-avatar-back').style.display = getAvatar() ? '' : 'none';
+  // 처음 캐릭터를 만들 때는 도감 탭 없이 꾸미기만
+  if (typeof resetMakerTabs === 'function') resetMakerTabs(Boolean(getAvatar()));
   renderAvatarMaker();
   avatarMaker.style.display = '';
 }

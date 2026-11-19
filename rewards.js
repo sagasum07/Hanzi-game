@@ -403,6 +403,100 @@ function gearRow(g) {
   }
 }
 
+// ---------- 장비 도감 (꾸미기 화면) ----------
+// 모든 장비를 칸별로 보여 주고, 얻은 장비는 밝게 · 못 얻은 장비는 어둡게 + 자물쇠
+const makerTabs = document.getElementById('maker-tabs');
+const makerAvatarPane = document.getElementById('maker-avatar-pane');
+const makerDexPane = document.getElementById('maker-dex-pane');
+const dexProgress = document.getElementById('dex-progress');
+const dexDetail = document.getElementById('dex-detail');
+const dexSections = document.getElementById('dex-sections');
+let dexSelected = null;
+
+function resetMakerTabs(showTabs) {
+  makerTabs.style.display = showTabs ? '' : 'none';
+  showMakerTab('avatar');
+}
+
+function showMakerTab(tab) {
+  makerAvatarPane.style.display = tab === 'avatar' ? '' : 'none';
+  makerDexPane.style.display = tab === 'dex' ? '' : 'none';
+  makerTabs.querySelectorAll('.bag-tab').forEach((b) => {
+    const on = b.dataset.tab === tab;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  if (tab === 'dex') renderGearDex();
+}
+
+makerTabs.querySelectorAll('.bag-tab').forEach((b) => b.addEventListener('click', () => showMakerTab(b.dataset.tab)));
+
+function renderGearDex() {
+  const p = gamePlayer();
+  const ownedCount = GEAR.filter((g) => p.items[g.id]).length;
+  dexProgress.innerHTML = `모은 장비 <strong>${ownedCount}</strong> / ${GEAR.length}`
+    + `<span class="dex-bar"><i style="width:${(ownedCount / GEAR.length) * 100}%"></i></span>`;
+  if (!dexSelected || !GEAR_BY_ID[dexSelected]) dexSelected = (GEAR.find((g) => p.items[g.id]) || GEAR[0]).id;
+  renderDexDetail();
+
+  dexSections.replaceChildren(...GEAR_SLOTS.map((slot) => {
+    const list = GEAR.filter((g) => g.slot === slot.id).sort((a, b) => a.rarity - b.rarity);
+    const section = document.createElement('section');
+    section.className = 'dex-section';
+    const head = document.createElement('h4');
+    head.className = 'dex-section-title';
+    head.textContent = `${slot.name} · ${list.filter((g) => p.items[g.id]).length}/${list.length}`;
+    const grid = document.createElement('div');
+    grid.className = 'dex-grid';
+    list.forEach((g) => {
+      const owned = Boolean(p.items[g.id]);
+      const card = document.createElement('button');
+      card.className = 'dex-card' + (owned ? ' owned' : ' locked') + (p.equip[g.slot] === g.id ? ' equipped' : '') + (dexSelected === g.id ? ' selected' : '');
+      card.style.setProperty('--rarity', RARITIES[g.rarity].color);
+      card.setAttribute('aria-label', `${g.name}, ${RARITIES[g.rarity].name}, ${owned ? '획득' : '미획득'}`);
+      card.innerHTML = `<span class="dex-icon">${renderGearIcon(g.id)}${owned ? '' : `<span class="dex-lock">${uiIcon('lock')}</span>`}</span>`
+        + `<span class="dex-name">${g.name}</span>`;
+      card.addEventListener('click', () => {
+        dexSelected = g.id;
+        renderGearDex();
+      });
+      grid.appendChild(card);
+    });
+    section.append(head, grid);
+    return section;
+  }));
+}
+
+// 위쪽 상세 칸: 고른 장비의 그림·희귀도·효과, 얻었으면 장착 버튼, 못 얻었으면 얻는 곳
+function renderDexDetail() {
+  const p = gamePlayer();
+  const g = GEAR_BY_ID[dexSelected];
+  const owned = Boolean(p.items[g.id]);
+  const equipped = p.equip[g.slot] === g.id;
+  const rarity = RARITIES[g.rarity];
+  dexDetail.className = 'dex-detail' + (owned ? ' owned' : ' locked');
+  dexDetail.style.setProperty('--rarity', rarity.color);
+  dexDetail.innerHTML = `
+    <span class="dex-icon big">${renderGearIcon(g.id)}${owned ? '' : `<span class="dex-lock">${uiIcon('lock')}</span>`}</span>
+    <span class="dex-detail-info">
+      <strong>${g.name}</strong>
+      <small><b style="color:${rarity.color}">${rarity.name}</b> ${gearKindName(g)} · ${gearEffectText(g)}</small>
+      <small class="dex-how">${owned ? (equipped ? '장착 중이에요' : '가방에 있어요') : `아직 못 얻었어요 · 주로 ‘${CHESTS[g.rarity].name}’에서 나와요`}</small>
+    </span>`;
+  if (owned) {
+    const btn = document.createElement('button');
+    btn.className = 'bag-item-btn';
+    btn.textContent = equipped ? '해제' : '장착';
+    btn.addEventListener('click', () => {
+      p.equip[g.slot] = equipped ? null : g.id;
+      scheduleRecordSave();
+      if (typeof syncMyProgress === 'function') syncMyProgress();
+      renderGearDex();
+    });
+    dexDetail.appendChild(btn);
+  }
+}
+
 // 칭호 칸: 얻은 칭호는 착용·해제, 아직 못 얻은 칭호는 얻는 방법을 보여 줌
 function renderTitleList(p) {
   const count = TITLES.filter((t) => p.titles[t.id]).length;
