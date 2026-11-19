@@ -32,7 +32,7 @@
 
     <!-- ===== Volume Control ===== -->
     <div class="volume-control-wrapper" id="volume-control-wrapper">
-      <button class="btn-volume" id="btn-volume" aria-label="음량 조절">🔊</button>
+      <button class="btn-volume" id="btn-volume" aria-label="음량 조절"><i class="ico-slot" data-icon="speaker"></i></button>
       <input type="range" class="volume-slider" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
     </div>
 
@@ -136,7 +136,7 @@
           <button type="button" class="btn-check-nickname" id="btn-check-nickname">중복 확인</button>
         </div>
         <p class="nickname-error" id="nickname-error"></p>
-        <button type="submit" class="btn-start-quiz" id="btn-nickname-save">시작하기 🚀</button>
+        <button type="submit" class="btn-start-quiz" id="btn-nickname-save">시작하기 <i class="ico-slot" data-icon="go"></i></button>
       </form>
     </div>
 
@@ -256,7 +256,7 @@
             <button class="segment" data-speed="normal">보통</button>
             <button class="segment" data-speed="fast">빠르게</button>
           </div>
-          <button class="btn-preview-speech" id="btn-preview-speech" aria-label="발음 미리 듣기">🔈 你好</button>
+          <button class="btn-preview-speech" id="btn-preview-speech" aria-label="발음 미리 듣기"><i class="ico-slot" data-icon="speaker"></i> 你好</button>
         </div>
       </section>
 
@@ -368,7 +368,7 @@
         <button class="count-preset-btn" data-count="40">40개</button>
         <button class="count-preset-btn" data-count="50">50개</button>
       </div>
-      <button class="btn-start-quiz" id="btn-start-quiz">학습 시작 🚀</button>
+      <button class="btn-start-quiz" id="btn-start-quiz">학습 시작 <i class="ico-slot" data-icon="go"></i></button>
       <button class="btn-back" id="btn-back-to-difficulty">← 뒤로</button>
     </div>
 
@@ -391,7 +391,7 @@
           <ul class="plan-word-list" id="plan-word-list">
             <!-- Day words dynamically inserted here -->
           </ul>
-          <button class="btn-start-quiz" id="btn-plan-start">오늘의 퀴즈 시작 🚀</button>
+          <button class="btn-start-quiz" id="btn-plan-start">오늘의 퀴즈 시작 <i class="ico-slot" data-icon="go"></i></button>
         </div>
         <button class="plan-arrow" id="btn-plan-next" aria-label="다음 학습일차">›</button>
       </div>
@@ -430,7 +430,7 @@
           </div>
         </div>
       </div>
-      <button class="btn-start-quiz" id="btn-wordbook-quiz">🎲 랜덤 퀴즈</button>
+      <button class="btn-start-quiz" id="btn-wordbook-quiz"><i class="ico-slot" data-icon="dice"></i> 랜덤 퀴즈</button>
       <button class="btn-back" id="btn-wordbook-back">← 뒤로</button>
     </div>
 
@@ -438,7 +438,7 @@
     <div id="quiz-screen" style="display:none;">
       <!-- Header -->
       <header id="header" class="game-header">
-        <button class="btn-top-home" id="btn-quiz-home" title="홈으로">🏠</button>
+        <button class="btn-top-home" id="btn-quiz-home" title="홈으로" aria-label="홈으로"><i class="ico-slot" data-icon="home"></i></button>
         <div class="header-titles">
           <h1>中文学习</h1>
           <p class="subtitle" id="level-subtitle">HSK 1급 한자 퀴즈</p>
@@ -463,7 +463,7 @@
       <main class="quiz-card" id="quiz-card">
         <!-- 1단계(중→한)를 마치면 2단계(한→중)로 넘어가기 전에 보여 주는 안내 -->
         <div class="stage-intro" id="stage-intro" style="display:none;">
-          <div class="stage-intro-icon">🔁</div>
+          <div class="stage-intro-icon"><i class="ico-slot" data-icon="repeat"></i></div>
           <h2 class="stage-intro-title">1단계 완료!</h2>
           <p class="stage-intro-score" id="stage-intro-score"></p>
           <p class="stage-intro-text">이번엔 <strong>한국어 뜻</strong>을 보고<br>알맞은 <strong>중국어</strong>를 골라 보세요.</p>
@@ -485,7 +485,7 @@
                 </button>
                 <button class="btn-save-word" id="btn-save-word" aria-pressed="false">☆ 단어장에 저장</button>
               </div>
-              <button class="btn-show-example" id="btn-show-example" disabled>📖 예문 보기</button>
+              <button class="btn-show-example" id="btn-show-example" disabled><i class="ico-slot" data-icon="book"></i> 예문 보기</button>
             </div>
             <div class="word-face word-back" id="word-back" aria-hidden="true">
               <span class="example-label">예문</span>
@@ -493,8 +493,8 @@
               <p class="example-pinyin" id="example-pinyin"></p>
               <p class="example-ko" id="example-ko"></p>
               <div class="example-actions">
-                <button class="btn-example-action" id="btn-speak-example">🔊 예문 듣기</button>
-                <button class="btn-example-action" id="btn-hide-example">↩ 단어 보기</button>
+                <button class="btn-example-action" id="btn-speak-example"><i class="ico-slot" data-icon="speaker"></i> 예문 듣기</button>
+                <button class="btn-example-action" id="btn-hide-example"><i class="ico-slot" data-icon="back"></i> 단어 보기</button>
               </div>
             </div>
           </div>
@@ -788,7 +788,7 @@
 
     <!-- Result Screen (Shared) -->
     <div class="result-screen" id="result-screen" style="display:none;">
-      <div class="result-icon">🎉</div>
+      <div class="result-icon"></div>
       <h2>학습 완료!</h2>
       <div class="result-stats">
         <div class="stat-item stat-correct">
@@ -810,15 +810,15 @@
       <div class="retry-prompt" id="retry-prompt" style="display:none;">
         <p class="retry-text">틀린 문제를 다시 풀어보시겠습니까?</p>
         <div class="retry-buttons">
-          <button class="btn-retry-yes" id="btn-retry-yes">예 ✅</button>
-          <button class="btn-retry-no" id="btn-retry-no">아니오 ❌</button>
+          <button class="btn-retry-yes" id="btn-retry-yes">예 <i class="ico-slot" data-icon="check"></i></button>
+          <button class="btn-retry-no" id="btn-retry-no">아니오 <i class="ico-slot" data-icon="cross"></i></button>
         </div>
       </div>
 
       <div class="result-buttons" id="result-buttons-wrap">
-        <button class="btn-restart" id="btn-restart">다시 도전하기 🔄</button>
-        <button class="btn-restart" id="btn-to-plan" style="display:none;">학습 플랜으로 📅</button>
-        <button class="btn-home" id="btn-home">처음으로 🏠</button>
+        <button class="btn-restart" id="btn-restart">다시 도전하기 <i class="ico-slot" data-icon="repeat"></i></button>
+        <button class="btn-restart" id="btn-to-plan" style="display:none;">학습 플랜으로 <i class="ico-slot" data-icon="calendar"></i></button>
+        <button class="btn-home" id="btn-home">처음으로 <i class="ico-slot" data-icon="home"></i></button>
       </div>
     </div>
 
@@ -826,7 +826,7 @@
     <div id="sentence-screen" style="display:none;">
       <!-- Header -->
       <header id="sentence-header" class="game-header">
-        <button class="btn-top-home" id="btn-sentence-home" title="홈으로">🏠</button>
+        <button class="btn-top-home" id="btn-sentence-home" title="홈으로" aria-label="홈으로"><i class="ico-slot" data-icon="home"></i></button>
         <div class="header-titles">
           <h1>문장 작문</h1>
           <p class="subtitle" id="sentence-level-subtitle">HSK 1급 작문</p>
@@ -860,8 +860,8 @@
         </div>
 
         <div class="action-buttons">
-          <button class="btn-action btn-hint" id="btn-hint">힌트 💡</button>
-          <button class="btn-action btn-skip" id="btn-skip">넘어가기 ⏭️</button>
+          <button class="btn-action btn-hint" id="btn-hint">힌트 <i class="ico-slot" data-icon="lantern"></i></button>
+          <button class="btn-action btn-skip" id="btn-skip">넘어가기 <i class="ico-slot" data-icon="skip"></i></button>
         </div>
 
         <div class="feedback-area" id="sentence-feedback-area">
@@ -875,8 +875,8 @@
     <footer class="feedback-section" id="feedback-section">
       <p class="feedback-title">이 게임이 어떠셨나요?</p>
       <div class="feedback-buttons">
-        <button class="btn-feedback" id="btn-like" aria-label="좋아요">👍</button>
-        <button class="btn-feedback" id="btn-dislike" aria-label="싫어요">👎</button>
+        <button class="btn-feedback" id="btn-like" aria-label="좋아요"><i class="ico-slot" data-icon="thumb-up"></i></button>
+        <button class="btn-feedback" id="btn-dislike" aria-label="싫어요"><i class="ico-slot" data-icon="thumb-down"></i></button>
       </div>
       <div class="feedback-input-wrapper">
         <input type="text" id="feedback-input" class="feedback-input" placeholder="한 줄 의견을 남겨주세요..." maxlength="100">
@@ -907,6 +907,7 @@
   <script src="data_hsk4.js"></script>
   <script src="data_hsk5.js"></script>
   <script src="data_hsk6.js"></script>
+  <script src="icons.js"></script>
   <script src="app.js"></script>
   <script src="sfx.js"></script>
   <script src="art.js"></script>

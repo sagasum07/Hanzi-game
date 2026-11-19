@@ -9594,3 +9594,106 @@ body {
     display: none;
   }
 }
+
+/* ==========================================================
+   그린 아이콘 (icons.js) · 결과 낙관 · 의견함
+   ========================================================== */
+.ico {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  flex: none;
+}
+
+.ico-slot {
+  display: inline-flex;
+  font-style: normal;
+}
+
+.btn-volume .ico,
+.btn-top-home .ico {
+  width: 1.4rem;
+  height: 1.4rem;
+  vertical-align: middle;
+}
+
+.btn-feedback .ico {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
+.stage-intro-icon .ico {
+  width: 2.6rem;
+  height: 2.6rem;
+  color: var(--o-cinnabar, #B8332A);
+}
+
+/* 주홍 버튼 위에서는 아이콘 포인트 색이 묻히지 않게 */
+:is(.btn-start-quiz, .btn-next, .btn-retry-yes, .btn-send) .ico {
+  filter: drop-shadow(0 0 1px rgba(255, 246, 230, 0.6));
+}
+
+/* 결과 낙관 */
+.result-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.result-seal {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+  background: radial-gradient(circle at 35% 30%, #D9533F, #8E241D);
+  color: #FFF6E6;
+  font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+  font-size: 3.2rem;
+  line-height: 1;
+  transform: rotate(-6deg);
+  box-shadow: inset 0 0 0 3px rgba(255, 246, 230, 0.55), 0 6px 16px rgba(142, 36, 29, 0.35);
+  animation: seal-stamp 0.5s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.result-seal.top {
+  background: radial-gradient(circle at 35% 30%, #F2D58A, #B8892E);
+  color: #5A3E12;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6), 0 0 22px rgba(242, 194, 48, 0.7);
+}
+
+.result-seal.ok { background: radial-gradient(circle at 35% 30%, #4F9A86, #24493F); }
+.result-seal.learn { background: radial-gradient(circle at 35% 30%, #4A423A, #1F1A17); }
+
+.result-seal-label {
+  font-family: 'Song Myung', serif;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+@keyframes seal-stamp {
+  0% { transform: rotate(-6deg) scale(2.2); opacity: 0; }
+  70% { transform: rotate(-6deg) scale(0.92); opacity: 1; }
+  100% { transform: rotate(-6deg) scale(1); }
+}
+
+/* 의견함: 카드 안쪽 여백을 줘서 입력칸이 테두리 밖으로 나가지 않게 */
+.start-screen ~ .feedback-section,
+.feedback-section {
+  padding: 18px 16px !important;
+  border-top: none;
+}
+
+.feedback-input-wrapper {
+  max-width: 100%;
+}
+
+.feedback-input {
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-seal { animation: none; }
+}

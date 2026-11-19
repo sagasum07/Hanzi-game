@@ -848,14 +848,14 @@ function handleAnswer(selectedBtn, selected, answer) {
   const msg = document.createElement('span');
   msg.className = `feedback-msg ${isCorrect ? 'correct' : 'wrong'}`;
   const answerText = isReverse ? `${answer} (${q.pinyin})` : answer;
-  msg.textContent = isCorrect ? '정답이에요! 🎉' : `아쉬워요! 정답: ${answerText}`;
+  msg.textContent = isCorrect ? '정답이에요!' : `아쉬워요! 정답: ${answerText}`;
   feedbackArea.innerHTML = '';
   feedbackArea.appendChild(msg);
 
   // Show next button (or finish)
   btnNext.style.display = 'inline-block';
   if (currentIndex === shuffledQuiz.length - 1) {
-    btnNext.textContent = isTwoStageRun && quizStage === 1 ? '2단계로 →' : '결과 보기 🏆';
+    btnNext.textContent = isTwoStageRun && quizStage === 1 ? '2단계로 →' : '결과 보기 →';
   } else {
     btnNext.textContent = '다음 문제 →';
   }
@@ -960,7 +960,7 @@ function renderExampleSentence(sentence, word) {
 
 function renderExampleTranslation(show) {
   if (!currentExample) return;
-  exampleKo.textContent = show ? currentExample[2] : '답을 고르면 해석이 보여요 🙈';
+  exampleKo.textContent = show ? currentExample[2] : '답을 고르면 해석이 보여요';
   exampleKo.classList.toggle('masked', !show);
 }
 
@@ -968,7 +968,7 @@ function prepareExample(q) {
   setWordFlipped(false);
   currentExample = null;
   btnShowExample.disabled = true;
-  btnShowExample.textContent = '📖 예문 보기';
+  setIconLabel(btnShowExample, '예문 보기', 'book', true);
   loadExamples(q.level).then((examples) => {
     if (shuffledQuiz[currentIndex] !== q) return; // 그 사이 다음 문제로 넘어감
     const item = examples[q.hanzi];
@@ -1223,14 +1223,14 @@ function checkSentenceAnswer() {
       updateSentenceScore();
       
       answerArea.classList.add('correct-anim');
-      showSentenceFeedback('정답입니다! 완벽해요 🎉', 'correct');
+      showSentenceFeedback('정답입니다! 완벽해요', 'correct');
       btnHint.disabled = true;
       btnSkip.disabled = true;
       
       // Show next button for manual advance
       btnSentenceNext.style.display = 'inline-block';
       if (currentSentenceIndex === sentenceQuestions.length - 1) {
-        btnSentenceNext.textContent = '결과 보기 🏆';
+        btnSentenceNext.textContent = '결과 보기 →';
       } else {
         btnSentenceNext.textContent = '다음 문제 →';
       }
@@ -1300,7 +1300,7 @@ btnHint.addEventListener('click', () => {
   
   if (targetSpan) {
     targetSpan.click();
-    showSentenceFeedback('힌트를 사용했습니다 💡', '');
+    showSentenceFeedback('힌트를 사용했습니다', '');
   }
 });
 
@@ -1332,7 +1332,7 @@ btnSkip.addEventListener('click', () => {
   // Show next button for manual advance
   btnSentenceNext.style.display = 'inline-block';
   if (currentSentenceIndex === sentenceQuestions.length - 1) {
-    btnSentenceNext.textContent = '결과 보기 🏆';
+    btnSentenceNext.textContent = '결과 보기 →';
   } else {
     btnSentenceNext.textContent = '다음 문제 →';
   }
@@ -1353,11 +1353,7 @@ function showSentenceResult() {
   finalWrong.textContent = wrongCount;
   finalPercent.textContent = pct + '%';
 
-  const icon = resultScreen.querySelector('.result-icon');
-  if (pct === 100) icon.textContent = '🏆';
-  else if (pct >= 70) icon.textContent = '🎉';
-  else if (pct >= 40) icon.textContent = '💪';
-  else icon.textContent = '📖';
+  setResultSeal(resultScreen.querySelector('.result-icon'), pct);
 
   // Show/hide retry prompt
   const retryPrompt = document.getElementById('retry-prompt');
@@ -1399,16 +1395,7 @@ function showResult() {
   finalPercent.textContent = pct + '%';
 
   // Update result icon based on score
-  const icon = resultScreen.querySelector('.result-icon');
-  if (pct === 100) {
-    icon.textContent = '🏆';
-  } else if (pct >= 70) {
-    icon.textContent = '🎉';
-  } else if (pct >= 40) {
-    icon.textContent = '💪';
-  } else {
-    icon.textContent = '📖';
-  }
+  setResultSeal(resultScreen.querySelector('.result-icon'), pct);
 
   // Show/hide retry prompt
   const retryPrompt = document.getElementById('retry-prompt');
@@ -1473,7 +1460,7 @@ btnLike.addEventListener('click', () => {
   selectedFeedback = 'like';
   btnLike.classList.add('selected');
   btnDislike.classList.remove('selected');
-  showToast('👍 감사합니다!');
+  showToast('감사합니다!');
 });
 
 btnDislike.addEventListener('click', () => {
@@ -1486,13 +1473,13 @@ btnDislike.addEventListener('click', () => {
 btnSend.addEventListener('click', () => {
   const text = feedbackInput.value.trim();
   if (!text) {
-    showToast('의견을 입력해주세요 ✏️');
+    showToast('의견을 입력해주세요');
     feedbackInput.focus();
     return;
   }
   console.log('User feedback:', { rating: selectedFeedback, comment: text });
   feedbackInput.value = '';
-  showToast('소중한 의견 감사합니다! 🙏');
+  showToast('소중한 의견 감사합니다!');
 });
 
 feedbackInput.addEventListener('keydown', (e) => {
@@ -1500,6 +1487,13 @@ feedbackInput.addEventListener('keydown', (e) => {
     btnSend.click();
   }
 });
+
+// 결과 낙관: 100% 優(우수) · 70% 이상 良(좋음) · 40% 이상 可(괜찮음) · 그 아래 學(더 배우자)
+function setResultSeal(el, pct) {
+  if (!el) return;
+  const [han, label, cls] = pct === 100 ? ['優', '완벽해요', 'top'] : pct >= 70 ? ['良', '잘했어요', 'good'] : pct >= 40 ? ['可', '좋아요', 'ok'] : ['學', '더 배워 봐요', 'learn'];
+  el.innerHTML = `<span class="result-seal ${cls}" aria-hidden="true">${han}</span><span class="result-seal-label">${label}</span>`;
+}
 
 function showToast(message) {
   feedbackToast.textContent = message;
@@ -1601,7 +1595,7 @@ async function saveRecordNow() {
     await window.hanziFirebase.saveRecord(recordOwner.uid, { ...userRecord, name: recordOwner.name });
   } catch (error) {
     console.error('학습 기록 저장 실패:', error);
-    showToast('학습 기록을 저장하지 못했습니다 😢');
+    showToast('학습 기록을 저장하지 못했습니다');
   }
 }
 
@@ -1686,7 +1680,7 @@ function renderLevelProgress() {
     const stats = getLevelStats(kind, level);
     if (kind === 'words' && PLAN_DAYS[level]) {
       const done = getPlanCompletedCount(level);
-      progress.textContent = `📅 ${PLAN_LABELS[level]} 플랜 · ${done}/${PLAN_DAYS[level]}일 완료`;
+      setIconLabel(progress, `${PLAN_LABELS[level]} 플랜 · ${done}/${PLAN_DAYS[level]}일 완료`, 'calendar', true);
       progress.classList.toggle('has-record', done > 0);
       return;
     }
@@ -1703,7 +1697,7 @@ function startReviewQuiz() {
     .sort((a, b) => b.entry.w - a.entry.w || a.entry.t - b.entry.t)
     .slice(0, REVIEW_MAX_QUESTIONS);
   if (items.length === 0) {
-    showToast('복습할 단어가 없어요! 🎉');
+    showToast('복습할 단어가 없어요!');
     showScreen('start');
     return;
   }
@@ -1805,7 +1799,8 @@ function renderPlan() {
   planProgressFill.style.width = `${(done / days) * 100}%`;
 
   planDayTitle.textContent = `${day}일차`;
-  planDayStatus.textContent = dayRecord ? `완료 ✅ 최고 ${dayRecord.score}%` : '학습할 차례 📖';
+  if (dayRecord) setIconLabel(planDayStatus, `완료 · 최고 ${dayRecord.score}%`, 'check', true);
+  else setIconLabel(planDayStatus, '학습할 차례', 'book', true);
   planDayStatus.classList.toggle('done', Boolean(dayRecord));
 
   planWordList.innerHTML = '';
@@ -1813,20 +1808,22 @@ function renderPlan() {
     planWordList.appendChild(createWordRow(word, level));
   });
 
-  btnPlanStart.textContent = dayRecord ? '복습 퀴즈 다시 풀기 🔄' : '오늘의 퀴즈 시작 🚀';
+  if (dayRecord) setIconLabel(btnPlanStart, '복습 퀴즈 다시 풀기', 'repeat');
+  else setIconLabel(btnPlanStart, '오늘의 퀴즈 시작', 'go');
 
   btnPlanPrev.disabled = day === 1;
   btnPlanNext.disabled = day === days;
   // 다음 일차가 잠겨 있으면 자물쇠 모양으로 표시 (누르면 안내 메시지)
   btnPlanNext.classList.toggle('locked', day < days && !isPlanDayUnlocked(level, day + 1));
-  btnPlanNext.textContent = btnPlanNext.classList.contains('locked') ? '🔒' : '›';
+  if (btnPlanNext.classList.contains('locked')) btnPlanNext.innerHTML = icon('lock');
+  else btnPlanNext.textContent = '›';
 }
 
 function movePlanDay(delta) {
   const target = planViewDay + delta;
   if (target < 1 || target > PLAN_DAYS[currentLevel]) return;
   if (!isPlanDayUnlocked(currentLevel, target)) {
-    showToast(`${planViewDay}일차를 완료해야 다음 일차로 넘어갈 수 있어요 🔒`);
+    showToast(`${planViewDay}일차를 완료해야 다음 일차로 넘어갈 수 있어요`);
     planDayCard.classList.remove('shake');
     void planDayCard.offsetWidth; // trigger reflow
     planDayCard.classList.add('shake');
@@ -1855,7 +1852,7 @@ function updatePlanResult(pct) {
   if (isWordbookQuiz) {
     // 단어장 퀴즈는 완료 판정 없이 단어장으로 돌아가는 버튼만 보여 줌
     resultPlanMessage.style.display = 'none';
-    btnToPlan.textContent = '나의 단어장으로 ⭐';
+    setIconLabel(btnToPlan, '나의 단어장으로', 'star');
     btnToPlan.style.display = '';
     return;
   }
@@ -1863,7 +1860,7 @@ function updatePlanResult(pct) {
     hidePlanResult();
     return;
   }
-  btnToPlan.textContent = '학습 플랜으로 📅';
+  setIconLabel(btnToPlan, '학습 플랜으로', 'calendar');
   const level = currentLevel;
   const day = currentPlanDay;
   let message;
@@ -1872,15 +1869,15 @@ function updatePlanResult(pct) {
   if (isPlanRetryRound) {
     // 틀린 문제만 다시 푼 경우는 일차 완료 판정에 넣지 않음
     message = isPlanDayCompleted(level, day)
-      ? `${day}일차는 이미 완료했어요 ✅`
+      ? `${day}일차는 이미 완료했어요`
       : `틀린 문제 복습을 마쳤어요. ${day}일차 퀴즈에서 ${PLAN_PASS_PERCENT}% 이상 맞히면 완료돼요.`;
     passed = isPlanDayCompleted(level, day);
   } else if (pct >= PLAN_PASS_PERCENT) {
     completePlanDay(level, day, pct);
     passed = true;
     message = day < PLAN_DAYS[level]
-      ? `🎉 ${day}일차 완료! ${day + 1}일차가 열렸어요.`
-      : `🏆 HSK ${level}급 ${PLAN_LABELS[level]} 학습 플랜을 모두 마쳤어요!`;
+      ? `${day}일차 완료! ${day + 1}일차가 열렸어요.`
+      : `HSK ${level}급 ${PLAN_LABELS[level]} 학습 플랜을 모두 마쳤어요!`;
   } else {
     message = `${PLAN_PASS_PERCENT}% 이상 맞혀야 ${day}일차가 완료돼요. 다시 도전해 보세요!`;
   }
@@ -1950,7 +1947,7 @@ function toggleWordbook(level, hanzi) {
   const saved = !userRecord.wordbook[key];
   if (saved) {
     userRecord.wordbook[key] = Date.now();
-    showToast('나의 단어장에 저장했어요 ⭐');
+    showToast('나의 단어장에 저장했어요');
   } else {
     delete userRecord.wordbook[key];
     showToast('단어장에서 뺐어요');
@@ -2097,7 +2094,7 @@ function renderWordbook(direction) {
   btnWordbookNext.disabled = wordbookPage === pageCount - 1;
 
   btnWordbookQuiz.style.display = items.length === 0 ? 'none' : '';
-  btnWordbookQuiz.textContent = `🎲 랜덤 퀴즈 (${Math.min(items.length, WORDBOOK_QUIZ_MAX)}문제)`;
+  setIconLabel(btnWordbookQuiz, `랜덤 퀴즈 (${Math.min(items.length, WORDBOOK_QUIZ_MAX)}문제)`, 'dice', true);
 
   if (direction) {
     wordbookList.classList.remove('turn-next', 'turn-prev');
@@ -2545,13 +2542,7 @@ let volumeCollapseTimer = null;
 
 function updateVolumeIcon() {
   const vol = isMuted ? 0 : currentVolume;
-  if (vol === 0) {
-    btnVolume.textContent = '🔇';
-  } else if (vol < 0.5) {
-    btnVolume.textContent = '🔉';
-  } else {
-    btnVolume.textContent = '🔊';
-  }
+  btnVolume.innerHTML = icon(vol === 0 ? 'mute' : vol < 0.5 ? 'speaker-low' : 'speaker');
 }
 
 function collapseVolume() {
@@ -2734,7 +2725,7 @@ async function copyUserCode() {
   const code = `@${userProfile.userCode}`;
   try {
     await navigator.clipboard.writeText(code);
-    showToast(`고유 번호 ${code} 를 복사했어요 📋`);
+    showToast(`고유 번호 ${code} 를 복사했어요`);
   } catch (error) {
     showToast(`내 고유 번호: ${code}`);
   }
@@ -2770,7 +2761,7 @@ nicknameForm.addEventListener('submit', async (e) => {
   saveBtn.disabled = false;
   if (!saved) return;
   enterStartScreen(getDisplayName());
-  showToast(`반가워요, ${userProfile.nickname}님! 내 고유 번호는 @${userProfile.userCode} 예요 👋`);
+  showToast(`반가워요, ${userProfile.nickname}님! 내 고유 번호는 @${userProfile.userCode} 예요`);
 });
 
 // --- 설정 화면 ---
@@ -2798,7 +2789,8 @@ function renderSettings() {
   if (isGoogle && document.activeElement !== settingsNicknameInput) {
     settingsNicknameInput.value = getDisplayName();
   }
-  settingsUserCode.textContent = userProfile ? `@${userProfile.userCode} 📋` : '닉네임을 정하면 생겨요';
+  if (userProfile) setIconLabel(settingsUserCode, `@${userProfile.userCode}`, 'copy');
+  else settingsUserCode.textContent = '닉네임을 정하면 생겨요';
   if (isGoogle) renderSettingsPhoto();
 
   settingsMusic.checked = !isMuted;
@@ -2843,7 +2835,7 @@ settingsNicknameForm.addEventListener('submit', async (e) => {
   settingsNicknameInput.blur();
   welcomeMessage.textContent = `환영합니다 ${getDisplayName()}님!`;
   renderSettings();
-  showToast('닉네임을 바꿨어요 ✏️');
+  showToast('닉네임을 바꿨어요');
 });
 
 settingsMusic.addEventListener('change', () => {
@@ -3019,7 +3011,7 @@ async function saveProfilePhoto(photo) {
     await window.hanziFirebase.setProfilePhoto(photo);
     userProfile.photo = photo;
     settingsPhotoNote.textContent = photo ? '프로필 사진을 바꿨어요. 친구 목록과 게임 지도에 보여요.' : '프로필 사진을 지웠어요.';
-    showToast(photo ? '프로필 사진을 바꿨어요 📷' : '프로필 사진을 지웠어요');
+    showToast(photo ? '프로필 사진을 바꿨어요' : '프로필 사진을 지웠어요');
   } catch (error) {
     console.warn('프로필 사진 저장 실패:', error);
     settingsPhotoNote.textContent = '사진을 저장하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
@@ -3104,7 +3096,7 @@ function renderFriends() {
   incomingList.replaceChildren(...incoming.map((p) => createFriendItem(p, [
     { label: '수락', kind: 'primary', onClick: async () => {
       await window.hanziFirebase.acceptFriendRequest(p.uid);
-      showToast(`${p.nickname}님과 친구가 되었어요 🎉`);
+      showToast(`${p.nickname}님과 친구가 되었어요`);
       await loadFriends();
     } },
     { label: '거절', onClick: async () => {
@@ -3165,7 +3157,7 @@ function openFriends() {
     const t = equippedTitle();
     if (t) myNickname.insertAdjacentHTML('afterend', `<span class="friend-title" id="my-friend-title">${titleBadgeHtml(t)}</span>`);
   }
-  myUserCode.textContent = `@${userProfile.userCode} 📋`;
+  setIconLabel(myUserCode, `@${userProfile.userCode}`, 'copy');
   loadFriends();
 }
 
@@ -3194,7 +3186,7 @@ friendSearchForm.addEventListener('submit', async (e) => {
     return;
   }
   if (person.uid === recordOwner.uid) {
-    showSearchMessage('내 계정이에요 😊');
+    showSearchMessage('내 계정이에요');
     return;
   }
 
@@ -3203,8 +3195,8 @@ friendSearchForm.addEventListener('submit', async (e) => {
   const actions = isFriend || sent ? [] : [{ label: '친구 요청', kind: 'primary', onClick: async () => {
     const result = await window.hanziFirebase.sendFriendRequest(person.uid);
     const messages = {
-      sent: `${person.nickname}님에게 친구 요청을 보냈어요 📨`,
-      accepted: `${person.nickname}님과 친구가 되었어요 🎉`,
+      sent: `${person.nickname}님에게 친구 요청을 보냈어요`,
+      accepted: `${person.nickname}님과 친구가 되었어요`,
       'already-sent': '이미 친구 요청을 보냈어요.',
       'already-friends': '이미 친구예요.',
     };
