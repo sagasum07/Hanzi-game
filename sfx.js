@@ -321,6 +321,29 @@ const Sfx = (() => {
       tone(c, 660, 0, 0.12, { type: 'sine', gain: 0.18, slideTo: 1320 });
       if (rarity >= 2) [6, 8, 9].forEach((n, i) => tone(c, PENTA[n], 0.08 + i * 0.06, 0.5, { gain: 0.12 + rarity * 0.02 }));
     }),
+    // 영웅 장비: 오음계 상행 + 반짝임 + 작은 징
+    epic: () => play('epic', (c) => {
+      [0, 2, 4, 5, 7, 9].forEach((n, i) => tone(c, PENTA[n], i * 0.06, 0.6, { type: 'triangle', gain: 0.15 }));
+      hiss(c, 0.1, 0.6, { gain: 0.18, type: 'highpass', freq: 6000 });
+      gong(c, 0, 0.22, 165);
+    }),
+    // 전설 장비 1) 기운이 모임: 아래에서 위로 솟는 소리 + 북 연타
+    legendCharge: () => play('legendCharge', (c) => {
+      tone(c, 220, 0, 0.75, { type: 'sawtooth', gain: 0.08, slideTo: 1320, attack: 0.3 });
+      tone(c, 330, 0, 0.75, { type: 'triangle', gain: 0.12, slideTo: 1760, attack: 0.3 });
+      hiss(c, 0, 0.75, { gain: 0.25, type: 'bandpass', freq: 300, slideTo: 6000, q: 1.5 });
+      [0, 0.12, 0.22, 0.31, 0.39, 0.46, 0.52, 0.57].forEach((at, i) => drum(c, at, 0.35 + i * 0.06, 95));
+    }),
+    // 전설 장비 2) 금빛 폭발: 큰 징 + 북 + 금종 폭포 + 긴 화음
+    legendary: () => play('legendary', (c) => {
+      drum(c, 0, 1, 60);
+      gong(c, 0, 0.5, 98);
+      gong(c, 0.02, 0.3, 147);
+      hiss(c, 0, 0.5, { gain: 0.4, type: 'highpass', freq: 3000, slideTo: 9000 });
+      [5, 6, 7, 8, 9].forEach((n, i) => tone(c, PENTA[n], 0.15 + i * 0.07, 0.7, { type: 'triangle', gain: 0.16 }));
+      [9, 8, 9, 7, 9].forEach((n, i) => tone(c, PENTA[n] * 2, 0.55 + i * 0.09, 0.4, { type: 'sine', gain: 0.07 }));
+      [0, 2, 4, 7].forEach((n) => tone(c, PENTA[n], 1.0, 2.2, { type: 'sine', gain: 0.1, attack: 0.05 }));
+    }),
     levelUp: () => play(`levelUp`, (c) => {
       [0, 2, 4, 5].forEach((n, i) => tone(c, PENTA[n], i * 0.09, 0.35, { type: 'triangle', gain: 0.22 }));
       [5, 7, 9].forEach((n) => tone(c, PENTA[n], 0.4, 0.9, { type: 'triangle', gain: 0.14 }));

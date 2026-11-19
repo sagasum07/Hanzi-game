@@ -1784,6 +1784,87 @@ function chestBurst(tier) {
   setTimeout(() => chestParticles.replaceChildren(), 1400);
 }
 
+// ---------- 비싼 장비 연출 ----------
+// 희귀(2): 푸른 고리 + 반짝이 / 영웅(3): 보랏빛 햇살 + '英雄' 현판 /
+// 전설(4): 금빛 기둥 → 화면이 금빛으로 번쩍 + 회전하는 햇살 + 금가루 비 + '傳說' 현판 + 징·금종 소리
+const chestOpenCard = document.querySelector('.chest-open-card');
+
+function legendCharge() {
+  Sfx.legendCharge();
+  if (reduceMotion.matches) return;
+  const pillar = document.createElement('div');
+  pillar.className = 'legend-pillar';
+  chestStage.appendChild(pillar);
+  chestStage.classList.add('legend-charging');
+  setTimeout(() => {
+    pillar.remove();
+    chestStage.classList.remove('legend-charging');
+  }, 1400);
+}
+
+function lootBurst(card, rarity) {
+  if (rarity >= 4) Sfx.legendary();
+  else if (rarity === 3) Sfx.epic();
+  else Sfx.loot(rarity);
+  card.classList.add('shine');
+  if (reduceMotion.matches) return;
+
+  const box = chestOpenCard.getBoundingClientRect();
+  const r = card.getBoundingClientRect();
+  const x = r.left + r.width / 2 - box.left + chestOpenCard.scrollLeft;
+  const y = r.top + r.height / 2 - box.top + chestOpenCard.scrollTop;
+  const burst = document.createElement('div');
+  burst.className = `loot-burst r${rarity}`;
+  burst.style.left = `${x}px`;
+  burst.style.top = `${y}px`;
+  burst.innerHTML = '<span class="burst-rays"></span><span class="burst-ring"></span>';
+  const sparks = 10 + rarity * 6;
+  for (let i = 0; i < sparks; i++) {
+    const sp = document.createElement('i');
+    const angle = (i / sparks) * Math.PI * 2 + Math.random() * 0.3;
+    const dist = 50 + Math.random() * (30 + rarity * 18);
+    sp.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+    sp.style.setProperty('--dy', `${Math.sin(angle) * dist}px`);
+    sp.style.setProperty('--d', `${Math.random() * 0.15}s`);
+    burst.appendChild(sp);
+  }
+  chestOpenCard.appendChild(burst);
+  setTimeout(() => burst.remove(), rarity >= 4 ? 2600 : 1500);
+
+  if (rarity >= 3) {
+    chestOpenCard.querySelectorAll('.loot-banner').forEach((b) => b.remove()); // 앞 현판이 남아 있으면 치움
+    const banner = document.createElement('div');
+    banner.className = `loot-banner r${rarity}`;
+    banner.innerHTML = rarity >= 4 ? '<b>傳說</b><span>전설 장비 획득!</span>' : '<b>英雄</b><span>영웅 장비 획득!</span>';
+    banner.style.top = `${Math.max(40, y - r.height)}px`;
+    chestOpenCard.appendChild(banner);
+    setTimeout(() => banner.remove(), rarity >= 4 ? 2400 : 1700);
+  }
+
+  if (rarity >= 4) {
+    // 화면 전체 금빛 섬광 + 흔들림 + 금가루 비
+    const flashEl = document.createElement('div');
+    flashEl.className = 'legend-flash';
+    chestOpen.appendChild(flashEl);
+    setTimeout(() => flashEl.remove(), 1200);
+    chestOpenCard.classList.remove('legend-shake');
+    void chestOpenCard.offsetWidth;
+    chestOpenCard.classList.add('legend-shake');
+    const rain = document.createElement('div');
+    rain.className = 'legend-rain';
+    for (let i = 0; i < 36; i++) {
+      const g = document.createElement('i');
+      g.style.left = `${Math.random() * 100}%`;
+      g.style.setProperty('--d', `${Math.random() * 0.9}s`);
+      g.style.setProperty('--t', `${1.2 + Math.random() * 1}s`);
+      if (i % 4 === 0) g.innerHTML = uiIcon('coin');
+      rain.appendChild(g);
+    }
+    chestOpen.appendChild(rain);
+    setTimeout(() => rain.remove(), 3000);
+  }
+}
+
 // 카드 하나를 상자에서 포물선으로 날려 제자리에 놓고 뒤집기
 function flyLoot(card, index, rarity = -1) {
   const from = chestBig.getBoundingClientRect();
@@ -1800,9 +1881,12 @@ function flyLoot(card, index, rarity = -1) {
     { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 90}px) scale(1.15) rotate(-40deg)`, opacity: 1, offset: 0.55 },
     { transform: 'translate(0, 0) scale(1) rotate(0deg)', opacity: 1 },
   ], { duration: 700, delay, easing: 'cubic-bezier(0.25, 0.8, 0.35, 1)', fill: 'backwards' });
+  // 전설 장비: 카드가 떠오를 때 금빛 기둥이 솟으며 기운을 모음
+  if (rarity >= 4) setTimeout(() => legendCharge(), Math.max(0, delay - 150));
   setTimeout(() => {
     card.classList.add('landed');
-    Sfx.loot(rarity);
+    if (rarity >= 2) lootBurst(card, rarity);
+    else Sfx.loot(rarity);
   }, delay + 700);
   setTimeout(() => card.classList.add('flipped'), delay + 820);
 }
@@ -1830,7 +1914,8 @@ chestBig.addEventListener('click', () => {
     chestLoot.replaceChildren(...cards);
     cards.forEach((card, i) => flyLoot(card, i, rewards.contents[i].type === 'gear' ? rewards.contents[i].gear.rarity : -1));
 
-    const done = rewards.contents.length * LOOT_GAP_MS + 1000;
+    const hasLegend = rewards.contents.some((it) => it.type === 'gear' && it.gear.rarity >= 4);
+    const done = rewards.contents.length * LOOT_GAP_MS + (hasLegend ? 2000 : 1000); // 전설 연출을 다 보고 버튼이 나오게
     setTimeout(() => {
       if (result.levelUp) {
         levelUpEl.textContent = `升级! 레벨 업! Lv.${result.level}`;
