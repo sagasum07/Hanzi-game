@@ -716,6 +716,8 @@ async function startBattle(level, stageNo) {
     hp: MONSTER_HP[kind],
     maxHp: MONSTER_HP[kind],
     hearts: PLAYER_HEARTS,
+    maxHearts: PLAYER_HEARTS, // 하트 추가 아이템을 쓰면 늘어남
+    revived: false, // 부활권은 전투마다 한 번
     queue: [],
     question: null,
     busy: false,
@@ -728,6 +730,7 @@ async function startBattle(level, stageNo) {
   answerReveal.style.display = 'none';
   battleVictory.style.display = 'none';
   battleDefeat.style.display = 'none';
+  revivePrompt.style.display = 'none';
   rewardArea.style.display = 'none';
   resultButtons.style.display = '';
   hideChestOpen();
@@ -927,7 +930,8 @@ battleDefeat.addEventListener('click', () => {
 });
 
 function renderBattleStatus() {
-  battleHearts.innerHTML = uiIcon('heart').repeat(battle.hearts) + uiIcon('heart-empty').repeat(PLAYER_HEARTS - battle.hearts);
+  battleHearts.innerHTML = uiIcon('heart').repeat(Math.max(0, battle.hearts)) + uiIcon('heart-empty').repeat(Math.max(0, battle.maxHearts - battle.hearts));
+  renderBattleItems();
   monsterHpFill.style.width = `${(battle.hp / battle.maxHp) * 100}%`;
 }
 
@@ -996,6 +1000,7 @@ function nextQuestion() {
   tilePool.classList.toggle('sentence', q.type === 'sentence');
   renderTiles();
   startBattleTimer(q.seconds);
+  renderBattleItems(); // 문제가 시작되면 시간 추가를 쓸 수 있음
 }
 
 // 내 말풍선: 답을 고르는 동안 지금까지 조립한 말을 보여 줌
@@ -1070,6 +1075,7 @@ function resolveQuestion(correct, timedOut) {
   const built = q.filled.map((i) => q.tiles[i]).join(q.type === 'sentence' ? ' ' : '');
   battle.busy = true;
   const remainRatio = stopBattleTimer();
+  renderBattleItems();
   renderTiles();
   recordAnswer('words', battle.level, q.word.hanzi, correct);
 
@@ -1124,9 +1130,106 @@ function resolveQuestion(correct, timedOut) {
 // 다음 문제로 넘어가거나, 승패가 났으면 결과를 보여 줌
 function continueBattle() {
   if (battle.hp <= 0) finishBattle(true);
-  else if (battle.hearts <= 0) finishBattle(false);
-  else nextQuestion();
+  else if (battle.hearts <= 0) {
+    // 부활권이 있고 이번 전투에서 아직 안 썼으면 물어봄
+    if (!battle.revived && gamePlayer().supplies.revive > 0) showRevivePrompt();
+    else finishBattle(false);
+  } else nextQuestion();
 }
+
+// ---------- 전투 아이템 ----------
+const battleItemsEl = document.getElementById('battle-items');
+const revivePrompt = document.getElementById('revive-prompt');
+const MAX_BATTLE_HEARTS = 5;
+const TIME_ITEM_SECONDS = 10;
+
+function renderBattleItems() {
+  if (!battle) return;
+  const p = gamePlayer();
+  const items = [
+    { id: 'heart', label: '하트 +1', usable: battle.hearts > 0 && battle.hearts < MAX_BATTLE_HEARTS },
+    { id: 'time', label: `시간 +${TIME_ITEM_SECONDS}초`, usable: Boolean(battle.timer) && !battle.busy },
+  ];
+  battleItemsEl.replaceChildren(...items.map((it) => {
+    const btn = document.createElement('button');
+    btn.className = 'battle-item';
+    btn.dataset.item = it.id;
+    const count = p.supplies[it.id];
+    btn.disabled = !count || !it.usable || battle.finished || battle.intro;
+    btn.innerHTML = `${renderSupplyIcon(it.id)}<span>${it.label}</span><b>${count}</b>`;
+    btn.setAttribute('aria-label', `${it.label} 사용, ${count}개 남음`);
+    btn.addEventListener('click', () => useBattleItem(it.id));
+    return btn;
+  }), Object.assign(document.createElement('span'), {
+    className: 'battle-item-revive',
+    innerHTML: `${renderSupplyIcon('revive')}<b>${p.supplies.revive}</b>`,
+    title: '부활권: 하트를 모두 잃으면 쓸 수 있어요',
+  }));
+}
+
+function useBattleItem(id) {
+  if (!battle || battle.finished) return;
+  const p = gamePlayer();
+  if (!p.supplies[id]) return;
+  if (id === 'heart') {
+    if (battle.hearts >= MAX_BATTLE_HEARTS) return;
+    p.supplies.heart -= 1;
+    battle.hearts += 1;
+    battle.maxHearts = Math.max(battle.maxHearts, battle.hearts);
+    Sfx.levelUp();
+    showDamage(playerPop, `+1 ${uiIcon('heart')}`, true);
+    flash('rgba(217,54,62,0.25)', 300);
+  } else if (id === 'time') {
+    if (!battle.timer || battle.busy) return;
+    p.supplies.time -= 1;
+    battle.timer.total += TIME_ITEM_SECONDS * 1000;
+    Sfx.loot(1);
+    showDamage(playerPop, `+${TIME_ITEM_SECONDS}초`);
+    battleTimerFill.classList.add('time-added');
+    setTimeout(() => battleTimerFill.classList.remove('time-added'), 700);
+  }
+  scheduleRecordSave();
+  renderBattleStatus();
+}
+
+function showRevivePrompt() {
+  const count = gamePlayer().supplies.revive;
+  document.getElementById('revive-icon').innerHTML = renderSupplyIcon('revive');
+  document.getElementById('revive-text').textContent = `부활권을 쓰면 하트를 가득 채워 다시 싸울 수 있어요. (가진 부활권 ${count}장 · 전투마다 한 번)`;
+  revivePrompt.style.display = '';
+  document.getElementById('btn-revive-yes').focus({ preventScroll: true });
+}
+
+document.getElementById('btn-revive-yes').addEventListener('click', () => {
+  if (!battle || revivePrompt.style.display === 'none') return;
+  const p = gamePlayer();
+  revivePrompt.style.display = 'none';
+  if (!p.supplies.revive) {
+    finishBattle(false);
+    return;
+  }
+  p.supplies.revive -= 1;
+  scheduleRecordSave();
+  battle.revived = true;
+  battle.hearts = battle.maxHearts;
+  setPlayerMood('win');
+  playerBubbleText.textContent = '아직 끝나지 않았다!';
+  playerBubbleText.lang = 'ko';
+  playerBubbleSub.textContent = '';
+  const c = centerOf(playerAvatarEl);
+  if (!reduceMotion.matches) spawnFx('fx-guard', c.x, c.y - 10, 900, (el) => { el.innerHTML = renderSupplyIcon('revive'); });
+  flash('rgba(242,213,138,0.6)', 500);
+  Sfx.levelUp();
+  renderBattleStatus();
+  const current = battle;
+  setTimeout(() => { if (battle === current) nextQuestion(); }, 900);
+});
+
+document.getElementById('btn-revive-no').addEventListener('click', () => {
+  if (!battle) return;
+  revivePrompt.style.display = 'none';
+  finishBattle(false);
+});
 
 function showAnswerReveal(q, timedOut, built) {
   revealTitle.textContent = timedOut ? '시간이 다 됐어요' : '아쉬워요, 틀렸어요';
@@ -1431,8 +1534,9 @@ function startBattleTimer(seconds) {
   placeTimerMarks();
   const tick = () => {
     if (!battle || !battle.timer) return;
-    const left = Math.max(0, total - (performance.now() - startAt));
-    const ratio = left / total;
+    // 시간 추가 아이템이 total 을 늘릴 수 있으므로 매번 battle.timer 에서 읽음
+    const left = Math.max(0, battle.timer.total - (performance.now() - battle.timer.startAt));
+    const ratio = left / battle.timer.total;
     battleTimerFill.style.width = `${ratio * 100}%`;
     battleTimerFill.classList.toggle('danger', ratio < 0.3);
     // 지금 맞히면 들어갈 데미지 단계를 색으로 보여 줌
@@ -1498,7 +1602,7 @@ function finishBattle(won) {
   }
   const { level, stage } = battle;
   stopBattleTimer();
-  const stars = won ? battle.hearts : 0;
+  const stars = won ? Math.min(3, Math.max(1, battle.hearts)) : 0; // 하트를 늘려도 별은 최대 3개
   const total = levelStages(level).length;
   const replay = stage.no <= gameProgress(level).cleared; // 이미 클리어했던 스테이지
   if (won) {
@@ -1773,6 +1877,7 @@ setInterval(() => {
   if (gameScreenEl.style.display !== 'none' && !document.hidden) ensureBgm();
 }, 3000);
 document.getElementById('btn-bag').addEventListener('click', () => openBag(() => renderPlayerCard()));
+document.getElementById('btn-shop').addEventListener('click', () => openShop(() => renderPlayerCard()));
 document.getElementById('btn-avatar-edit').addEventListener('click', () => {
   gameMap.style.display = 'none';
   openAvatarMaker(() => openGameMap());
@@ -1780,7 +1885,9 @@ document.getElementById('btn-avatar-edit').addEventListener('click', () => {
 
 // 안드로이드 뒤로 가기 (app.js handleBackButton 에서 호출)
 function gameHandleBack() {
-  if (bagModal.style.display !== 'none') {
+  if (shopModal.style.display !== 'none') {
+    document.getElementById('btn-shop-close').click();
+  } else if (bagModal.style.display !== 'none') {
     document.getElementById('btn-bag-close').click();
   } else if (gameBattle.style.display !== 'none') {
     openGameMap();

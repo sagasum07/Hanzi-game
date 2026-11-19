@@ -8247,3 +8247,414 @@ header h1, .header-titles h1 {
 .dex-card.locked .dex-name {
   color: #9C9389;
 }
+
+/* ==========================================================
+   상점 (萬寶商店)
+   ========================================================== */
+.shop-card {
+  position: relative;
+  max-width: 440px;
+  padding-top: 34px;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(255, 240, 200, 0.6), transparent 60%),
+    repeating-linear-gradient(90deg, rgba(120, 80, 40, 0.05) 0 2px, transparent 2px 22px),
+    #F4E4C8 !important;
+  border: 3px solid #5C3A1A !important;
+  overflow: visible;
+}
+
+/* 기와 처마 */
+.shop-eaves {
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  top: -16px;
+  height: 30px;
+  border-radius: 50% 50% 6px 6px / 100% 100% 6px 6px;
+  background:
+    repeating-linear-gradient(90deg, #2B2321 0 10px, #3A322E 10px 20px);
+  border-bottom: 5px solid #8E241D;
+  box-shadow: 0 4px 0 #C9A14A;
+}
+
+.shop-lantern {
+  position: absolute;
+  top: 28px;
+  width: 30px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 45%;
+  background: radial-gradient(circle at 40% 35%, #FF6B4A, #B8332A 70%);
+  color: #FFE9A8;
+  font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+  font-size: 1rem;
+  box-shadow: 0 0 14px rgba(255, 120, 60, 0.6);
+  animation: lantern-swing 3s ease-in-out infinite;
+  transform-origin: 50% -10px;
+}
+
+.shop-lantern::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  background: #2B2321;
+}
+
+.shop-lantern.left { left: 10px; }
+.shop-lantern.right { right: 10px; animation-delay: -1.5s; }
+
+@keyframes lantern-swing {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.shop-sign {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 4px 22px 2px;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #3A2A1E, #2B2321);
+  border: 2px solid #C9A14A;
+  color: #F2C230;
+  font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+  font-size: 1.6rem;
+  letter-spacing: 6px;
+  line-height: 1.1;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.shop-sign small {
+  font-family: var(--serif-ko, serif);
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: #E9DCC4;
+}
+
+.shop-scene {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  min-height: 130px;
+}
+
+.shopkeeper {
+  flex: none;
+  width: 110px;
+  height: 136px;
+}
+
+.shopkeeper .shopkeeper-svg {
+  width: 100%;
+  height: 100%;
+  animation: shopkeeper-bob 2.4s ease-in-out infinite;
+}
+
+.shopkeeper.happy .shopkeeper-svg {
+  animation: shopkeeper-bow 0.6s ease;
+}
+
+.shopkeeper.sad .shopkeeper-svg {
+  animation: shopkeeper-shake 0.5s ease;
+}
+
+@keyframes shopkeeper-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes shopkeeper-bow {
+  0%, 100% { transform: none; }
+  40% { transform: rotate(8deg) translateY(4px); }
+}
+
+@keyframes shopkeeper-shake {
+  0%, 100% { transform: none; }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.shop-bubble {
+  position: relative;
+  align-self: flex-start;
+  margin: 8px 0 0;
+  max-width: 190px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: #FFF9EE;
+  border: 2.5px solid #2B2321;
+  font-family: var(--serif-ko, serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2B2321;
+  word-break: keep-all;
+}
+
+.shop-bubble::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  bottom: 14px;
+  border: 7px solid transparent;
+  border-right: 10px solid #2B2321;
+}
+
+.shop-bubble.pop {
+  animation: bubble-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+@keyframes bubble-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* 판매대 */
+.shop-counter {
+  width: 100%;
+  padding: 10px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #8B5A2B, #6B4228);
+  border: 2px solid #4A2E1C;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15);
+}
+
+.shop-coins {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  color: #FFF6E6;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.9rem;
+}
+
+.shop-coins .ui-icon { width: 20px; height: 20px; }
+.shop-coins strong { color: #F2C230; font-size: 1.1rem; }
+
+.shop-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #FFF9EE;
+  border: 1.5px solid #C9A14A;
+}
+
+.shop-item-icon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+}
+
+.shop-item-icon .supply-icon { width: 100%; height: 100%; }
+
+.shop-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.shop-item-info strong {
+  font-family: var(--serif-ko, serif);
+  font-size: 0.98rem;
+  color: #2B2321;
+}
+
+.shop-item-info strong small {
+  font-size: 0.7rem;
+  color: #8C7A5B;
+  font-weight: 400;
+}
+
+.shop-item-info span {
+  font-size: 0.75rem;
+  color: #6B5E52;
+  line-height: 1.4;
+  word-break: keep-all;
+}
+
+.shop-item-info em {
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #3F7D6B;
+}
+
+.shop-buy {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 2px solid #8E241D;
+  background: linear-gradient(180deg, #D9533F, #B8332A);
+  color: #FFF6E6;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 3px 0 #8E241D;
+}
+
+.shop-buy .ui-icon { width: 16px; height: 16px; }
+
+.shop-buy:active { transform: translateY(2px); box-shadow: 0 1px 0 #8E241D; }
+
+.shop-buy.poor {
+  background: linear-gradient(180deg, #A89A82, #8C7A5B);
+  border-color: #6B5E52;
+  box-shadow: 0 3px 0 #6B5E52;
+}
+
+.shop-buy:disabled { opacity: 0.5; cursor: default; }
+
+.btn-shop {
+  background: linear-gradient(180deg, #D9533F, #B8332A) !important;
+  color: #FFF6E6 !important;
+  border-color: #8E241D !important;
+}
+
+/* ---- 전투 아이템 칸 ---- */
+.battle-items {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 2px 0;
+}
+
+.battle-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px 3px 4px;
+  border-radius: 999px;
+  border: 1.5px solid #C9A14A;
+  background: #FFF9EE;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.78rem;
+  color: #2B2321;
+  cursor: pointer;
+}
+
+.battle-item .supply-icon,
+.battle-item-revive .supply-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.battle-item b,
+.battle-item-revive b {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #2B2321;
+  color: #F2C230;
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.battle-item:not(:disabled):hover { background: #FFF1D6; }
+
+.battle-item:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.battle-item-revive {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 8px 3px 4px;
+  border-radius: 999px;
+  border: 1.5px dashed rgba(201, 161, 74, 0.7);
+  background: rgba(255, 249, 238, 0.6);
+}
+
+.battle-timer-fill.time-added {
+  box-shadow: 0 0 12px 3px rgba(63, 125, 107, 0.8);
+}
+
+/* ---- 부활권 창 ---- */
+.revive-prompt {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(31, 26, 23, 0.6);
+}
+
+.revive-card {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 16px;
+  border-radius: 14px;
+  background: #F4E4C8;
+  border: 3px solid #C9A14A;
+  text-align: center;
+  animation: bubble-pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.revive-icon {
+  width: 72px;
+  height: 72px;
+  animation: lantern-swing 2s ease-in-out infinite;
+}
+
+.revive-icon .supply-icon { width: 100%; height: 100%; }
+
+.revive-title {
+  margin: 0;
+  font-family: var(--serif-ko, serif);
+  color: #8E241D;
+}
+
+.revive-text {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #4A3F36;
+  word-break: keep-all;
+}
+
+.revive-buttons {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.revive-buttons button { margin: 0; width: 100%; }
+
+.fx .supply-icon { width: 100%; height: 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-lantern,
+  .shopkeeper .shopkeeper-svg,
+  .revive-icon { animation: none !important; }
+}

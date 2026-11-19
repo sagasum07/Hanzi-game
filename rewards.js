@@ -93,6 +93,18 @@ const TITLES = [
   { id: 'allmaster', level: 0, name: '한자 무림 맹주', han: '盟', how: '여섯 급수의 마왕을 모두 물리치면 얻어요', color: '#1F1A17', special: true },
 ];
 const TITLE_BY_ID = Object.fromEntries(TITLES.map((t) => [t.id, t]));
+
+// 상점 소모품 (엽전으로 사서 전투에서 씀)
+const SUPPLIES = [
+  { id: 'revive', name: '부활권', sub: '되살림 부적', price: 120,
+    desc: '하트를 모두 잃었을 때 하트를 가득 채워 다시 싸워요. (전투마다 한 번)' },
+  { id: 'heart', name: '하트 추가', sub: '붉은 옥 심장', price: 40,
+    desc: '전투 중에 누르면 하트가 하나 늘어나요. (최대 5개)' },
+  { id: 'time', name: '시간 추가', sub: '느린 향', price: 25,
+    desc: '문제를 푸는 중에 누르면 제한 시간이 10초 늘어나요.' },
+];
+const SUPPLY_BY_ID = Object.fromEntries(SUPPLIES.map((s) => [s.id, s]));
+const SUPPLY_MAX = 99; // 한 종류를 최대 몇 개까지 가질 수 있는지
 const DUPLICATE_COINS = [30, 60, 120, 250, 500]; // 같은 장비가 또 나오면 등급별로 바꿔 주는 코인
 
 // ---------- 플레이어 기록 ----------
@@ -105,6 +117,7 @@ function gamePlayer() {
     items: p.items && typeof p.items === 'object' ? p.items : {},
     equip: p.equip && typeof p.equip === 'object' ? p.equip : { weapon: null, hat: null },
     titles: p.titles && typeof p.titles === 'object' ? p.titles : {},
+    supplies: Object.fromEntries(SUPPLIES.map(({ id }) => [id, Math.max(0, Math.min(SUPPLY_MAX, Math.floor(Number((p.supplies || {})[id]) || 0)))])),
   };
   // 착용한 칭호가 없어졌거나 얻지 못한 칭호면 해제
   const t = userRecord.game.player.equip.title;
@@ -402,6 +415,83 @@ function gearRow(g) {
     return row;
   }
 }
+
+// ---------- 상점 ----------
+// 동양풍 가게: 주인이 "어서옵쇼~" 하고 맞이하고, 엽전으로 소모품을 삼
+const shopModal = document.getElementById('shop-modal');
+const shopkeeperEl = document.getElementById('shopkeeper');
+const shopBubble = document.getElementById('shop-bubble');
+const shopCoins = document.getElementById('shop-coins');
+const shopItems = document.getElementById('shop-items');
+let onShopClose = null;
+let shopTalkTimer = null;
+const SHOP_GREETINGS = ['어서옵쇼~', '어서옵쇼~ 좋은 물건 많습니다요!', '어서옵쇼~ 오늘도 요괴 사냥 가십니까?'];
+
+function shopSay(text, mood = 'normal') {
+  shopBubble.textContent = text;
+  shopBubble.classList.remove('pop');
+  void shopBubble.offsetWidth;
+  shopBubble.classList.add('pop');
+  shopkeeperEl.innerHTML = renderShopkeeper(mood);
+  shopkeeperEl.className = `shopkeeper ${mood}`;
+  clearTimeout(shopTalkTimer);
+  if (mood !== 'normal') {
+    shopTalkTimer = setTimeout(() => { shopkeeperEl.innerHTML = renderShopkeeper('normal'); shopkeeperEl.className = 'shopkeeper'; }, 1600);
+  }
+}
+
+function openShop(onClose) {
+  onShopClose = onClose;
+  renderShop();
+  shopModal.style.display = '';
+  shopSay(SHOP_GREETINGS[Math.floor(Math.random() * SHOP_GREETINGS.length)], 'happy');
+}
+
+function renderShop() {
+  const p = gamePlayer();
+  shopCoins.innerHTML = `${uiIcon('coin')} 내 엽전 <strong>${p.coins.toLocaleString()}</strong>`;
+  shopItems.replaceChildren(...SUPPLIES.map((s) => {
+    const card = document.createElement('div');
+    card.className = 'shop-item';
+    const icon = document.createElement('span');
+    icon.className = 'shop-item-icon';
+    icon.innerHTML = renderSupplyIcon(s.id);
+    const info = document.createElement('span');
+    info.className = 'shop-item-info';
+    info.innerHTML = `<strong>${s.name} <small>${s.sub}</small></strong><span>${s.desc}</span><em>가진 개수 ${p.supplies[s.id]}개</em>`;
+    const btn = document.createElement('button');
+    btn.className = 'shop-buy';
+    btn.innerHTML = `${uiIcon('coin')}${s.price}`;
+    btn.setAttribute('aria-label', `${s.name} 사기, 엽전 ${s.price}개`);
+    const full = p.supplies[s.id] >= SUPPLY_MAX;
+    btn.classList.toggle('poor', p.coins < s.price);
+    btn.disabled = full;
+    btn.addEventListener('click', () => buySupply(s));
+    card.append(icon, info, btn);
+    return card;
+  }));
+}
+
+function buySupply(s) {
+  const p = gamePlayer();
+  if (p.coins < s.price) {
+    shopSay('아이고, 엽전이 조금 모자라시네요… 요괴를 더 잡고 오십쇼!', 'sad');
+    return;
+  }
+  if (p.supplies[s.id] >= SUPPLY_MAX) return;
+  p.coins -= s.price;
+  p.supplies[s.id] += 1;
+  scheduleRecordSave();
+  Sfx.loot(2);
+  shopSay(['감사합니다요~!', '탁월한 선택이십니다요!', '또 오십쇼~!'][Math.floor(Math.random() * 3)], 'happy');
+  renderShop();
+}
+
+document.getElementById('btn-shop-close').addEventListener('click', () => {
+  shopModal.style.display = 'none';
+  clearTimeout(shopTalkTimer);
+  if (onShopClose) onShopClose();
+});
 
 // ---------- 장비 도감 (꾸미기 화면) ----------
 // 모든 장비를 칸별로 보여 주고, 얻은 장비는 밝게 · 못 얻은 장비는 어둡게 + 자물쇠

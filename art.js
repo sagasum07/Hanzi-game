@@ -357,3 +357,63 @@ const UI_ICON_ART = {
 function uiIcon(name, className = '') {
   return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="ui-icon ${className}" aria-hidden="true">${UI_ICON_ART[name] || ''}</svg>`;
 }
+
+// ---------- 상점 ----------
+// 상점 주인: 둥근 검은 모자(瓜皮帽), 팔자 콧수염, 웃는 눈, 비단 마고자, 손에 주판
+// mood: 'normal' | 'happy'(물건을 샀을 때) | 'sad'(엽전이 모자랄 때)
+function renderShopkeeper(mood = 'normal') {
+  const eyes = mood === 'sad'
+    ? `<path d="M46 56 Q51 60 56 56 M64 56 Q69 60 74 56" stroke="${INK}" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M45 48 L55 51 M75 48 L65 51" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>`
+    : `<path d="M45 56 Q50 50 55 56 M65 56 Q70 50 75 56" stroke="${INK}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
+  const mouth = mood === 'sad'
+    ? `<path d="M54 74 Q60 70 66 74" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+    : `<path d="M52 70 Q60 ${mood === 'happy' ? 82 : 78} 68 70 Z" fill="#B23A48" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" class="shopkeeper-svg" overflow="visible">
+  <ellipse cx="60" cy="144" rx="38" ry="5" fill="rgba(0,0,0,0.18)"/>
+  <path d="M20 146 Q20 98 60 94 Q100 98 100 146 Z" fill="#8E241D" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M60 96 V146" stroke="#C9A14A" stroke-width="3"/>
+  ${[106, 118, 130].map((y) => `<circle cx="60" cy="${y}" r="3" fill="#F2C230" stroke="${INK}" stroke-width="1"/>`).join('')}
+  <path d="M30 120 q10 6 20 0 M70 120 q10 6 20 0" stroke="#C9A14A" stroke-width="2" fill="none"/>
+  <circle cx="60" cy="60" r="32" fill="#F5C7A1" stroke="${INK}" stroke-width="3"/>
+  <ellipse cx="28" cy="62" rx="5" ry="8" fill="#F5C7A1" stroke="${INK}" stroke-width="2.5"/>
+  <ellipse cx="92" cy="62" rx="5" ry="8" fill="#F5C7A1" stroke="${INK}" stroke-width="2.5"/>
+  <path d="M27 46 Q30 18 60 18 Q90 18 93 46 Q78 38 60 38 Q42 38 27 46 Z" fill="#2B2321" stroke="${INK}" stroke-width="2"/>
+  <path d="M30 42 Q60 34 90 42" stroke="#8E241D" stroke-width="4" fill="none"/>
+  <circle cx="60" cy="18" r="5" fill="#B8332A" stroke="${INK}" stroke-width="2"/>
+  ${eyes}
+  <ellipse cx="44" cy="66" rx="6" ry="3.5" fill="#F28B8B" opacity="0.6"/><ellipse cx="76" cy="66" rx="6" ry="3.5" fill="#F28B8B" opacity="0.6"/>
+  ${mouth}
+  <path d="M60 66 Q48 62 38 70 Q48 68 58 69 Z M60 66 Q72 62 82 70 Q72 68 62 69 Z" fill="#2B2321"/>
+  <path d="M58 82 Q60 92 62 82" stroke="#2B2321" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <g class="shopkeeper-abacus">
+    <rect x="74" y="104" width="38" height="26" rx="3" fill="#8B5A2B" stroke="${INK}" stroke-width="2.5"/>
+    <rect x="78" y="108" width="30" height="18" fill="#F4EBDD"/>
+    <path d="M78 114 h30" stroke="#5C3A1A" stroke-width="1.5"/>
+    ${[0, 1, 2, 3].map((r) => [0, 1, 2].map((c) => `<circle cx="${82 + r * 7.5}" cy="${110 + c * 6 + (c ? 2 : 0)}" r="2.3" fill="#B8332A"/>`).join('')).join('')}
+    <ellipse cx="78" cy="122" rx="6" ry="5" fill="#F5C7A1" stroke="${INK}" stroke-width="2"/>
+  </g>
+</svg>`;
+}
+
+// 상점 소모품 그림 (48×48)
+const SUPPLY_ART = {
+  // 부활권: 노란 부적 종이에 붉은 '生'
+  revive: `<path d="M14 4 H34 L36 44 H12 Z" fill="#F2D58A" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M16 8 H32" stroke="#B8332A" stroke-width="2"/><path d="M15 40 H33" stroke="#B8332A" stroke-width="2"/>
+    <text x="24" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#B8332A" font-family="'Ma Shan Zheng', 'Noto Serif SC', serif">生</text>
+    <path d="M24 44 v3" stroke="#B8332A" stroke-width="2"/><circle cx="38" cy="10" r="4" fill="#FFE066" opacity="0.7"/>`,
+  // 하트 추가: 붉은 하트 + 금빛 '+'
+  heart: `<path d="M24 42 C8 30 4 20 10 13 C16 7 22 10 24 15 C26 10 32 7 38 13 C44 20 40 30 24 42 Z" fill="#D9363E" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M14 16 q3 -4 7 -2" stroke="#fff" stroke-width="2" fill="none" opacity="0.7" stroke-linecap="round"/>
+    <circle cx="37" cy="36" r="9" fill="#F2C230" stroke="${INK}" stroke-width="2"/><path d="M37 31 v10 M32 36 h10" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`,
+  // 시간 추가: 향로와 피어오르는 연기 + '+'
+  time: `<path d="M20 4 q-6 6 0 12 q6 6 0 12" stroke="#9C9389" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M22 18 V30" stroke="#8B5A2B" stroke-width="2.5"/><circle cx="22" cy="17" r="2" fill="#E0624F"/>
+    <path d="M8 30 H36 L32 42 H12 Z" fill="#C9A14A" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M10 34 H34" stroke="#8E6A1E" stroke-width="1.5"/><path d="M12 42 L10 46 M32 42 L34 46" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="38" cy="14" r="8" fill="#3F7D6B" stroke="${INK}" stroke-width="2"/><path d="M38 10 v8 M34 14 h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`,
+};
+
+function renderSupplyIcon(id) {
+  return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="supply-icon" aria-hidden="true" overflow="visible">${SUPPLY_ART[id] || ''}</svg>`;
+}
