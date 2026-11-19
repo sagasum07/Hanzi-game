@@ -9047,3 +9047,116 @@ header h1, .header-titles h1 {
 .home-title-btn:active {
   transform: scale(0.97);
 }
+
+/* ==========================================================
+   처음 화면: 게임 모드를 맨 위 메인 카드로
+   ========================================================== */
+.btn-game-mode.main {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 6px;
+  min-height: 112px;
+  padding: 20px 110px 20px 20px;
+}
+
+.btn-game-mode.main .game-mode-icon {
+  width: 56px;
+  height: 56px;
+  font-size: 2.3rem;
+  flex: none;
+}
+
+.btn-game-mode.main .game-mode-text strong {
+  font-size: 1.35rem;
+}
+
+.btn-game-mode.main .game-mode-text small {
+  font-size: 0.85rem;
+}
+
+.btn-game-mode.main .game-mode-arrow {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  font-size: 1.6rem;
+  z-index: 1;
+}
+
+.game-mode-art {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  width: 112px;
+  height: 112px;
+  transform: translateY(-50%);
+  opacity: 0.95;
+  filter: drop-shadow(0 0 12px rgba(201, 161, 74, 0.5));
+  animation: game-art-bob 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.game-mode-art .monster-svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes game-art-bob {
+  0%, 100% { transform: translateY(-50%); }
+  50% { transform: translateY(calc(-50% - 5px)); }
+}
+
+.mode-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 12px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.mode-divider::before,
+.mode-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+@media (max-width: 380px) {
+  .btn-game-mode.main { padding-right: 92px; }
+  .game-mode-art { width: 96px; height: 96px; }
+  .btn-game-mode.main .game-mode-text strong { font-size: 1.15rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-mode-art { animation: none; }
+}
+
+.btn-game-mode.main .game-mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.game-mode-tag {
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--cinnabar, #B8332A);
+  color: #FFF6E6;
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.btn-game-mode.main .game-mode-text strong {
+  font-size: 1.5rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+  .btn-game-mode.main .game-mode-text strong { font-size: 1.35rem; }
+}

@@ -72,6 +72,8 @@ function hanNum(n) {
 
 // ---------- DOM ----------
 const btnGameMode = document.getElementById('btn-game-mode');
+// 처음 화면의 게임 모드 카드: 오른쪽에 두목 요괴 그림
+document.getElementById('game-mode-art').innerHTML = renderMonster('dragon');
 const gameMap = document.getElementById('game-map');
 const gameBattle = document.getElementById('game-battle');
 const gameLevelTabs = document.getElementById('game-level-tabs');
