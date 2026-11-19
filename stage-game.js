@@ -1195,7 +1195,7 @@ function useBattleItem(id) {
 function showRevivePrompt() {
   const count = gamePlayer().supplies.revive;
   document.getElementById('revive-icon').innerHTML = renderSupplyIcon('revive');
-  document.getElementById('revive-text').textContent = `부활권을 쓰면 하트를 가득 채워 다시 싸울 수 있어요. (가진 부활권 ${count}장 · 전투마다 한 번)`;
+  document.getElementById('revive-text').textContent = `부활권을 쓰면 하트를 가득 채워 다시 싸울 수 있어요. 대신 이 스테이지는 이겨도 별 1개예요. (가진 부활권 ${count}장 · 전투마다 한 번)`;
   revivePrompt.style.display = '';
   document.getElementById('btn-revive-yes').focus({ preventScroll: true });
 }
@@ -1602,7 +1602,8 @@ function finishBattle(won) {
   }
   const { level, stage } = battle;
   stopBattleTimer();
-  const stars = won ? Math.min(3, Math.max(1, battle.hearts)) : 0; // 하트를 늘려도 별은 최대 3개
+  // 하트를 늘려도 별은 최대 3개, 부활권을 썼으면 무조건 1개
+  const stars = !won ? 0 : battle.revived ? 1 : Math.min(3, Math.max(1, battle.hearts));
   const total = levelStages(level).length;
   const replay = stage.no <= gameProgress(level).cleared; // 이미 클리어했던 스테이지
   if (won) {
@@ -1630,6 +1631,7 @@ function finishBattle(won) {
       : stage.no === total - 1 ? '모든 챕터를 마쳤어요. 마왕성의 문이 열렸어요!'
       : stage.boss ? `챕터 ${stage.chapter}를 마쳤어요. 다음 챕터가 열렸어요!` : '다음 스테이지가 열렸어요.')
     : '틀린 단어는 오답 노트에 모였어요. 다시 도전해 보세요!';
+  if (won && battle.revived) battleResultText.textContent += ' (부활권을 써서 별 1개)';
   btnBattleNext.style.display = won && stage.no < total ? '' : 'none';
   if (!won) setPlayerMood('hurt');
   battleResult.style.display = '';

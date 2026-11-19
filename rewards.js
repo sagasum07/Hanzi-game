@@ -97,7 +97,7 @@ const TITLE_BY_ID = Object.fromEntries(TITLES.map((t) => [t.id, t]));
 // 상점 소모품 (엽전으로 사서 전투에서 씀)
 const SUPPLIES = [
   { id: 'revive', name: '부활권', sub: '되살림 부적', price: 120,
-    desc: '하트를 모두 잃었을 때 하트를 가득 채워 다시 싸워요. (전투마다 한 번)' },
+    desc: '하트를 모두 잃었을 때 하트를 가득 채워 다시 싸워요. 이기면 별은 1개! (전투마다 한 번)' },
   { id: 'heart', name: '하트 추가', sub: '붉은 옥 심장', price: 40,
     desc: '전투 중에 누르면 하트가 하나 늘어나요. (최대 5개)' },
   { id: 'time', name: '시간 추가', sub: '느린 향', price: 25,
