@@ -200,11 +200,14 @@
         <div id="settings-profile-google">
           <!-- 프로필 사진: 갤러리·파일에서 골라 작게 줄여 저장 (친구 목록·게임 지도에 보임) -->
           <div class="settings-photo-row">
-            <span class="profile-photo large" id="settings-photo" aria-hidden="true"></span>
+            <label class="photo-picker" for="settings-photo-input" aria-label="프로필 사진 올리기">
+              <span class="profile-photo large" id="settings-photo" aria-hidden="true"></span>
+              <span class="photo-badge" aria-hidden="true"><i class="ico-slot" data-icon="camera"></i></span>
+            </label>
             <div class="settings-photo-actions">
               <span class="settings-label">프로필 사진</span>
               <div class="settings-photo-buttons">
-                <label class="btn-check-nickname btn-photo-pick" for="settings-photo-input">사진 선택</label>
+                <label class="btn-photo-pick" for="settings-photo-input"><i class="ico-slot" data-icon="camera"></i> 사진 올리기</label>
                 <button type="button" class="btn-photo-remove" id="btn-photo-remove">삭제</button>
               </div>
               <input type="file" id="settings-photo-input" accept="image/*" hidden>

@@ -3000,6 +3000,7 @@ function renderSettingsPhoto() {
   const hasProfile = Boolean(userProfile);
   btnPhotoRemove.style.display = userProfile && validPhoto(userProfile.photo) ? '' : 'none';
   btnPhotoPick.classList.toggle('disabled', !hasProfile);
+  document.querySelector('.photo-picker').classList.toggle('disabled', !hasProfile);
   settingsPhotoInput.disabled = !hasProfile;
   if (!hasProfile) settingsPhotoNote.textContent = '닉네임을 먼저 정하면 프로필 사진을 올릴 수 있어요.';
 }

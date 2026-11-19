@@ -39,6 +39,8 @@ const ICON_ART = {
   lock: '<path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2" fill="none"/><rect x="5" y="11" width="14" height="10" rx="2" fill="#C9A14A" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="15.5" r="1.6" fill="currentColor"/>',
   // 복사 (겹친 종이)
   copy: '<rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M5.5 15.5h-.5a1.5 1.5 0 0 1-1.5-1.5V5a1.5 1.5 0 0 1 1.5-1.5h9A1.5 1.5 0 0 1 15.5 5v.5" stroke="currentColor" stroke-width="1.9" fill="none"/>',
+  // 카메라
+  camera: '<path d="M4 8h3l1.6-2.5h6.8L17 8h3a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 20 19H4a1.5 1.5 0 0 1-1.5-1.5v-8A1.5 1.5 0 0 1 4 8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="13.2" r="3.4" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="18.2" cy="10.5" r="0.9" fill="#B8332A"/>',
   // 별 (단어장)
   star: '<path d="M12 3.2l2.6 5.5 6 .8-4.4 4.1 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.5l6-.8z" fill="#E3B341" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
   // 트로피 대신 금 원보(元寶)
