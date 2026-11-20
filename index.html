@@ -517,7 +517,8 @@
       <!-- 캐릭터 만들기 (avatar.js) -->
       <div class="avatar-maker" id="avatar-maker" style="display:none;">
         <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">人</span>나의 무인(武人)</h2>
-        <p class="game-map-desc">요괴와 겨룰 나만의 무인을 꾸며 보세요.</p>
+        <p class="game-map-desc" id="maker-desc">요괴와 겨룰 나만의 무인을 꾸며 보세요.</p>
+        <p class="maker-notice" id="maker-notice"></p>
         <!-- 캐릭터 꾸미기 / 장비 도감 (도감은 rewards.js) -->
         <div class="bag-tabs maker-tabs" id="maker-tabs" role="tablist">
           <button class="bag-tab active" data-tab="avatar" role="tab" aria-selected="true">캐릭터</button>
@@ -558,7 +559,8 @@
       <!-- 문파 선택 (story.js) -->
       <div class="sect-select" id="sect-select" style="display:none;">
         <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">門</span>문파 선택</h2>
-        <p class="game-map-desc">비법서를 되찾으러 떠나기 전에, 몸담을 문파를 골라 주세요.<br>문파마다 무공의 특기가 달라요.</p>
+        <p class="game-map-desc">비법서를 되찾으러 떠나기 전에, 몸담을 문파를 골라 주세요.<br>문파마다 무공의 특기와 옷이 달라요.</p>
+        <p class="sect-warning"><span class="seal-icon" aria-hidden="true">誓</span>한 번 입문한 문파는 <b>바꿀 수 없어요.</b> 신중하게 골라 주세요!</p>
         <div class="sect-cards" id="sect-cards"></div>
         <button class="btn-start-quiz" id="btn-sect-join" disabled>문파를 골라 주세요</button>
       </div>

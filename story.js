@@ -404,6 +404,8 @@ function renderSectCards() {
 
 btnSectJoin.addEventListener('click', () => {
   if (!sectChoice) return;
+  const s = SECT_BY_ID[sectChoice];
+  if (!confirm(`${s.name}(${s.han})에 입문할까요?\n한 번 입문한 문파는 바꿀 수 없어요.`)) return;
   storyState().sect = sectChoice;
   scheduleRecordSave();
   Sfx.levelUp();
@@ -428,6 +430,11 @@ function runStoryGate(onContinue) {
   }
   if (!st.sect) {
     openSectSelect(onContinue);
+    return true;
+  }
+  // 문파를 고른 뒤: 문파 옷을 입은 기본 캐릭터로 꾸미기 창을 열어 외모를 한 번 확정
+  if (!userRecord.game.avatarLocked) {
+    openAvatarMaker(onContinue);
     return true;
   }
   if (!getAvatar()) return false;

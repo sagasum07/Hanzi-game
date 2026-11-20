@@ -404,25 +404,81 @@ const avatarOptionsEl = document.getElementById('avatar-options');
 let draftAvatar = null;
 let avatarMakerDone = null; // 완료 후 실행할 함수
 
+// 외모는 처음 한 번 정하면 확정(avatarLocked). 그 뒤에는 상점의 교체권이 있는 항목만 바꿀 수 있음
+let makerUnlocked = {}; // 항목 → 이번에 쓰기로 한 교체권 id
+
+function avatarLocked() {
+  return Boolean(userRecord && userRecord.game && userRecord.game.avatarLocked);
+}
+
+// 이 항목을 바꿀 수 있는 교체권 중 가진 것 (전용 교체권 먼저, 없으면 환골탈태권)
+function ticketFor(key) {
+  if (typeof SUPPLIES === 'undefined') return null;
+  const p = gamePlayer();
+  const own = SUPPLIES.filter((t) => t.kind === 'ticket' && t.unlock.includes(key) && p.supplies[t.id] > 0);
+  own.sort((a, b) => a.unlock.length - b.unlock.length);
+  return own[0] || null;
+}
+
 function openAvatarMaker(onDone) {
-  draftAvatar = { ...(getAvatar() || randomAvatar()) };
+  // 처음 정할 때는 문파 옷을 입은 기본 캐릭터에서 시작
+  draftAvatar = { ...(getAvatar() || DEFAULT_AVATAR) };
   avatarMakerDone = onDone;
+  makerUnlocked = {};
+  const locked = avatarLocked();
+  const sect = typeof mySect === 'function' ? mySect() : null;
+  document.getElementById('maker-desc').textContent = locked
+    ? '확정한 외모는 상점의 교체권으로 바꿀 수 있어요.'
+    : `${sect ? `${sect.name} 제자의` : '나만의 무인'} 모습을 정해 주세요.`;
+  const notice = document.getElementById('maker-notice');
+  notice.innerHTML = locked
+    ? '<span class="seal-icon" aria-hidden="true">鎖</span>바꾸고 싶은 항목의 <b>교체권 쓰기</b>를 누르세요.'
+    : '<span class="seal-icon" aria-hidden="true">定</span>한 번 정하면 <b>바꿀 수 없어요.</b> (나중에 상점의 교체권으로만 바꿀 수 있어요)';
+  document.getElementById('btn-avatar-random').style.display = locked ? 'none' : '';
+  document.getElementById('btn-avatar-done').textContent = locked ? '저장하고 돌아가기' : '이 모습으로 확정 →';
   // 뒤로 버튼 대신 빈 곳을 누르면 저장하고 돌아감 (처음 만들 때는 '완료'로만)
-  document.getElementById('avatar-tap-hint').style.display = getAvatar() ? '' : 'none';
+  document.getElementById('avatar-tap-hint').style.display = locked ? '' : 'none';
   // 처음 캐릭터를 만들 때는 도감 탭 없이 꾸미기만
-  if (typeof resetMakerTabs === 'function') resetMakerTabs(Boolean(getAvatar()));
+  if (typeof resetMakerTabs === 'function') resetMakerTabs(locked);
   renderAvatarMaker();
   avatarMaker.style.display = '';
 }
 
 function renderAvatarMaker() {
   avatarPreview.innerHTML = renderAvatar(draftAvatar, 'normal', withSect());
+  const locked = avatarLocked();
   avatarOptionsEl.replaceChildren(...AVATAR_GROUPS.map((group) => {
     const section = document.createElement('div');
-    section.className = 'avatar-group';
+    const groupLocked = locked && !makerUnlocked[group.key];
+    section.className = 'avatar-group' + (groupLocked ? ' locked' : '');
     const title = document.createElement('span');
     title.className = 'avatar-group-title';
     title.textContent = group.title;
+    if (locked) {
+      // 잠긴 항목: 교체권이 있으면 '교체권 쓰기', 없으면 상점 안내
+      const tag = document.createElement('span');
+      tag.className = 'group-lock';
+      if (makerUnlocked[group.key]) {
+        tag.textContent = `${SUPPLY_BY_ID[makerUnlocked[group.key]].name} 사용 중`;
+        tag.classList.add('using');
+      } else {
+        const t = ticketFor(group.key);
+        if (t) {
+          const use = document.createElement('button');
+          use.className = 'btn-use-ticket';
+          use.textContent = `${t.name} 쓰기 (${gamePlayer().supplies[t.id]}장)`;
+          use.addEventListener('click', () => {
+            // 환골탈태권은 모든 항목을 한꺼번에 풂
+            t.unlock.forEach((k) => { if (!makerUnlocked[k]) makerUnlocked[k] = t.id; });
+            renderAvatarMaker();
+          });
+          tag.appendChild(use);
+        } else {
+          tag.innerHTML = `${typeof uiIcon === 'function' ? uiIcon('lock') : ''} 상점의 교체권 필요`;
+        }
+      }
+      title.appendChild(tag);
+    }
     const row = document.createElement('div');
     row.className = `avatar-choices ${group.kind}`;
     row.setAttribute('role', 'radiogroup');
@@ -447,7 +503,9 @@ function renderAvatarMaker() {
       } else {
         btn.textContent = opt.label;
       }
+      btn.disabled = groupLocked && !selected;
       btn.addEventListener('click', () => {
+        if (groupLocked) return;
         draftAvatar[group.key] = opt.id;
         renderAvatarMaker();
       });
@@ -464,7 +522,24 @@ document.getElementById('btn-avatar-random').addEventListener('click', () => {
 });
 
 document.getElementById('btn-avatar-done').addEventListener('click', () => {
-  saveAvatar(validAvatar(draftAvatar));
+  const next = validAvatar(draftAvatar);
+  if (!avatarLocked()) {
+    // 처음 확정: 한 번 더 확인
+    if (!confirm('이 모습으로 확정할까요?\n확정한 외모는 상점의 교체권으로만 바꿀 수 있어요.')) return;
+    userRecord.game.avatarLocked = true;
+    saveAvatar(next);
+  } else {
+    // 확정 뒤: 실제로 바뀐 항목의 교체권만 사용 (같은 교체권은 한 장만)
+    const prev = getAvatar() || DEFAULT_AVATAR;
+    const used = new Set(AVATAR_GROUPS.filter((g) => makerUnlocked[g.key] && next[g.key] !== prev[g.key]).map((g) => makerUnlocked[g.key]));
+    if (used.size) {
+      const p = gamePlayer();
+      used.forEach((id) => { p.supplies[id] = Math.max(0, p.supplies[id] - 1); });
+      saveAvatar(next);
+      if (typeof showToast === 'function') showToast(`${[...used].map((id) => SUPPLY_BY_ID[id].name).join(', ')}을(를) 사용했어요`);
+    }
+  }
+  makerUnlocked = {};
   avatarMaker.style.display = 'none';
   if (avatarMakerDone) avatarMakerDone();
 });

@@ -452,6 +452,38 @@ const SUPPLY_ART = {
     <circle cx="38" cy="14" r="8" fill="#3F7D6B" stroke="${INK}" stroke-width="2"/><path d="M38 10 v8 M34 14 h8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`,
 };
 
+// 외모 교체권 그림
+Object.assign(SUPPLY_ART, {
+  // 머리 모양: 대나무 빗 + 가위
+  hairTicket: `<rect x="6" y="10" width="22" height="9" rx="3" fill="#C9A15B" stroke="${INK}" stroke-width="2"/>
+    ${[0, 1, 2, 3, 4].map((i) => `<path d="M${9 + i * 4} 19 v9" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`).join('')}
+    <circle cx="33" cy="34" r="5" fill="none" stroke="${INK}" stroke-width="2.4"/><circle cx="41" cy="27" r="5" fill="none" stroke="${INK}" stroke-width="2.4"/>
+    <path d="M36 30 L22 40 M37.5 31.5 L28 46" stroke="#8A9199" stroke-width="3" stroke-linecap="round"/>`,
+  // 머리 색: 물감 단지 + 붓
+  hairColorTicket: `<path d="M10 22 h24 l-3 20 h-18 z" fill="#E9DCC4" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+    <ellipse cx="22" cy="22" rx="12" ry="4" fill="#B8332A" stroke="${INK}" stroke-width="2"/>
+    <path d="M14 30 q8 4 16 0" stroke="#2F6FB0" stroke-width="2.5" fill="none"/>
+    <path d="M40 4 L26 20" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><path d="M40 4 L26 20" stroke="#C9A15B" stroke-width="2" stroke-linecap="round"/>
+    <path d="M28 17 Q22 20 23 25 Q28 24 30 19 Z" fill="#B8332A"/>`,
+  // 표정: 경극 가면
+  faceTicket: `<path d="M8 10 Q24 2 40 10 Q42 30 24 44 Q6 30 8 10 Z" fill="#F4EBDD" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+    <path d="M8 10 Q16 22 24 18 Q32 22 40 10" fill="#B8332A"/>
+    <path d="M13 22 q4 -3 8 0 M27 22 q4 -3 8 0" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M18 33 Q24 38 30 33" stroke="${INK}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <path d="M24 18 v8" stroke="#C9A14A" stroke-width="2"/>`,
+  // 옷 색: 비단 끈
+  outfitTicket: `<path d="M6 18 Q24 8 42 18 L42 26 Q24 16 6 26 Z" fill="#3F7D6B" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="24" cy="22" r="5" fill="#C9A14A" stroke="${INK}" stroke-width="2"/>
+    <path d="M22 26 L16 44 L22 40 Z M26 26 L32 44 L26 40 Z" fill="#B8332A" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>`,
+  // 환골탈태: 빛나는 신선의 선단과 표주박
+  rebirthTicket: `<circle cx="24" cy="24" r="22" fill="#FFE9A8" opacity="0.45"/>
+    <path d="M24 6 v4" stroke="#8B5A2B" stroke-width="2.5"/>
+    <circle cx="24" cy="15" r="6" fill="#C98E3A" stroke="${INK}" stroke-width="2"/>
+    <ellipse cx="24" cy="31" rx="10" ry="12" fill="#C98E3A" stroke="${INK}" stroke-width="2"/>
+    <path d="M16 22 q8 3 16 0" stroke="#B8332A" stroke-width="2.4" fill="none"/>
+    <circle cx="38" cy="36" r="6" fill="#F2C230" stroke="${INK}" stroke-width="1.8"/><circle cx="36.5" cy="34.5" r="1.8" fill="#fff"/>`,
+});
+
 function renderSupplyIcon(id) {
   return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="supply-icon" aria-hidden="true" overflow="visible">${SUPPLY_ART[id] || ''}</svg>`;
 }

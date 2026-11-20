@@ -10053,3 +10053,92 @@ body {
   .game-wide .sect-model { width: 120px; height: 150px; }
   .game-wide .sect-model .avatar-svg { width: 110px; left: 5px; }
 }
+
+/* ==========================================================
+   외모 확정 · 교체권
+   ========================================================== */
+.maker-notice,
+.sect-warning {
+  display: block;
+  line-height: 1.6;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px dashed rgba(184, 51, 42, 0.5);
+  background: #FFF6EE;
+  font-size: 0.85rem;
+  color: #4A3F36;
+  word-break: keep-all;
+}
+
+.maker-notice:empty { display: none; }
+
+.maker-notice b,
+.sect-warning b { color: #B8332A; }
+
+.maker-notice .seal-icon,
+.sect-warning .seal-icon {
+  font-size: 0.8rem;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.avatar-group.locked .avatar-choices {
+  opacity: 0.55;
+}
+
+.avatar-group.locked .avatar-choice:disabled {
+  cursor: not-allowed;
+}
+
+.avatar-group.locked .avatar-choice.selected {
+  opacity: 1;
+}
+
+.avatar-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.group-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #8C7A5B;
+}
+
+.group-lock .ui-icon { width: 14px; height: 14px; }
+
+.group-lock.using {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #3F7D6B;
+  color: #FFF6E6;
+}
+
+.btn-use-ticket {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.5px solid #B8332A;
+  background: #FFF6EE;
+  color: #B8332A;
+  font-family: var(--serif-ko, serif);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.shop-group {
+  margin: 4px 0 0;
+  color: #F2D58A;
+  font-family: 'Song Myung', serif;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+}
+
+.shop-group:not(:first-child) {
+  margin-top: 10px;
+}

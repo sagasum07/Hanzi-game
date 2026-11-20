@@ -103,6 +103,20 @@ const SUPPLIES = [
   { id: 'time', name: '시간 추가', sub: '느린 향', price: 25,
     desc: '문제를 푸는 중에 누르면 제한 시간이 10초 늘어나요.' },
 ];
+// 외모 교체권: 확정한 캐릭터 외모를 꾸미기에서 한 번 바꿀 수 있음 (unlock = 바꿀 수 있는 항목)
+SUPPLIES.push(
+  { id: 'hairTicket', kind: 'ticket', name: '머리 모양 교체권', sub: '빗과 가위', price: 80, unlock: ['hair'],
+    desc: '꾸미기에서 헤어스타일을 한 번 바꿀 수 있어요.' },
+  { id: 'hairColorTicket', kind: 'ticket', name: '머리 색 교체권', sub: '물감 단지', price: 60, unlock: ['hairColor'],
+    desc: '꾸미기에서 머리 색을 한 번 바꿀 수 있어요.' },
+  { id: 'faceTicket', kind: 'ticket', name: '표정 교체권', sub: '경극 가면', price: 60, unlock: ['face'],
+    desc: '꾸미기에서 표정을 한 번 바꿀 수 있어요.' },
+  { id: 'outfitTicket', kind: 'ticket', name: '옷 색 교체권', sub: '비단 끈', price: 40, unlock: ['outfit'],
+    desc: '꾸미기에서 옷 색(문파 옷의 허리띠 색)을 한 번 바꿀 수 있어요.' },
+  { id: 'rebirthTicket', kind: 'ticket', name: '환골탈태권', sub: '신선의 선단', price: 300,
+    unlock: ['gender', 'hair', 'hairColor', 'face', 'skin', 'outfit'],
+    desc: '성별·피부까지 외모 전체를 한 번 새로 정할 수 있어요.' },
+);
 const SUPPLY_BY_ID = Object.fromEntries(SUPPLIES.map((s) => [s.id, s]));
 const SUPPLY_MAX = 99; // 한 종류를 최대 몇 개까지 가질 수 있는지
 const DUPLICATE_COINS = [30, 60, 120, 250, 500]; // 같은 장비가 또 나오면 등급별로 바꿔 주는 코인
@@ -501,7 +515,18 @@ function openShop(onClose) {
 function renderShop() {
   const p = gamePlayer();
   shopCoins.innerHTML = `${uiIcon('coin')} 내 엽전 <strong>${p.coins.toLocaleString()}</strong>`;
-  shopItems.replaceChildren(...SUPPLIES.map((s) => {
+  const groups = [['전투 아이템', SUPPLIES.filter((s) => s.kind !== 'ticket')], ['외모 교체권', SUPPLIES.filter((s) => s.kind === 'ticket')]];
+  shopItems.replaceChildren(...groups.flatMap(([title, list]) => {
+    const head = document.createElement('p');
+    head.className = 'shop-group';
+    head.textContent = title;
+    return [head, ...list.map(shopItemCard)];
+  }));
+}
+
+function shopItemCard(s) {
+  const p = gamePlayer();
+  {
     const card = document.createElement('div');
     card.className = 'shop-item';
     const icon = document.createElement('span');
@@ -520,7 +545,7 @@ function renderShop() {
     btn.addEventListener('click', () => buySupply(s));
     card.append(icon, info, btn);
     return card;
-  }));
+  }
 }
 
 function buySupply(s) {

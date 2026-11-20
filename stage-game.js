@@ -1970,7 +1970,7 @@ bagModal.addEventListener('click', (e) => {
 });
 const MAKER_EMPTY = ['avatar-maker', 'maker-pane', 'avatar-maker-buttons', 'game-screen', 'gear-dex', 'dex-sections', 'tap-out-hint'];
 document.getElementById('game-screen').addEventListener('click', (e) => {
-  if (avatarMaker.style.display === 'none' || !getAvatar()) return; // 처음 만들 때는 '완료'로만
+  if (avatarMaker.style.display === 'none' || !avatarLocked()) return; // 처음 정할 때는 '확정' 버튼으로만
   if (!MAKER_EMPTY.some((c) => e.target.classList && e.target.classList.contains(c))) return;
   document.getElementById('btn-avatar-done').click();
 });
