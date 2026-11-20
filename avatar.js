@@ -404,7 +404,8 @@ const SECT_UNIFORM = {
     // 가슴: 화산파 문장
     chest: hwasanCrest(73.5, 93, 1),
     head: '',
-    extra: '<path d="M30 130 L90 130" stroke="#B8332A" stroke-width="2.5" opacity="0.9"/>',
+    // 옷단 붉은 줄: 도포 끝자락(바지를 입으면 짧아짐)에 맞춰 그림
+    extra: (hem) => `<path d="M${hem.left + 1} ${hem.y - 1.6} L${hem.right - 1} ${hem.y - 1.6}" stroke="#B8332A" stroke-width="2.5" opacity="0.9"/>`,
   },
   // 무당파: 짙은 남색 도사 도포 + 흰 깃, 가슴에 태극, 머리에 도관
   wudang: {
@@ -419,7 +420,8 @@ const SECT_UNIFORM = {
     cloth: '#8B6A48', dark: '#6B4E34', collar: '#C9A27A', cuff: '#C9A27A', rope: true,
     chest: '<rect x="42" y="92" width="7" height="7" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1"/>' + gaibangCrest(73.5, 93, 1),
     head: '',
-    extra: '<rect x="38" y="116" width="9" height="8" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1" transform="rotate(10 42 120)"/><path d="M78 118 l3 6 -4 4 3 4" stroke="#4A3828" stroke-width="1" fill="none"/>'
+    extra: (hem) => `<rect x="38" y="113" width="8" height="7" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1" transform="rotate(10 42 116.5)"/>
+      <path d="M78 113 l3 ${Math.min(5, hem.y - 120)} -3 3" stroke="#4A3828" stroke-width="1" fill="none"/>`
       + '<g transform="translate(86 112)"><path d="M0 -6 v3" stroke="#C9A27A" stroke-width="1.5"/><circle cy="-1" r="3" fill="#C98E3A" stroke="#4A3828" stroke-width="1"/><ellipse cy="6" rx="4.5" ry="5.5" fill="#C98E3A" stroke="#4A3828" stroke-width="1"/><path d="M-2 0 q2 1.5 4 0" stroke="#B8332A" stroke-width="1.2" fill="none"/></g>',
   },
 };
@@ -461,7 +463,12 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
     <path d="M74 105 L80 118 L76 119 Z M74 105 L71 119 L68 117 Z" fill="${sashColor}"/>
     <circle cx="74" cy="105" r="3.2" fill="${u ? '#C9A14A' : '#B8332A'}"/>`;
   // 문파 옷 장식 (가슴 문양·덧댄 조각·머리 장식). 투구·모자를 쓰면 머리 장식은 숨김
-  const sectChest = u ? `${u.extra || ''}${u.chest}` : '';
+  // 도포 끝자락: 바지를 입으면 짧은 도포, 아니면 남자 무릎 길이·여자 발목 길이
+  const hem = pants
+    ? { y: a.gender === 'f' ? 128 : 126, left: 30, right: 90 }
+    : a.gender === 'f' ? { y: 146, left: 26, right: 94 } : { y: 130, left: 30, right: 90 };
+  const sectExtra = u && u.extra ? (typeof u.extra === 'function' ? u.extra(hem) : u.extra) : '';
+  const sectChest = u ? `${sectExtra}${u.chest}` : '';
   const sectHead = u && u.head && !(equip && equip.hat) ? u.head : '';
   return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="avatar-svg" overflow="visible">
   <ellipse cx="60" cy="152" rx="30" ry="5" fill="rgba(0,0,0,0.18)"/>
