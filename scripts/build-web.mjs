@@ -10,6 +10,7 @@ const FILES = [
   'art.js',
   'avatar.js',
   'rewards.js',
+  'story.js',
   'grammar.js',
   'stage-game.js',
   'style.css',

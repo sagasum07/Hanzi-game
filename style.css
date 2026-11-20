@@ -9768,3 +9768,247 @@ body {
   .settings-photo-row { gap: 10px; }
   .profile-photo.large { width: 60px; height: 60px; font-size: 1.5rem; }
 }
+
+/* ==========================================================
+   이야기 (프롤로그 · 비법서 · 엔딩)
+   ========================================================== */
+.story-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: radial-gradient(circle at 50% 40%, rgba(58, 42, 30, 0.92), rgba(15, 11, 9, 0.97));
+  cursor: pointer;
+  animation: story-fade 0.5s ease;
+}
+
+.story-frame {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 3px solid #C9A14A;
+  box-shadow: 0 0 0 3px #1F1A17, 0 18px 40px rgba(0, 0, 0, 0.5);
+  background: #F4EBDD;
+}
+
+/* 두루마리 축처럼 위아래에 나무 막대 */
+.story-frame::before,
+.story-frame::after {
+  content: '';
+  display: block;
+  height: 10px;
+  background: linear-gradient(180deg, #6B4A2E, #3A2A1E);
+}
+
+.story-art {
+  aspect-ratio: 320 / 200;
+  background: #F3EAD9;
+}
+
+.story-art.turn {
+  animation: story-art-in 0.6s ease;
+}
+
+.story-art .story-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.story-box {
+  padding: 14px 18px 12px;
+  background:
+    repeating-linear-gradient(17deg, rgba(120, 90, 50, 0.03) 0 2px, transparent 2px 7px),
+    #FFFBF3;
+  border-top: 2px solid #C9A14A;
+}
+
+.story-text {
+  margin: 0;
+  min-height: 4.8em;
+  font-family: 'Song Myung', 'Noto Serif KR', serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #1F1A17;
+  word-break: keep-all;
+}
+
+.story-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.story-step {
+  font-size: 0.8rem;
+  color: #8C7A5B;
+  letter-spacing: 2px;
+}
+
+.btn-story-next {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 2px solid #C9A14A;
+  background: linear-gradient(180deg, #C9442F, #8E241D);
+  color: #FFF6E6;
+  font-family: 'Song Myung', serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 0 0 2px #8E241D;
+}
+
+.btn-story-skip {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 235, 221, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  color: #E9DCC4;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+/* 장면 속 움직임 */
+.story-svg .steam { animation: steam-rise 2.4s ease-in-out infinite; }
+.story-svg .steam.s2 { animation-delay: -1.2s; }
+.story-svg .lantern-sway { transform-box: fill-box; transform-origin: 50% 0; animation: lantern-swing 3s ease-in-out infinite; }
+.story-svg .fire { transform-box: fill-box; transform-origin: 50% 100%; animation: fire-flicker 0.5s ease-in-out infinite alternate; }
+.story-svg .story-shout { animation: shout-shake 0.4s ease-in-out infinite; }
+.story-svg .story-rays { transform-box: fill-box; transform-origin: center; animation: rays-pulse 2s ease-in-out infinite; }
+.story-svg .flying-page { animation: page-gather 1.6s ease-in forwards; transform-box: fill-box; transform-origin: center; }
+
+@keyframes story-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes story-art-in { from { opacity: 0; transform: scale(1.04); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes steam-rise { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-10px); } }
+@keyframes fire-flicker { from { transform: scale(1, 1); } to { transform: scale(1.1, 0.88); } }
+@keyframes shout-shake { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(2px); } }
+@keyframes rays-pulse { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes page-gather { 0% { transform: scale(1) rotate(0deg); } 100% { transform: scale(0.6) rotate(360deg); opacity: 0.4; } }
+
+/* ==========================================================
+   문파 선택
+   ========================================================== */
+.sect-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.sect-cards {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sect-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid #D9C4A0;
+  background: linear-gradient(135deg, #FFFCF5, var(--sect-light));
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.sect-card:hover {
+  transform: translateY(-2px);
+}
+
+.sect-card.selected {
+  border-color: var(--sect);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sect) 30%, transparent), 0 6px 16px rgba(74, 58, 44, 0.18);
+}
+
+.sect-emblem {
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--sect) 75%, #fff), var(--sect));
+  border: 3px double var(--sect-light);
+  box-shadow: 0 0 0 2px var(--sect);
+  color: #FFF6E6;
+  font-family: 'Ma Shan Zheng', 'Noto Serif SC', serif;
+}
+
+.sect-emblem.big { width: 58px; height: 58px; font-size: 2rem; }
+.sect-emblem.small { width: 18px; height: 18px; font-size: 0.7rem; border-width: 1px; box-shadow: none; display: inline-grid; vertical-align: -3px; margin-right: 3px; }
+
+.sect-card.selected .sect-emblem { animation: seal-stamp 0.45s cubic-bezier(0.2, 1.6, 0.4, 1); }
+
+.sect-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sect-info strong {
+  font-family: 'Song Myung', serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--sect);
+}
+
+.sect-info strong small {
+  font-family: 'Ma Shan Zheng', serif;
+  font-size: 0.85rem;
+  color: #6B5E52;
+}
+
+.sect-info em {
+  font-style: normal;
+  font-size: 0.85rem;
+  color: #4A3F36;
+  word-break: keep-all;
+}
+
+.sect-bonus {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--sect);
+  color: #FFF6E6;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.sect-select .btn-start-quiz:disabled {
+  opacity: 0.5;
+}
+
+.player-story {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--ink-soft, #6B5E52);
+}
+
+@media (min-width: 720px) {
+  .game-wide .sect-cards { flex-direction: row; }
+  .game-wide .sect-card { flex-direction: column; text-align: center; padding: 18px 12px; }
+  .game-wide .sect-info { align-items: center; }
+  .game-wide .sect-bonus { align-self: center; }
+  .story-text { font-size: 1.15rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-screen, .story-art.turn, .story-svg * { animation: none !important; }
+}

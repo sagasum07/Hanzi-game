@@ -540,6 +540,29 @@
         <button class="btn-back" id="btn-avatar-back" hidden>← 뒤로</button>
       </div>
 
+      <!-- 이야기: 프롤로그 · 비법서 · 엔딩 (story.js) — 화면을 누르면 다음 장면 -->
+      <div class="story-screen" id="story-screen" style="display:none;" role="dialog" aria-modal="true" aria-label="이야기">
+        <div class="story-frame">
+          <div class="story-art" id="story-art" aria-hidden="true"></div>
+          <div class="story-box">
+            <p class="story-text" id="story-text" aria-live="polite"></p>
+            <div class="story-controls">
+              <span class="story-step" id="story-step"></span>
+              <button class="btn-story-next" id="btn-story-next">다음 ›</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn-story-skip" id="btn-story-skip">건너뛰기</button>
+      </div>
+
+      <!-- 문파 선택 (story.js) -->
+      <div class="sect-select" id="sect-select" style="display:none;">
+        <h2 class="game-map-title"><span class="title-seal" aria-hidden="true">門</span>문파 선택</h2>
+        <p class="game-map-desc">비법서를 되찾으러 떠나기 전에, 몸담을 문파를 골라 주세요.<br>문파마다 무공의 특기가 달라요.</p>
+        <div class="sect-cards" id="sect-cards"></div>
+        <button class="btn-start-quiz" id="btn-sect-join" disabled>문파를 골라 주세요</button>
+      </div>
+
       <!-- 상점: 엽전으로 전투 아이템 구매 (rewards.js) -->
       <div class="game-modal shop-modal" id="shop-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="shop-title">
         <div class="game-modal-card shop-card">
@@ -605,6 +628,7 @@
             <div class="exp-bar" aria-hidden="true"><div class="exp-bar-fill" id="exp-bar-fill"></div></div>
             <span class="player-stats"><span id="exp-text">0 / 100 EXP</span> · <span class="coin-mark" aria-label="코인"></span><span id="coin-text">0</span></span>
             <span class="player-gear" id="player-gear"></span>
+            <span class="player-story" id="player-story"></span>
           </div>
           <div class="my-avatar-buttons">
             <button class="btn-avatar-edit" id="btn-avatar-edit">꾸미기</button>
@@ -916,6 +940,7 @@
   <script src="art.js"></script>
   <script src="avatar.js"></script>
   <script src="rewards.js"></script>
+  <script src="story.js"></script>
   <script src="grammar.js"></script>
   <script src="stage-game.js"></script>
   <script type="module" src="firebase.js"></script>

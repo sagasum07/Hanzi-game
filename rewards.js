@@ -153,13 +153,13 @@ function equippedGear() {
 // 갑옷: 틀렸을 때 공격을 막을 확률
 function guardChance() {
   const a = equippedGear().armor;
-  return a ? a.guard : 0;
+  return (a ? a.guard : 0) + (typeof sectBonus === 'function' ? sectBonus('guard') : 0);
 }
 
 // 바지: 클리어 보상 추가 비율
 function rewardBonus() {
   const b = equippedGear().pants;
-  return b ? b.bonus : 0;
+  return (b ? b.bonus : 0) + (typeof sectBonus === 'function' ? sectBonus('reward') : 0);
 }
 
 // 장비 종류 이름 (투구는 머리 칸이지만 이름은 '투구')
@@ -169,7 +169,7 @@ function gearKindName(g) {
 
 function critBonus() {
   const w = equippedGear().weapon;
-  return w ? w.crit : 0;
+  return (w ? w.crit : 0) + (typeof sectBonus === 'function' ? sectBonus('crit') : 0);
 }
 
 function timeBonus() {

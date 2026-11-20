@@ -222,6 +222,11 @@ function openGameMap(level) {
   gameBattle.style.display = 'none';
   avatarMaker.style.display = 'none';
   showScreen('game');
+  // 이야기: 프롤로그 → 문파 선택 → (캐릭터) / 마왕성을 깼으면 비법서 장면 → 엔딩
+  if (runStoryGate(() => openGameMap())) {
+    gameMap.style.display = 'none';
+    return;
+  }
   // 처음 들어오면 캐릭터부터 만들기
   if (!getAvatar()) {
     gameMap.style.display = 'none';
@@ -406,8 +411,8 @@ let tutorialStep = 0;
 
 const TUTORIAL_STEPS = [
   {
-    title: '한자 무림에 온 걸 환영해요!',
-    text: '요괴를 물리치며 HSK 단어와 문장을 익히는 모험이에요. 어떻게 싸우는지 차근차근 알려 줄게요.',
+    title: '비법서를 되찾으러 떠나요!',
+    text: '마왕에게 빼앗긴 마라탕 비법서를 되찾는 여정이에요. 요괴를 물리치며 HSK 단어와 문장을 익혀요. 어떻게 싸우는지 차근차근 알려 줄게요.',
     art: () => `
       <div class="tut-duo">
         <div class="tut-fighter tut-monster">${renderMonster('fox')}</div>
@@ -417,7 +422,7 @@ const TUTORIAL_STEPS = [
   },
   {
     title: '관문을 하나씩 넘어요',
-    text: '관문을 클리어하면 다음 관문이 열려요. 여섯 관문마다 일곱 번째에는 그 챕터를 복습하는 <b>요괴 두목</b>이, 모든 챕터를 끝내면 급수 전체를 문제로 내는 <b>마왕</b>이 기다려요.',
+    text: '관문을 클리어하면 다음 관문이 열려요. 여섯 관문마다 그 챕터를 복습하는 <b>요괴 두목</b>이, 모든 챕터 끝에는 급수 전체를 문제로 내는 <b>마왕</b>이 기다려요. 마왕을 물리치면 <b>비법서 한 장</b>을 되찾아요!',
     art: () => `
       <div class="tut-path">
         ${HAN_DIGITS.slice(1, 7).map((h, i) => `<span class="tut-coin${i < 2 ? ' done' : i === 2 ? ' now' : ''}">${h}</span>`).join('<i class="tut-link"></i>')}
@@ -611,6 +616,11 @@ function renderPlayerCard() {
   document.getElementById('player-gear').innerHTML = worn.length
     ? worn.map((g) => `<span class="worn-gear">${renderGearIcon(g.id)}${g.name}</span>`).join('')
     : '맨손';
+  // 문파와 되찾은 비법서
+  const sect = typeof mySect === 'function' ? mySect() : null;
+  document.getElementById('player-story').innerHTML = sect
+    ? `${sectEmblem(sect, 'small')}<b style="color:${sect.color}">${sect.name}</b> · 마라탕 비법서 ${recoveredPageCount()}/${RECIPE_PAGES}장`
+    : '';
 }
 
 function renderGameMap() {
@@ -1990,7 +2000,12 @@ document.getElementById('btn-avatar-edit').addEventListener('click', () => {
 
 // 안드로이드 뒤로 가기 (app.js handleBackButton 에서 호출)
 function gameHandleBack() {
-  if (shopModal.style.display !== 'none') {
+  if (storyScreen.style.display !== 'none') {
+    closeStory();
+  } else if (sectSelect.style.display !== 'none') {
+    sectSelect.style.display = 'none';
+    showScreen('start');
+  } else if (shopModal.style.display !== 'none') {
     document.getElementById('btn-shop-close').click();
   } else if (bagModal.style.display !== 'none') {
     document.getElementById('btn-bag-close').click();
