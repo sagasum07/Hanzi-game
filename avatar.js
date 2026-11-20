@@ -148,14 +148,14 @@ function hairFront(style, color) {
         <path d="M62 41 Q52 48 44 56 M74 36 Q62 40 54 50" stroke="${dark}" stroke-width="1.4" fill="none"/>${shine}`;
     case 'bob':
       return `<path d="M31 47 C31 11 89 11 89 47 L85 40 L81 46 L76 38 L70 45 L64 37 L58 45 L52 37 L46 45 L40 38 L35 46 Z" fill="${color}"/>
-        <path d="M52 37 L50 44 M64 37 L66 44" stroke="${dark}" stroke-width="1.3"/>${shine}`;
+        <path d="M52 37 L50 44 M64 37 L66 44" stroke="${dark}" stroke-width="1.3"/>`;
     case 'long':
       return `<path d="M31 54 C29 11 91 11 89 54 Q84 41 74 34 L70 42 L66 32 Q62 30 60 34 Q58 30 54 32 L50 42 L46 34 Q36 41 31 54 Z" fill="${color}"/>
-        <path d="M60 34 L60 22" stroke="${dark}" stroke-width="1.4"/>${shine}`;
+        <path d="M60 34 L60 22" stroke="${dark}" stroke-width="1.4"/>`;
     case 'pony':
     case 'twin':
       return `<path d="M31 49 C31 11 89 11 89 49 L84 40 L79 46 L74 36 L67 44 L60 34 L53 44 L46 36 L41 46 L36 40 Z" fill="${color}"/>
-        <path d="M60 34 L60 22" stroke="${dark}" stroke-width="1.4"/>${shine}`;
+        <path d="M60 34 L60 22" stroke="${dark}" stroke-width="1.4"/>`;
     default: // short
       return `<path d="M30 50 C29 20 48 15 62 16 C80 17 92 28 90 50 L86 41 L83 49 L78 36 L72 45 L66 32 L60 43 L54 31 L48 44 L42 34 L38 47 L35 39 Z" fill="${color}"/>
         <path d="M30 46 L31 60 L35 52 Z M90 46 L89 60 L85 52 Z" fill="${color}"/>
@@ -336,6 +336,23 @@ function pantsPart(id) {
   return leg(44) + leg(62);
 }
 
+// 매화 한 송이: 동그란 꽃잎 다섯 장 + 노란 꽃술이 사방으로 퍼짐
+function plumBlossom(cx, cy, k = 1) {
+  const petals = [0, 72, 144, 216, 288].map((a) => {
+    const rad = (a - 90) * Math.PI / 180;
+    const px = cx + Math.cos(rad) * 2.5 * k;
+    const py = cy + Math.sin(rad) * 2.5 * k;
+    return `<circle cx="${px.toFixed(2)}" cy="${py.toFixed(2)}" r="${(2.1 * k).toFixed(2)}" fill="#FBE1E7" stroke="#D9536F" stroke-width="${(0.55 * k).toFixed(2)}"/>`;
+  }).join('');
+  const stamens = [0, 45, 90, 135, 180, 225, 270, 315].map((a) => {
+    const rad = a * Math.PI / 180;
+    const x2 = cx + Math.cos(rad) * 1.9 * k;
+    const y2 = cy + Math.sin(rad) * 1.9 * k;
+    return `<path d="M${cx} ${cy} L${x2.toFixed(2)} ${y2.toFixed(2)}" stroke="#C9A14A" stroke-width="${(0.35 * k).toFixed(2)}"/><circle cx="${x2.toFixed(2)}" cy="${y2.toFixed(2)}" r="${(0.38 * k).toFixed(2)}" fill="#E3A92B"/>`;
+  }).join('');
+  return `<g>${petals}<circle cx="${cx}" cy="${cy}" r="${(1.25 * k).toFixed(2)}" fill="#F7C9D3"/>${stamens}<circle cx="${cx}" cy="${cy}" r="${(0.6 * k).toFixed(2)}" fill="#9C6B1E"/></g>`;
+}
+
 // ---------- 문파 옷 ----------
 // equip.sect 가 있으면 도포를 문파 옷으로: 바탕색·깃·소매 끝·가슴 문양·장식이 바뀌고,
 // 내가 고른 '옷 색'은 허리띠 색으로 남음
@@ -343,8 +360,12 @@ const SECT_UNIFORM = {
   // 화산파: 흰 비단 도포 + 붉은 깃·소매, 가슴에 매화 자수, 머리에 매화 장식
   hwasan: {
     cloth: '#F4EFE6', dark: '#D9CEBF', collar: '#B8332A', cuff: '#B8332A',
-    chest: `<g transform="translate(73 93)">${[0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="-3.2" rx="2.4" ry="3" fill="#E0627A" transform="rotate(${a})"/>`).join('')}<circle r="1.6" fill="#F2C230"/></g>`,
-    head: '<g transform="translate(83 30)">' + [0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="-2.6" rx="2" ry="2.5" fill="#E0627A" transform="rotate(${a})"/>`).join('') + '<circle r="1.3" fill="#F2C230"/></g><path d="M80 33 L90 40" stroke="#8B5A2B" stroke-width="1.5"/>',
+    // 가슴: 굽은 매화 가지에 핀 꽃 두 송이와 꽃봉오리 자수
+    chest: `<path d="M64 101 Q68 96 72 95 Q76 94 80 89" stroke="#5C3A1A" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <path d="M72 95 Q71 91 73 88" stroke="#5C3A1A" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+      ${plumBlossom(74, 92.5, 1)}${plumBlossom(79.5, 89.5, 0.75)}
+      <circle cx="73" cy="87.6" r="1.1" fill="#D9536F"/><circle cx="66.5" cy="99" r="0.9" fill="#D9536F"/>`,
+    head: '',
     extra: '<path d="M30 130 L90 130" stroke="#B8332A" stroke-width="2.5" opacity="0.9"/>',
   },
   // 무당파: 짙은 남색 도사 도포 + 흰 깃, 가슴에 태극, 머리에 도관
