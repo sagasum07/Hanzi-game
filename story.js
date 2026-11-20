@@ -62,9 +62,39 @@ function sceneSky(top, bottom, id) {
     <rect width="320" height="200" fill="url(#sky-${id})"/>`;
 }
 
+let sceneSeq = 0;
+// 산: 멀리 있는 산은 흐리게 번지고, 가까운 산은 짙게 + 산허리를 감싸는 안개 띠
 function sceneMountains(color, opacity = 0.35) {
-  return `<path d="M0 130 L40 92 L70 110 L110 70 L150 104 L190 80 L230 108 L270 76 L320 100 L320 200 L0 200Z" fill="${color}" opacity="${opacity}"/>
-    <path d="M0 150 L50 124 L90 140 L140 118 L200 142 L250 122 L320 140 L320 200 L0 200Z" fill="${color}" opacity="${opacity + 0.15}"/>`;
+  sceneSeq += 1;
+  const n = sceneSeq;
+  return `<defs><filter id="far-${n}" x="-5%" y="-20%" width="110%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter>
+      <linearGradient id="mist-${n}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient></defs>
+    <path d="M0 118 L30 96 L55 104 L90 62 L120 92 L160 74 L200 98 L240 66 L280 90 L320 80 L320 200 L0 200Z" fill="${color}" opacity="${opacity * 0.6}" filter="url(#far-${n})"/>
+    <path d="M0 130 L40 92 L70 110 L110 70 L150 104 L190 80 L230 108 L270 76 L320 100 L320 200 L0 200Z" fill="${color}" opacity="${opacity}"/>
+    <path d="M110 70 L104 86 L114 82 L108 100 M270 76 L262 92 L272 88" stroke="${color}" stroke-width="1.2" opacity="${opacity}" fill="none"/>
+    <rect x="0" y="104" width="320" height="26" fill="url(#mist-${n})"/>
+    <path d="M0 150 L50 124 L90 140 L140 118 L200 142 L250 122 L320 140 L320 200 L0 200Z" fill="${color}" opacity="${opacity + 0.15}"/>
+    ${scenePine(18, 150, 0.7, color, opacity + 0.35)}${scenePine(300, 146, 0.6, color, opacity + 0.3)}`;
+}
+
+// 바위에 선 소나무 (먹빛)
+function scenePine(x, y, s, color, opacity) {
+  return `<g transform="translate(${x} ${y}) scale(${s})" opacity="${Math.min(1, opacity)}" fill="${color}">
+    <path d="M0 0 Q-2 -18 4 -34 Q8 -46 2 -58" stroke="${color}" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <path d="M-16 -36 Q2 -46 18 -38 Q2 -40 -16 -36 Z M-10 -50 Q6 -60 20 -52 Q6 -54 -10 -50 Z M-20 -22 Q0 -32 14 -24 Q0 -26 -20 -22 Z"/>
+    <ellipse cx="-14" cy="-37" rx="9" ry="4"/><ellipse cx="14" cy="-51" rx="9" ry="4"/><ellipse cx="-12" cy="-23" rx="10" ry="4"/>
+  </g>`;
+}
+
+// 장면 전체에 한지 결과 가장자리 그늘
+function sceneFinish() {
+  sceneSeq += 1;
+  const n = sceneSeq;
+  return `<defs><filter id="paper-${n}"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="${n}" result="g"/>
+      <feColorMatrix in="g" type="matrix" values="0 0 0 0 0.4  0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 -1 0.5"/></filter>
+    <radialGradient id="vig-${n}" cx="50%" cy="50%" r="70%"><stop offset="0.6" stop-color="#1F1A17" stop-opacity="0"/><stop offset="1" stop-color="#1F1A17" stop-opacity="0.35"/></radialGradient></defs>
+    <rect width="320" height="200" filter="url(#paper-${n})" opacity="0.5" style="mix-blend-mode:multiply"/>
+    <rect width="320" height="200" fill="url(#vig-${n})"/>`;
 }
 
 // 마라탕집: 처마가 들린 지붕, 麻辣烫 현판, 붉은 등불, 김이 나는 문
@@ -156,6 +186,7 @@ const SCENES = {
     ${sceneInn(90, 70, 1)}
     <path d="M20 176 q6 -20 2 -40 M30 176 q-4 -16 4 -32 M290 176 q-6 -18 0 -36" stroke="#3F7D6B" stroke-width="4" fill="none"/>
     <circle cx="24" cy="132" r="10" fill="#E8A3B0" opacity="0.8"/><circle cx="292" cy="136" r="9" fill="#E8A3B0" opacity="0.8"/>
+  ${sceneFinish()}
   </svg>`,
   // 2) 사람들과 무인들이 지상 최고의 마라탕이라 칭찬
   praise: () => {
@@ -171,6 +202,7 @@ const SCENES = {
     ${sceneBubble(8, 58, '天下第一!', 62)}
     ${sceneBubble(250, 58, '太好吃了!', 62)}
     ${sceneBubble(124, 14, '最好吃的麻辣烫!', 74)}
+  ${sceneFinish()}
   </svg>`;
   },
   // 3) 마왕이 마을을 습격해 비법서를 훔쳐 감
@@ -184,6 +216,7 @@ const SCENES = {
     ${embedSvg(renderMonster('demonking'), 168, 30, 150, 150)}
     ${sceneBook(196, 112, 0.9)}
     <text x="250" y="24" text-anchor="middle" font-size="16" fill="#F2D58A" font-family="'Ma Shan Zheng', serif" class="story-shout">哈哈哈!</text>
+  ${sceneFinish()}
   </svg>`,
   // 4) 망연자실한 주인에게 '당신'이 비법서를 되찾겠다고 약속
   vow: () => `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" class="story-svg">
@@ -196,6 +229,7 @@ const SCENES = {
     ${sceneHeroSilhouette(236, 70, 0.95)}
     ${sceneBubble(54, 40, '我的秘法书…', 72)}
     ${sceneBubble(196, 26, '我一定找回来!', 78)}
+  ${sceneFinish()}
   </svg>`,
   // 5) 비법서는 여섯 장으로 찢겨 여섯 마왕성에 — 여정의 시작
   journey: () => `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" class="story-svg">
@@ -210,6 +244,7 @@ const SCENES = {
       <rect x="${x - 5}" y="${y - 6}" width="10" height="13" fill="#F4EBDD" stroke="${SC_INK}" stroke-width="1" transform="rotate(${i % 2 ? 8 : -8} ${x} ${y})"/></g>`;
   }).join('')}
     ${sceneHeroSilhouette(20, 96, 0.6)}
+  ${sceneFinish()}
   </svg>`,
   // 비법서 한 장을 되찾음
   page: (n) => `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" class="story-svg">
@@ -223,6 +258,7 @@ const SCENES = {
       <path d="M-18 22 h36 M-18 28 h28" stroke="#C9A14A" stroke-width="1.5"/></g>
     ${[...Array(n)].map((_, i) => `<rect x="${104 + i * 20}" y="176" width="14" height="16" fill="#C9A14A" stroke="${SC_INK}" stroke-width="1"/>`).join('')}
     ${[...Array(RECIPE_PAGES - n)].map((_, i) => `<rect x="${104 + (n + i) * 20}" y="176" width="14" height="16" fill="none" stroke="#A89A86" stroke-width="1" stroke-dasharray="2 2"/>`).join('')}
+  ${sceneFinish()}
   </svg>`,
   // 엔딩 1) 여섯 장이 모여 비법서가 빛남
   reunite: () => `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" class="story-svg">
@@ -233,6 +269,7 @@ const SCENES = {
     return `<rect x="${160 + Math.cos(a) * 78 - 7}" y="${100 + Math.sin(a) * 64 - 9}" width="14" height="18" fill="#F4EBDD" stroke="#C9A14A" stroke-width="1.5" class="flying-page"/>`;
   }).join('')}
     ${sceneBook(136, 70, 1.35, true)}
+  ${sceneFinish()}
   </svg>`,
   // 엔딩 2) 마라탕집이 다시 문을 열고 모두가 기뻐함
   reopen: () => `<svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" class="story-svg">
@@ -245,6 +282,7 @@ const SCENES = {
     ${sceneBowl(86, 170, 0.55)}
     ${sceneBubble(110, 50, '谢谢你，英雄!', 76)}
     ${[30, 70, 250, 290].map((x, i) => `<path d="M${x} 10 v${12 + (i % 2) * 8}" stroke="#2B2321" stroke-width="1"/><ellipse cx="${x}" cy="${28 + (i % 2) * 8}" rx="7" ry="9" fill="#D9363E" stroke="#2B2321" stroke-width="1.5" class="lantern-sway"/>`).join('')}
+  ${sceneFinish()}
   </svg>`,
 };
 

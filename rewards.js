@@ -339,10 +339,13 @@ function renderChest(tier, open = false) {
         <circle cx="50" cy="40" r="2.2" fill="${st.metalDark}"/><circle cx="70" cy="40" r="2.2" fill="${st.metalDark}"/>
        </g>`;
   const light = open ? `<path d="M26 50 L4 0 L116 0 L94 50 Z" fill="url(#chestLight${tier})" opacity="0.9"/>` : '';
+  const fid = typeof illusId === 'function' ? illusId('ch') : 'ch';
+  const finish = typeof illusFilter === 'function' ? illusFilter(fid, { wobble: 0.8, outline: 1.1, outlineWobble: 1.5, volume: 1, grain: 0.3, seed: 23 + tier }) : '';
   return `<svg viewBox="0 0 120 110" xmlns="http://www.w3.org/2000/svg" class="chest-svg tier-${c.id}" overflow="visible">
-  <defs><linearGradient id="chestLight${tier}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF6C9" stop-opacity="1"/><stop offset="1" stop-color="#FFF6C9" stop-opacity="0"/></linearGradient></defs>
+  <defs><linearGradient id="chestLight${tier}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF6C9" stop-opacity="1"/><stop offset="1" stop-color="#FFF6C9" stop-opacity="0"/></linearGradient>${finish}</defs>
   <ellipse cx="60" cy="104" rx="46" ry="5.5" fill="rgba(0,0,0,0.22)"/>
   ${light}
+  <g filter="url(#${fid})">
   <path d="M22 96 h10 l-2 8 h-6 z M88 96 h10 l-2 8 h-6 z" fill="${st.dark}"/>
   <rect x="18" y="56" width="84" height="42" rx="2" fill="${st.body}" stroke="${st.dark}" stroke-width="3"/>
   <rect x="23" y="61" width="74" height="26" rx="2" fill="none" stroke="${st.dark}" stroke-width="1.4" opacity="0.45"/>
@@ -354,6 +357,7 @@ function renderChest(tier, open = false) {
   ${lid}
   ${lockFace}
   ${gem}
+  </g>
   ${sparkle}
 </svg>`;
 }

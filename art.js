@@ -11,6 +11,60 @@
 
 const INK = '#2B2321';
 
+// ---------- 공통 일러스트 마감 필터 ----------
+// 모든 그림(캐릭터·요괴·장비·보물함·상점)에 같은 '그린 그림' 질감을 입힘:
+//   wobble  붓으로 그은 듯 선을 살짝 흔듦 (0이면 또렷)
+//   outline 실루엣 둘레의 먹 윤곽선 굵기, outlineWobble 윤곽선 흔들림
+//   volume  입체감: 빛이 오는 왼쪽 위 가장자리는 밝게, 오른쪽 아래 가장자리는 그늘
+//   grain   한지 결 / shadow 아래로 떨어지는 그림자 (아이콘용)
+let illusSeq = 0;
+function illusId(prefix) {
+  illusSeq += 1;
+  return `${prefix}-${illusSeq}`;
+}
+
+function illusFilter(id, { wobble = 0, outline = 1.2, outlineWobble = 2, volume = 1, grain = 0.3, shadow = 0, seed = 7, blur = 2.6 } = {}) {
+  const f = [];
+  f.push(`<feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="${seed}" result="warp"/>`);
+  f.push(wobble
+    ? `<feDisplacementMap in="SourceGraphic" in2="warp" scale="${wobble}" xChannelSelector="R" yChannelSelector="G" result="base"/>`
+    : '<feOffset in="SourceGraphic" dx="0" dy="0" result="base"/>');
+  f.push('<feColorMatrix in="base" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="ba"/>');
+  let tex = 'base';
+  if (grain) {
+    f.push(`<feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${seed + 5}" result="grainN"/>
+      <feColorMatrix in="grainN" type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.36  0 0 0 0 0.26  0 0 0 -0.9 ${grain}" result="grainInk"/>
+      <feComposite in="grainInk" in2="base" operator="in" result="grainIn"/>
+      <feBlend in="grainIn" in2="base" mode="multiply" result="tex"/>`);
+    tex = 'tex';
+  }
+  const merge = [];
+  if (shadow) {
+    f.push(`<feGaussianBlur in="ba" stdDeviation="1.4" result="sbl"/><feOffset in="sbl" dx="0.6" dy="${shadow}" result="sbo"/>
+      <feFlood flood-color="#1F1A17" flood-opacity="0.32"/><feComposite in2="sbo" operator="in" result="drop"/>`);
+    merge.push('drop');
+  }
+  if (outline) {
+    f.push(`<feMorphology in="ba" operator="dilate" radius="${outline}" result="fat"/>`);
+    if (outlineWobble) {
+      f.push(`<feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="1" seed="${seed + 2}" result="warp2"/>
+        <feDisplacementMap in="fat" in2="warp2" scale="${outlineWobble}" xChannelSelector="R" yChannelSelector="G" result="fatW"/>`);
+    }
+    f.push(`<feFlood flood-color="#1F1A17" flood-opacity="0.92"/><feComposite in2="${outlineWobble ? 'fatW' : 'fat'}" operator="in" result="inkLine"/>`);
+    merge.push('inkLine');
+  }
+  merge.push(tex);
+  if (volume) {
+    f.push(`<feGaussianBlur in="ba" stdDeviation="${blur}" result="vb"/>
+      <feOffset in="vb" dx="-${blur}" dy="-${blur * 1.25}" result="vo1"/><feComposite in="ba" in2="vo1" operator="out" result="rimS"/>
+      <feGaussianBlur in="rimS" stdDeviation="1.1" result="rimSb"/><feFlood flood-color="#2B1F16" flood-opacity="${(0.45 * volume).toFixed(2)}"/><feComposite in2="rimSb" operator="in" result="shade"/>
+      <feOffset in="vb" dx="${blur * 0.85}" dy="${blur * 1.05}" result="vo2"/><feComposite in="ba" in2="vo2" operator="out" result="rimL"/>
+      <feGaussianBlur in="rimL" stdDeviation="1.1" result="rimLb"/><feFlood flood-color="#FFF8E8" flood-opacity="${(0.42 * volume).toFixed(2)}"/><feComposite in2="rimLb" operator="in" result="light"/>`);
+    merge.push('shade', 'light');
+  }
+  return `<filter id="${id}" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">${f.join('')}<feMerge>${merge.map((m) => `<feMergeNode in="${m}"/>`).join('')}</feMerge></filter>`;
+}
+
 // ---------- 눈 (몬스터마다 위치·색만 다르고 표정은 공통) ----------
 // eyes: [{ x, y, r, color }] / mood 에 따라 보통 눈 · 찡그린 눈(><) · 기절 눈(X)
 function monsterEyes(eyes, mood, glow) {
@@ -307,21 +361,7 @@ function renderMonster(id, mood = 'normal') {
   const body = `${art.body}${art.front || ''}`;
   return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="monster-svg painted" overflow="visible">
   <defs>
-    <filter id="mp-brush-${n}" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="${seed}" result="warp"/>
-      <feDisplacementMap in="SourceGraphic" in2="warp" scale="3.2" xChannelSelector="R" yChannelSelector="G" result="brushed"/>
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="${seed + 5}" result="grain"/>
-      <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.36  0 0 0 0 0.26  0 0 0 -0.9 0.42" result="grainInk"/>
-      <feComposite in="grainInk" in2="brushed" operator="in" result="grainIn"/>
-      <feBlend in="grainIn" in2="brushed" mode="multiply" result="textured"/>
-      <!-- 실루엣 둘레에 굵기가 고르지 않은 먹선 (동양화의 윤곽선) -->
-      <feMorphology in="SourceAlpha" operator="dilate" radius="1.4" result="fat"/>
-      <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="1" seed="${seed + 2}" result="warp2"/>
-      <feDisplacementMap in="fat" in2="warp2" scale="4" xChannelSelector="R" yChannelSelector="G" result="fatWarp"/>
-      <feFlood flood-color="#1F1A17" flood-opacity="0.92"/>
-      <feComposite in2="fatWarp" operator="in" result="inkLine"/>
-      <feMerge><feMergeNode in="inkLine"/><feMergeNode in="textured"/></feMerge>
-    </filter>
+    ${illusFilter(`mp-brush-${n}`, { wobble: 3.2, outline: 1.4, outlineWobble: 4, volume: 1.1, grain: 0.42, seed })}
     <filter id="mp-white-${n}" color-interpolation-filters="sRGB">
       <feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/>
     </filter>
@@ -385,7 +425,8 @@ const GEAR_ICON_ART = {
 };
 
 function renderGearIcon(id) {
-  return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="gear-icon" aria-hidden="true" overflow="visible">${GEAR_ICON_ART[id] || ''}</svg>`;
+  const fid = illusId('gi');
+  return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="gear-icon" aria-hidden="true" overflow="visible"><defs>${illusFilter(fid, { outline: 0.9, outlineWobble: 0, volume: 0.9, grain: 0.18, shadow: 1.6, blur: 2 })}</defs><g filter="url(#${fid})">${GEAR_ICON_ART[id] || ''}</g></svg>`;
 }
 
 // ---------- UI 아이콘 (24×24) ----------
@@ -415,7 +456,9 @@ function renderShopkeeper(mood = 'normal') {
   const mouth = mood === 'sad'
     ? `<path d="M54 74 Q60 70 66 74" stroke="${INK}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
     : `<path d="M52 70 Q60 ${mood === 'happy' ? 82 : 78} 68 70 Z" fill="#B23A48" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  const fid = illusId('sk');
   return `<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" class="shopkeeper-svg" overflow="visible">
+  <defs>${illusFilter(fid, { wobble: 1.2, outline: 1.2, outlineWobble: 2.5, volume: 1, grain: 0.3, seed: 31 })}</defs><g filter="url(#${fid})">
   <ellipse cx="60" cy="144" rx="38" ry="5" fill="rgba(0,0,0,0.18)"/>
   <path d="M20 146 Q20 98 60 94 Q100 98 100 146 Z" fill="#8E241D" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
   <path d="M60 96 V146" stroke="#C9A14A" stroke-width="3"/>
@@ -439,7 +482,7 @@ function renderShopkeeper(mood = 'normal') {
     ${[0, 1, 2, 3].map((r) => [0, 1, 2].map((c) => `<circle cx="${82 + r * 7.5}" cy="${110 + c * 6 + (c ? 2 : 0)}" r="2.3" fill="#B8332A"/>`).join('')).join('')}
     <ellipse cx="78" cy="122" rx="6" ry="5" fill="#F5C7A1" stroke="${INK}" stroke-width="2"/>
   </g>
-</svg>`;
+</g></svg>`;
 }
 
 // 상점 소모품 그림 (48×48)
@@ -494,5 +537,6 @@ Object.assign(SUPPLY_ART, {
 });
 
 function renderSupplyIcon(id) {
-  return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="supply-icon" aria-hidden="true" overflow="visible">${SUPPLY_ART[id] || ''}</svg>`;
+  const fid = illusId('si');
+  return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" class="supply-icon" aria-hidden="true" overflow="visible"><defs>${illusFilter(fid, { outline: 0.9, outlineWobble: 0, volume: 0.9, grain: 0.18, shadow: 1.6, blur: 2 })}</defs><g filter="url(#${fid})">${SUPPLY_ART[id] || ''}</g></svg>`;
 }
