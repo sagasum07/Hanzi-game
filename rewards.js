@@ -509,6 +509,8 @@ function openShop(onClose) {
   onShopClose = onClose;
   renderShop();
   shopModal.style.display = '';
+  shopModal.scrollTop = 0;
+  document.body.classList.add('modal-open'); // 상점이 열려 있는 동안 뒤 화면은 스크롤되지 않게
   shopSay(SHOP_GREETINGS[Math.floor(Math.random() * SHOP_GREETINGS.length)], 'happy');
 }
 
@@ -565,6 +567,7 @@ function buySupply(s) {
 
 document.getElementById('btn-shop-close').addEventListener('click', () => {
   shopModal.style.display = 'none';
+  document.body.classList.remove('modal-open');
   clearTimeout(shopTalkTimer);
   if (onShopClose) onShopClose();
 });

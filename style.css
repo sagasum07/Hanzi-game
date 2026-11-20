@@ -10142,3 +10142,22 @@ body {
 .shop-group:not(:first-child) {
   margin-top: 10px;
 }
+
+/* 상점: 창 바깥(어두운 막)이 스크롤되어 긴 상점도 끝까지 내려 볼 수 있게 (처마 장식은 그대로 밖으로) */
+.game-modal.shop-modal {
+  align-items: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 34px 16px 24px;
+}
+
+.game-modal.shop-modal .shop-card {
+  max-height: none;
+  margin: auto 0;
+  flex: none;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
