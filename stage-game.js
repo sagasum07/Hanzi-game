@@ -417,7 +417,7 @@ const TUTORIAL_STEPS = [
       <div class="tut-duo">
         <div class="tut-fighter tut-monster">${renderMonster('fox')}</div>
         <div class="tut-vs">對</div>
-        <div class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', gamePlayer().equip)}</div>
+        <div class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', withSect(gamePlayer().equip))}</div>
       </div>`,
   },
   {
@@ -477,7 +477,7 @@ const TUTORIAL_STEPS = [
     art: () => `
       <div class="tut-gear">
         <span class="tut-gear-col"><span class="tut-gear-item">${renderGearIcon('glaive')}<em>무기</em></span><span class="tut-gear-item">${renderGearIcon('generalhelm')}<em>투구</em></span></span>
-        <span class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', { weapon: 'glaive', hat: 'generalhelm', armor: 'lamellar', pants: 'warriorpants' })}</span>
+        <span class="tut-fighter tut-me">${renderAvatar(getAvatar(), 'win', withSect({ weapon: 'glaive', hat: 'generalhelm', armor: 'lamellar', pants: 'warriorpants' }))}</span>
         <span class="tut-gear-col"><span class="tut-gear-item">${renderGearIcon('lamellar')}<em>갑옷</em></span><span class="tut-gear-item">${renderGearIcon('warriorpants')}<em>바지</em></span></span>
       </div>`,
   },
@@ -596,14 +596,14 @@ function syncProfileTitle() {
 }
 
 function setPlayerMood(mood) {
-  playerAvatarEl.innerHTML = renderAvatar(getAvatar(), mood, gamePlayer().equip);
+  playerAvatarEl.innerHTML = renderAvatar(getAvatar(), mood, withSect(gamePlayer().equip));
 }
 
 // 지도 위 내 캐릭터 카드: 레벨·경험치·코인·장비
 function renderPlayerCard() {
   const p = gamePlayer();
   const info = levelInfo(p.exp);
-  myAvatarEl.innerHTML = renderAvatar(getAvatar(), 'normal', p.equip);
+  myAvatarEl.innerHTML = renderAvatar(getAvatar(), 'normal', withSect(p.equip));
   setNameWithTitle(myAvatarName, playerDisplayName());
   document.getElementById('player-level').textContent = `Lv.${info.level}`;
   document.getElementById('exp-bar-fill').style.width = `${(info.exp / info.need) * 100}%`;

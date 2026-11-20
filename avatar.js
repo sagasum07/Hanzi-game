@@ -307,6 +307,41 @@ function pantsPart(id) {
   return leg(44) + leg(62);
 }
 
+// ---------- 문파 옷 ----------
+// equip.sect 가 있으면 도포를 문파 옷으로: 바탕색·깃·소매 끝·가슴 문양·장식이 바뀌고,
+// 내가 고른 '옷 색'은 허리띠 색으로 남음
+const SECT_UNIFORM = {
+  // 화산파: 흰 비단 도포 + 붉은 깃·소매, 가슴에 매화 자수, 머리에 매화 장식
+  hwasan: {
+    cloth: '#F4EFE6', dark: '#D9CEBF', collar: '#B8332A', cuff: '#B8332A',
+    chest: `<g transform="translate(73 93)">${[0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="-3.2" rx="2.4" ry="3" fill="#E0627A" transform="rotate(${a})"/>`).join('')}<circle r="1.6" fill="#F2C230"/></g>`,
+    head: '<g transform="translate(83 30)">' + [0, 72, 144, 216, 288].map((a) => `<ellipse cx="0" cy="-2.6" rx="2" ry="2.5" fill="#E0627A" transform="rotate(${a})"/>`).join('') + '<circle r="1.3" fill="#F2C230"/></g><path d="M80 33 L90 40" stroke="#8B5A2B" stroke-width="1.5"/>',
+    extra: '<path d="M30 130 L90 130" stroke="#B8332A" stroke-width="2.5" opacity="0.9"/>',
+  },
+  // 무당파: 짙은 남색 도사 도포 + 흰 깃, 가슴에 태극, 머리에 도관
+  wudang: {
+    cloth: '#33506E', dark: '#24394F', collar: '#F4EBDD', cuff: '#F4EBDD',
+    chest: `<g transform="translate(73 93)"><circle r="5" fill="#F4EBDD" stroke="#1F1A17" stroke-width="0.8"/><path d="M0 -5 A5 5 0 0 1 0 5 A2.5 2.5 0 0 1 0 0 A2.5 2.5 0 0 0 0 -5 Z" fill="#1F1A17"/><circle cy="-2.5" r="0.9" fill="#1F1A17"/><circle cy="2.5" r="0.9" fill="#F4EBDD"/></g>`,
+    head: '<path d="M52 24 Q52 14 60 13 Q68 14 68 24 Z" fill="#2B2321"/><rect x="51" y="21" width="18" height="5" rx="2" fill="#C9A14A"/><path d="M60 13 L60 7" stroke="#C9A14A" stroke-width="2"/>',
+    hideHeadWithHat: true,
+    extra: '<path d="M36 112 L84 112" stroke="#F4EBDD" stroke-width="1.5" opacity="0.6"/>',
+  },
+  // 개방: 해진 갈색 옷에 기운 조각, 새끼줄 허리띠, 허리에 술 호리병
+  gaibang: {
+    cloth: '#8B6A48', dark: '#6B4E34', collar: '#C9A27A', cuff: '#C9A27A', rope: true,
+    chest: '<rect x="68" y="88" width="9" height="8" fill="#6E8B5A" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1" transform="rotate(-8 72 92)"/><rect x="42" y="92" width="7" height="7" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1"/>',
+    head: '',
+    extra: '<rect x="38" y="116" width="9" height="8" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1" transform="rotate(10 42 120)"/><path d="M78 118 l3 6 -4 4 3 4" stroke="#4A3828" stroke-width="1" fill="none"/>'
+      + '<g transform="translate(86 112)"><path d="M0 -6 v3" stroke="#C9A27A" stroke-width="1.5"/><circle cy="-1" r="3" fill="#C98E3A" stroke="#4A3828" stroke-width="1"/><ellipse cy="6" rx="4.5" ry="5.5" fill="#C98E3A" stroke="#4A3828" stroke-width="1"/><path d="M-2 0 q2 1.5 4 0" stroke="#B8332A" stroke-width="1.2" fill="none"/></g>',
+  },
+};
+
+// 내 캐릭터 그리기용 장비: 장착 장비 + 내 문파
+function withSect(equip) {
+  const sect = typeof mySect === 'function' ? mySect() : null;
+  return { ...(equip || {}), sect: sect ? sect.id : null };
+}
+
 function renderAvatar(avatarIn, mood = 'normal', equip = null) {
   const [weaponUnder, weaponOver] = weaponParts(equip && equip.weapon);
   const hat = hatPart(equip && equip.hat);
@@ -315,8 +350,12 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
   const a = validAvatar(avatarIn) || DEFAULT_AVATAR;
   const skin = a.skin;
   const skinDark = shade(skin, 0.12);
-  const cloth = a.outfit;
-  const clothDark = shade(cloth, 0.25);
+  const u = equip && equip.sect ? SECT_UNIFORM[equip.sect] : null;
+  const cloth = u ? u.cloth : a.outfit;
+  const clothDark = u ? u.dark : shade(cloth, 0.25);
+  const collarColor = u ? u.collar : '#F4EBDD';
+  const cuffColor = u ? u.cuff : '#F4EBDD';
+  const sashColor = u ? a.outfit : (a.gender === 'f' ? '#C9A14A' : '#2B2321');
   // 동양풍 도포: 교차 깃(交領) + 허리띠, 남자는 무릎까지 오는 도포와 바지, 여자는 발목까지 오는 긴 치마
   const legs = pants
     ? `${pants}<path d="M35 108 L85 108 L90 ${a.gender === 'f' ? 128 : 126} L30 ${a.gender === 'f' ? 128 : 126} Z" fill="${a.gender === 'f' ? clothDark : cloth}"/><path d="M60 110 L60 126" stroke="${clothDark}" stroke-width="2"/>`
@@ -324,29 +363,37 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
     ? `<path d="M36 108 L84 108 L94 146 L26 146 Z" fill="${clothDark}"/><path d="M48 112 L44 144 M72 112 L76 144" stroke="${cloth}" stroke-width="2" opacity="0.6"/>`
     : `<rect x="44" y="118" width="14" height="29" rx="4" fill="#3A3530"/><rect x="62" y="118" width="14" height="29" rx="4" fill="#3A3530"/>
        <path d="M35 108 L85 108 L90 130 L30 130 Z" fill="${cloth}"/><path d="M60 110 L60 130" stroke="${clothDark}" stroke-width="2"/>`;
-  const collar = `<path d="M49 82 L69 106" stroke="#F4EBDD" stroke-width="4.5" stroke-linecap="round"/>
-    <path d="M71 82 L61 94" stroke="#F4EBDD" stroke-width="4.5" stroke-linecap="round"/>
+  const collar = `<path d="M49 82 L69 106" stroke="${collarColor}" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M71 82 L61 94" stroke="${collarColor}" stroke-width="4.5" stroke-linecap="round"/>
     <path d="M49 82 L69 106" stroke="${clothDark}" stroke-width="1" stroke-linecap="round" opacity="0.5"/>`;
-  const sash = `<rect x="35" y="101" width="50" height="8" rx="2" fill="${a.gender === 'f' ? '#C9A14A' : '#2B2321'}"/>
-    <path d="M74 105 L80 118 L76 119 Z M74 105 L71 119 L68 117 Z" fill="${a.gender === 'f' ? '#C9A14A' : '#2B2321'}"/>
-    <circle cx="74" cy="105" r="3.2" fill="#B8332A"/>`;
+  const sash = u && u.rope
+    ? `<path d="M35 104 Q60 108 85 104" stroke="#C9A27A" stroke-width="5" fill="none"/><path d="M35 104 Q60 108 85 104" stroke="#8C6A44" stroke-width="1.2" stroke-dasharray="3 2" fill="none"/>
+       <path d="M74 106 l-2 12 M76 106 l3 11" stroke="#C9A27A" stroke-width="2.5" stroke-linecap="round"/>`
+    : `<rect x="35" y="101" width="50" height="8" rx="2" fill="${sashColor}"/>
+    <path d="M74 105 L80 118 L76 119 Z M74 105 L71 119 L68 117 Z" fill="${sashColor}"/>
+    <circle cx="74" cy="105" r="3.2" fill="${u ? '#C9A14A' : '#B8332A'}"/>`;
+  // 문파 옷 장식 (가슴 문양·덧댄 조각·머리 장식). 투구·모자를 쓰면 머리 장식은 숨김
+  const sectChest = u ? `${u.extra || ''}${u.chest}` : '';
+  const sectHead = u && u.head && !(equip && equip.hat) ? u.head : '';
   return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="avatar-svg" overflow="visible">
   <ellipse cx="60" cy="152" rx="30" ry="5" fill="rgba(0,0,0,0.18)"/>
   ${hairBack(a.hair, a.hairColor)}
   ${legs}
   <ellipse cx="50" cy="148" rx="9" ry="5" fill="#2B2321"/><ellipse cx="70" cy="148" rx="9" ry="5" fill="#2B2321"/>
-  <g class="arm-back"><path d="M80 88 Q91 99 89 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M84 108 L95 108" stroke="#F4EBDD" stroke-width="3" stroke-linecap="round"/><circle cx="89" cy="115" r="6" fill="${skin}"/></g>
+  <g class="arm-back"><path d="M80 88 Q91 99 89 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M84 108 L95 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/><circle cx="89" cy="115" r="6" fill="${skin}"/></g>
   <path d="M38 88 Q60 78 82 88 L86 110 L34 110 Z" fill="${cloth}"/>
   ${collar}
   ${sash}
+  ${sectChest}
   ${armorBody}
   <rect x="54" y="72" width="12" height="10" rx="3" fill="${skinDark}"/>
   <circle cx="60" cy="50" r="28" fill="${skin}"/>
   <ellipse cx="32" cy="54" rx="4" ry="6" fill="${skin}"/><ellipse cx="88" cy="54" rx="4" ry="6" fill="${skin}"/>
   ${faceParts(a.face, mood)}
   ${hairFront(a.hair, a.hairColor)}
+  ${sectHead}
   ${hat}
-  <g class="arm-front"><path d="M40 88 Q29 99 31 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M25 108 L37 108" stroke="#F4EBDD" stroke-width="3" stroke-linecap="round"/>${armorShoulder}${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
+  <g class="arm-front"><path d="M40 88 Q29 99 31 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M25 108 L37 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/>${armorShoulder}${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
 </svg>`;
 }
 
@@ -369,7 +416,7 @@ function openAvatarMaker(onDone) {
 }
 
 function renderAvatarMaker() {
-  avatarPreview.innerHTML = renderAvatar(draftAvatar);
+  avatarPreview.innerHTML = renderAvatar(draftAvatar, 'normal', withSect());
   avatarOptionsEl.replaceChildren(...AVATAR_GROUPS.map((group) => {
     const section = document.createElement('div');
     section.className = 'avatar-group';
@@ -393,7 +440,7 @@ function renderAvatarMaker() {
       } else if (group.kind === 'preview') {
         const mini = document.createElement('span');
         mini.className = 'avatar-mini';
-        mini.innerHTML = renderAvatar({ ...draftAvatar, [group.key]: opt.id });
+        mini.innerHTML = renderAvatar({ ...draftAvatar, [group.key]: opt.id }, 'normal', withSect());
         const label = document.createElement('span');
         label.textContent = opt.label;
         btn.append(mini, label);

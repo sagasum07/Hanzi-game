@@ -216,7 +216,7 @@ const SCENES = {
     ${sceneSky('#FBEFD9', '#F3EAD9', 'page')}
     <g class="story-rays"><circle cx="160" cy="96" r="80" fill="#FFF6C9" opacity="0.7"/></g>
     ${embedSvg(renderMonster('demonking', 'ko'), 18, 96, 90, 90)}
-    ${embedSvg(renderAvatar(getAvatar(), 'win', gamePlayer().equip), 216, 52, 96, 128)}
+    ${embedSvg(renderAvatar(getAvatar(), 'win', withSect(gamePlayer().equip)), 216, 52, 96, 128)}
     <g transform="translate(160 92) rotate(-6)"><rect x="-26" y="-34" width="52" height="68" fill="#F4EBDD" stroke="${SC_INK}" stroke-width="2"/>
       <text x="0" y="-12" text-anchor="middle" font-size="11" fill="#8E241D" font-family="'Ma Shan Zheng', serif">秘法书</text>
       <text x="0" y="12" text-anchor="middle" font-size="22" fill="${SC_INK}" font-family="'Ma Shan Zheng', serif">第${'一二三四五六'[n - 1]}章</text>
@@ -241,7 +241,7 @@ const SCENES = {
     <path d="M0 176 L320 176 L320 200 L0 200 Z" fill="#C9B48A"/>
     ${sceneInn(150, 62, 1.05)}
     ${embedSvg(renderShopkeeper('happy'), 110, 80, 80, 100)}
-    ${embedSvg(renderAvatar(getAvatar(), 'win', gamePlayer().equip), 10, 66, 90, 120)}
+    ${embedSvg(renderAvatar(getAvatar(), 'win', withSect(gamePlayer().equip)), 10, 66, 90, 120)}
     ${sceneBowl(86, 170, 0.55)}
     ${sceneBubble(110, 50, '谢谢你，英雄!', 76)}
     ${[30, 70, 250, 290].map((x, i) => `<path d="M${x} 10 v${12 + (i % 2) * 8}" stroke="#2B2321" stroke-width="1"/><ellipse cx="${x}" cy="${28 + (i % 2) * 8}" rx="7" ry="9" fill="#D9363E" stroke="#2B2321" stroke-width="1.5" class="lantern-sway"/>`).join('')}
@@ -386,7 +386,9 @@ function renderSectCards() {
     card.style.setProperty('--sect', s.color);
     card.style.setProperty('--sect-light', s.light);
     card.setAttribute('aria-pressed', String(sectChoice === s.id));
-    card.innerHTML = `${sectEmblem(s)}
+    // 내 캐릭터(아직 없으면 기본 캐릭터)가 이 문파 옷을 입은 모습 + 문파 문장
+    const model = (typeof getAvatar === 'function' && getAvatar()) || DEFAULT_AVATAR;
+    card.innerHTML = `<span class="sect-model" aria-hidden="true">${renderAvatar(model, sectChoice === s.id ? 'win' : 'normal', { sect: s.id })}${sectEmblem(s)}</span>
       <span class="sect-info"><strong>${s.name} <small>${s.han}</small></strong>
       <em>“${s.motto}”</em><span class="sect-bonus">${s.desc}</span></span>`;
     card.addEventListener('click', () => {

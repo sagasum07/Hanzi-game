@@ -397,7 +397,7 @@ function openBag(onClose) {
 
 function renderBag() {
   const p = gamePlayer();
-  bagPreview.innerHTML = renderAvatar(getAvatar(), 'normal', p.equip);
+  bagPreview.innerHTML = renderAvatar(getAvatar(), 'normal', withSect(p.equip));
   const eq = equippedGear();
   // 장착 중인 장비 4칸 (무기·머리·갑옷·바지)
   bagStats.innerHTML = `<span class="bag-slots">${GEAR_SLOTS.map((slot) => {
