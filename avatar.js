@@ -87,7 +87,7 @@ function saveAvatar(avatar) {
 // 작은 얼굴 그림 (친구 표시용): 전신 그림에서 머리 부분만 잘라 보여 줌
 function renderAvatarFace(avatar, hat = null) {
   return renderAvatar(avatar, 'normal', { hat })
-    .replace('viewBox="0 0 120 160"', 'viewBox="24 4 72 72"')
+    .replace('viewBox="0 0 120 160"', 'viewBox="28 18 64 64"')
     .replace('class="avatar-svg"', 'class="avatar-svg avatar-face"');
 }
 
@@ -116,69 +116,98 @@ function shade(hex, amount) {
 // ---------- SVG ----------
 // viewBox 0 0 120 160, 머리 중심 (60, 50) 반지름 28. 캐릭터는 왼쪽(몬스터 쪽)을 보고 앞쪽 팔(.arm-front)로 주먹을 뻗습니다.
 function hairBack(style, color) {
+  const dark = shade(color, 0.25);
   switch (style) {
     case 'bob':
-      return `<path d="M31 46 C30 16 90 16 89 46 L91 80 C86 84 79 83 76 79 L76 58 L44 58 L44 79 C41 83 34 84 29 80 Z" fill="${color}"/>`;
+      return `<path d="M30 44 C29 14 91 14 90 44 L92 78 L84 72 L80 80 L74 70 L46 70 L40 80 L36 72 L28 78 Z" fill="${color}"/>`;
     case 'long':
-      return `<path d="M31 46 C29 15 91 15 89 46 L94 108 C84 112 74 106 70 100 L50 100 C46 106 36 112 26 108 Z" fill="${color}"/>`;
+      return `<path d="M30 44 C28 12 92 12 90 44 L95 100 L88 94 L86 108 L78 98 L72 106 L66 98 L54 98 L48 106 L42 98 L34 108 L32 94 L25 100 Z" fill="${color}"/>
+        <path d="M36 60 L34 96 M84 60 L86 96" stroke="${dark}" stroke-width="1.5" opacity="0.6"/>`;
     case 'pony':
-      return `<path d="M84 40 C104 40 108 64 100 88 C97 96 90 98 88 92 C94 74 92 56 82 50 Z" fill="${color}"/><circle cx="85" cy="44" r="4" fill="#E05A7A"/>`;
+      return `<path d="M80 30 C100 26 112 46 106 74 L100 66 L98 92 L92 80 L86 96 L88 62 C88 50 84 42 76 38 Z" fill="${color}"/>
+        <path d="M78 30 L84 26 L86 34 Z" fill="#B8332A"/>`;
     case 'twin':
-      return `<path d="M33 44 C14 46 10 72 18 92 C21 98 28 98 28 92 C24 76 26 60 36 52 Z" fill="${color}"/><path d="M87 44 C106 46 110 72 102 92 C99 98 92 98 92 92 C96 76 94 60 84 52 Z" fill="${color}"/><circle cx="34" cy="47" r="4" fill="#E05A7A"/><circle cx="86" cy="47" r="4" fill="#E05A7A"/>`;
+      return `<path d="M34 40 C16 42 10 66 16 92 L22 84 L24 100 L30 88 L32 60 C32 52 34 46 38 44 Z" fill="${color}"/>
+        <path d="M86 40 C104 42 110 66 104 92 L98 84 L96 100 L90 88 L88 60 C88 52 86 46 82 44 Z" fill="${color}"/>
+        <path d="M32 40 l6 -4 2 6 z M88 40 l-6 -4 -2 6 z" fill="#B8332A"/>`;
     default:
-      return '';
+      return `<path d="M31 44 C30 16 90 16 89 44 L90 56 L84 50 L36 50 L30 56 Z" fill="${color}"/>`;
   }
 }
 
+// 앞머리: 끝이 뾰족하게 갈라지는 무협풍 머리카락
 function hairFront(style, color) {
+  const dark = shade(color, 0.3);
+  const shine = `<path d="M44 26 Q54 20 66 21" stroke="#FFFFFF" stroke-width="2" fill="none" opacity="0.18" stroke-linecap="round"/>`;
   switch (style) {
     case 'spiky':
-      return `<path d="M30 50 L33 30 L41 34 L45 15 L53 29 L60 10 L67 29 L75 15 L79 34 L87 30 L90 50 C83 40 71 36 60 38 C49 36 37 40 30 50 Z" fill="${color}"/>`;
+      return `<path d="M29 52 L27 30 L37 34 L35 13 L47 25 L51 4 L60 21 L69 4 L73 25 L85 13 L83 34 L93 30 L91 52 L85 41 L81 48 L75 35 L67 43 L60 31 L53 43 L45 35 L39 48 L35 41 Z" fill="${color}"/>
+        <path d="M51 6 L56 24 M69 6 L64 24" stroke="${dark}" stroke-width="1.4"/>${shine}`;
     case 'side':
-      return `<path d="M31 52 C29 20 91 18 89 50 C85 44 81 40 77 37 C67 46 48 45 38 40 C35 44 33 48 31 52 Z" fill="${color}"/>`;
+      return `<path d="M30 54 C28 20 50 15 64 16 C82 18 93 30 90 52 L86 43 Q76 35 62 41 Q50 47 39 60 Q42 48 47 41 Q39 45 33 55 Z" fill="${color}"/>
+        <path d="M62 41 Q52 48 44 56 M74 36 Q62 40 54 50" stroke="${dark}" stroke-width="1.4" fill="none"/>${shine}`;
     case 'bob':
-      return `<path d="M32 47 C33 21 87 21 88 47 C80 41 70 39 60 39 C50 39 40 41 32 47 Z" fill="${color}"/>`;
+      return `<path d="M31 47 C31 11 89 11 89 47 L85 40 L81 46 L76 38 L70 45 L64 37 L58 45 L52 37 L46 45 L40 38 L35 46 Z" fill="${color}"/>
+        <path d="M52 37 L50 44 M64 37 L66 44" stroke="${dark}" stroke-width="1.3"/>${shine}`;
     case 'long':
-      return `<path d="M32 50 C31 19 89 19 88 50 C84 42 74 36 66 37 L62 44 L58 37 C48 37 37 42 32 50 Z" fill="${color}"/>`;
+      return `<path d="M31 54 C29 11 91 11 89 54 Q84 41 74 34 L70 42 L66 32 Q62 30 60 34 Q58 30 54 32 L50 42 L46 34 Q36 41 31 54 Z" fill="${color}"/>
+        <path d="M60 34 L60 22" stroke="${dark}" stroke-width="1.4"/>${shine}`;
     case 'pony':
     case 'twin':
-      return `<path d="M32 48 C32 20 88 20 88 48 C82 40 72 36 60 37 C48 36 38 40 32 48 Z" fill="${color}"/>`;
+      return `<path d="M31 49 C31 11 89 11 89 49 L84 40 L79 46 L74 36 L67 44 L60 34 L53 44 L46 36 L41 46 L36 40 Z" fill="${color}"/>
+        <path d="M60 34 L60 22" stroke="${dark}" stroke-width="1.4"/>${shine}`;
     default: // short
-      return `<path d="M31 50 C30 19 90 19 89 50 C86 44 82 41 78 40 C70 38 64 41 60 40 C52 38 44 40 38 42 C35 44 33 47 31 50 Z" fill="${color}"/><rect x="31" y="46" width="4" height="10" rx="2" fill="${color}"/><rect x="85" y="46" width="4" height="10" rx="2" fill="${color}"/>`;
+      return `<path d="M30 50 C29 20 48 15 62 16 C80 17 92 28 90 50 L86 41 L83 49 L78 36 L72 45 L66 32 L60 43 L54 31 L48 44 L42 34 L38 47 L35 39 Z" fill="${color}"/>
+        <path d="M30 46 L31 60 L35 52 Z M90 46 L89 60 L85 52 Z" fill="${color}"/>
+        <path d="M54 31 L52 42 M66 32 L68 42" stroke="${dark}" stroke-width="1.3"/>${shine}`;
+  }
+}
+
+// 아몬드 모양 눈 (side: -1 왼쪽 눈, 1 오른쪽 눈 — 눈꼬리가 바깥으로 올라감)
+function avEye(cx, cy, side, { lid = 0, iris = '#3A2A22' } = {}) {
+  const ink = '#1F1A17';
+  const ox = cx + side * 6.5;
+  const ix = cx - side * 5.5;
+  return `<path d="M${ix} ${cy + 0.5} Q${cx} ${cy - 5 + lid} ${ox} ${cy - 1.8} Q${cx} ${cy + 3.6} ${ix} ${cy + 0.5} Z" fill="#FFFDF7"/>
+    <circle cx="${cx + side * 0.6}" cy="${cy - 0.4 + lid * 0.3}" r="2.7" fill="${iris}"/>
+    <circle cx="${cx + side * 0.6 - 0.9}" cy="${cy - 1.4 + lid * 0.3}" r="0.85" fill="#FFFFFF"/>
+    <path d="M${ix - side * 0.5} ${cy + 0.2} Q${cx} ${cy - 5.4 + lid} ${ox + side * 1.6} ${cy - 3.2}" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>
+    ${lid ? `<path d="M${ix} ${cy - 1.2 + lid * 0.5} Q${cx} ${cy - 3.6 + lid} ${ox} ${cy - 2.2 + lid * 0.4}" stroke="${ink}" stroke-width="1.3" fill="none"/>` : ''}`;
+}
+
+function avBrows(kind) {
+  const ink = '#1F1A17';
+  const w = 'stroke-width="2.6" stroke-linecap="round" fill="none"';
+  switch (kind) {
+    case 'fierce': return `<path d="M41 41 L55 46" stroke="${ink}" ${w}/><path d="M79 41 L65 46" stroke="${ink}" ${w}/>`;
+    case 'flat': return `<path d="M42 44 L55 44" stroke="${ink}" ${w}/><path d="M78 44 L65 44" stroke="${ink}" ${w}/>`;
+    case 'up': return `<path d="M42 42 Q48 38 55 41" stroke="${ink}" ${w}/><path d="M78 42 Q72 38 65 41" stroke="${ink}" ${w}/>`;
+    default: return `<path d="M42 43 Q48 40 55 42.5" stroke="${ink}" ${w}/><path d="M78 43 Q72 40 65 42.5" stroke="${ink}" ${w}/>`;
   }
 }
 
 function faceParts(face, mood) {
-  const ink = '#2B2321';
+  const ink = '#1F1A17';
+  const nose = `<path d="M60 55 L58.6 61 L61.2 61.2" stroke="${shade('#C98E6A', 0)}" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>`;
   if (mood === 'hurt') {
-    return `<path d="M45 48 L53 54 M53 48 L45 54 M67 48 L75 54 M75 48 L67 54" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M51 66 Q55 62 59 66 Q63 70 67 66" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
+    return `${avBrows('fierce')}<path d="M44 50 L54 53 L44 55 M76 50 L66 53 L76 55" stroke="${ink}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>${nose}
+      <path d="M53 66 L67 66 L66 69 L54 69 Z" fill="#FFFDF7" stroke="${ink}" stroke-width="1.6" stroke-linejoin="round"/><path d="M57 66 v3 M60 66 v3 M63 66 v3" stroke="${ink}" stroke-width="1"/>`;
   }
   if (mood === 'win') {
-    return `<path d="M44 52 Q49 46 54 52 M66 52 Q71 46 76 52" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>
-      <path d="M50 61 Q60 74 70 61 Z" fill="#B23A48"/>`;
+    return `${avBrows('up')}${avEye(49, 51, -1)}${avEye(71, 51, 1)}${nose}
+      <path d="M53 64 Q60 71 67 64 Q60 66.5 53 64 Z" fill="#8E241D" stroke="${ink}" stroke-width="1.4" stroke-linejoin="round"/>`;
   }
-  const blush = '<ellipse cx="43" cy="60" rx="4.5" ry="2.6" fill="#F28B8B" opacity="0.55"/><ellipse cx="77" cy="60" rx="4.5" ry="2.6" fill="#F28B8B" opacity="0.55"/>';
   switch (face) {
     case 'grin':
-      return `${blush}<path d="M44 52 Q49 46 54 52 M66 52 Q71 46 76 52" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>
-        <path d="M50 61 Q60 73 70 61 Z" fill="#B23A48"/>`;
+      return `${avBrows('up')}${avEye(49, 51, -1)}${avEye(71, 51, 1)}${nose}<path d="M54 65 Q61 69 67 62.5" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
     case 'cool':
-      return `${blush}<path d="M43 44 L54 46 M66 46 L77 43" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>
-        <ellipse cx="49" cy="52" rx="3" ry="3.6" fill="${ink}"/><ellipse cx="71" cy="52" rx="3" ry="3.6" fill="${ink}"/>
-        <path d="M53 65 Q61 68 68 62" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
+      return `${avBrows('flat')}${avEye(49, 51, -1, { lid: 2.2 })}${avEye(71, 51, 1, { lid: 2.2 })}${nose}<path d="M55.5 66 L64.5 65.5" stroke="${ink}" stroke-width="2" stroke-linecap="round"/>`;
     case 'fierce':
-      return `<path d="M43 43 L54 48 M77 43 L66 48" stroke="${ink}" stroke-width="2.8" stroke-linecap="round"/>
-        <ellipse cx="49" cy="53" rx="3" ry="3.4" fill="${ink}"/><ellipse cx="71" cy="53" rx="3" ry="3.4" fill="${ink}"/>
-        <path d="M53 66 L67 66" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>`;
+      return `${avBrows('fierce')}${avEye(49, 52, -1, { lid: 1.4, iris: '#5A1A12' })}${avEye(71, 52, 1, { lid: 1.4, iris: '#5A1A12' })}${nose}<path d="M54.5 67 Q60 64.5 65.5 67" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
     case 'wink':
-      return `${blush}<ellipse cx="49" cy="52" rx="3" ry="3.8" fill="${ink}"/>
-        <path d="M66 53 Q71 48 76 53" fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round"/>
-        <path d="M52 63 Q60 70 68 63" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
-    default: // smile
-      return `${blush}<ellipse cx="49" cy="52" rx="3" ry="3.8" fill="${ink}"/><ellipse cx="71" cy="52" rx="3" ry="3.8" fill="${ink}"/>
-        <circle cx="50" cy="50.5" r="1" fill="#fff"/><circle cx="72" cy="50.5" r="1" fill="#fff"/>
-        <path d="M52 63 Q60 70 68 63" fill="none" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
+      return `${avBrows('up')}${avEye(49, 51, -1)}<path d="M65 51.5 Q71 48 77 50.5" stroke="${ink}" stroke-width="2.2" fill="none" stroke-linecap="round"/>${nose}<path d="M54 65 Q60 69 66 64" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+    default: // smile: 차분하고 늠름한 얼굴
+      return `${avBrows()}${avEye(49, 51, -1)}${avEye(71, 51, 1)}${nose}<path d="M55 65.5 Q60 68 65 65.5" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
   }
 }
 
@@ -377,7 +406,7 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
   const sectHead = u && u.head && !(equip && equip.hat) ? u.head : '';
   return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="avatar-svg" overflow="visible">
   <ellipse cx="60" cy="152" rx="30" ry="5" fill="rgba(0,0,0,0.18)"/>
-  ${hairBack(a.hair, a.hairColor)}
+  <g transform="translate(60 80) scale(0.86) translate(-60 -80)">${hairBack(a.hair, a.hairColor)}</g>
   ${legs}
   <ellipse cx="50" cy="148" rx="9" ry="5" fill="#2B2321"/><ellipse cx="70" cy="148" rx="9" ry="5" fill="#2B2321"/>
   <g class="arm-back"><path d="M80 88 Q91 99 89 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M84 108 L95 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/><circle cx="89" cy="115" r="6" fill="${skin}"/></g>
@@ -386,13 +415,16 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
   ${sash}
   ${sectChest}
   ${armorBody}
-  <rect x="54" y="72" width="12" height="10" rx="3" fill="${skinDark}"/>
-  <circle cx="60" cy="50" r="28" fill="${skin}"/>
-  <ellipse cx="32" cy="54" rx="4" ry="6" fill="${skin}"/><ellipse cx="88" cy="54" rx="4" ry="6" fill="${skin}"/>
+  <rect x="54.5" y="70" width="11" height="13" rx="3" fill="${skinDark}"/>
+  <g class="avatar-head" transform="translate(60 80) scale(0.86) translate(-60 -80)">
+  <path d="M30 50 q-6 -3 -5 5 q1 7 7 7 Z M90 50 q6 -3 5 5 q-1 7 -7 7 Z" fill="${skinDark}"/>
+  <path d="M32 44 Q31 22 60 21 Q89 22 88 44 Q88 60 78 70 Q69 78 60 78 Q51 78 42 70 Q32 60 32 44 Z" fill="${skin}"/>
+  <path d="M42 70 Q51 78 60 78 Q69 78 78 70 Q70 74 60 74.5 Q50 74 42 70 Z" fill="${skinDark}" opacity="0.6"/>
   ${faceParts(a.face, mood)}
   ${hairFront(a.hair, a.hairColor)}
   ${sectHead}
   ${hat}
+  </g>
   <g class="arm-front"><path d="M40 88 Q29 99 31 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M25 108 L37 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/>${armorShoulder}${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
 </svg>`;
 }

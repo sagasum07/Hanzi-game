@@ -487,6 +487,7 @@ function openTutorial() {
   tutorialStep = 0;
   renderTutorial();
   tutorialModal.style.display = '';
+  document.body.classList.add('modal-open');
   btnTutorialNext.focus();
 }
 
@@ -510,6 +511,7 @@ function renderTutorial() {
 
 function closeTutorial() {
   tutorialModal.style.display = 'none';
+  document.body.classList.remove('modal-open');
   if (!userRecord.game) userRecord.game = {};
   if (!userRecord.game.tutorialDone) {
     userRecord.game.tutorialDone = true;

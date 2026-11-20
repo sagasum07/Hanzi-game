@@ -10161,3 +10161,10 @@ body {
 body.modal-open {
   overflow: hidden;
 }
+
+/* 모든 게임 창: 끝까지 밀어도 뒤 화면으로 스크롤이 넘어가지 않게 */
+.game-modal,
+.game-modal-card,
+.story-screen {
+  overscroll-behavior: contain;
+}

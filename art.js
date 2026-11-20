@@ -26,11 +26,20 @@ function monsterEyes(eyes, mood, glow) {
       const d = r * 0.85;
       return `<path d="M${x - d} ${y - d} L${x + d} ${y + d} M${x + d} ${y - d} L${x - d} ${y + d}" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
     }
+    // 치켜 올라간 날카로운 눈 + 찡그린 눈썹 (동글동글한 왕눈 대신 위협적인 눈빛)
     const color = e.color || '#F2C230';
-    return `${glow ? `<circle cx="${x}" cy="${y}" r="${r + 3}" fill="${color}" opacity="0.35"/>` : ''}
-      <ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * 1.05}" fill="${color}" stroke="${INK}" stroke-width="2"/>
-      <ellipse cx="${x + (e.look || 0)}" cy="${y + 0.5}" rx="${r * (e.slit ? 0.22 : 0.48)}" ry="${r * 0.78}" fill="${INK}"/>
-      <circle cx="${x + (e.look || 0) - r * 0.25}" cy="${y - r * 0.35}" r="${r * 0.22}" fill="#fff"/>`;
+    const side = i % 2 === 0 ? -1 : 1; // 바깥쪽 방향 (왼쪽 눈은 왼쪽)
+    const ox = x + side * r * 1.25;
+    const oy = y - r * 0.55;
+    const ix = x - side * r * 1.1;
+    const iy = y + r * 0.35;
+    const small = eyes.length > 2 && r < 3.2;
+    const brow = small ? '' : `<path d="M${x + side * r * 1.55} ${y - r * 1.55} L${x - side * r * 1.05} ${y - r * 0.75}" stroke="${INK}" stroke-width="${Math.max(2.4, r * 0.55)}" stroke-linecap="round"/>`;
+    return `${glow ? `<path d="M${ix} ${iy} Q${x} ${y - r * 1.5} ${ox + side * 2} ${oy - 1} Q${x} ${y + r * 1.4} ${ix} ${iy} Z" fill="${color}" opacity="0.4"/>` : ''}
+      <path d="M${ix} ${iy} Q${x} ${y - r * 1.1} ${ox} ${oy} Q${x} ${y + r * 0.95} ${ix} ${iy} Z" fill="${color}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+      <ellipse cx="${x + (e.look || 0) * 0.5}" cy="${y - r * 0.05}" rx="${r * (e.slit ? 0.2 : 0.3)}" ry="${r * 0.55}" fill="${INK}"/>
+      <circle cx="${x + (e.look || 0) * 0.5 - r * 0.15}" cy="${y - r * 0.3}" r="${r * 0.14}" fill="#fff"/>
+      ${brow}`;
   }).join('');
 }
 

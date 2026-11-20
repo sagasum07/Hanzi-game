@@ -406,6 +406,7 @@ function openBag(onClose) {
   onBagClose = onClose;
   bagTab = 'gear';
   renderBag();
+  document.body.classList.add('modal-open'); // 가방이 열려 있는 동안 뒤 화면은 스크롤되지 않게
   bagModal.style.display = '';
 }
 
@@ -712,6 +713,7 @@ document.querySelectorAll('.bag-tab').forEach((b) => b.addEventListener('click',
 }));
 
 document.getElementById('btn-bag-close').addEventListener('click', () => {
+  document.body.classList.remove('modal-open');
   if (typeof syncMyProgress === 'function') syncMyProgress(); // 바꾼 모자·투구를 친구 지도에도
   bagModal.style.display = 'none';
   if (onBagClose) onBagClose();
