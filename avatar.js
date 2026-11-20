@@ -353,6 +353,28 @@ function plumBlossom(cx, cy, k = 1) {
   return `<g>${petals}<circle cx="${cx}" cy="${cy}" r="${(1.25 * k).toFixed(2)}" fill="#F7C9D3"/>${stamens}<circle cx="${cx}" cy="${cy}" r="${(0.6 * k).toFixed(2)}" fill="#9C6B1E"/></g>`;
 }
 
+// 화산파 문장(이 게임만의 디자인): 붉은 원 테두리 안에 문양화한 매화, 뒤로 비스듬한 검
+function hwasanCrest(cx, cy, k = 1) {
+  const R = 6.2 * k;
+  const petals = [0, 72, 144, 216, 288].map((a) => {
+    const rad = (a - 90) * Math.PI / 180;
+    return `<circle cx="${(cx + Math.cos(rad) * 2.45 * k).toFixed(2)}" cy="${(cy + Math.sin(rad) * 2.45 * k).toFixed(2)}" r="${(1.75 * k).toFixed(2)}" fill="#B8332A"/>`;
+  }).join('');
+  const lines = [0, 72, 144, 216, 288].map((a) => {
+    const rad = (a - 90) * Math.PI / 180;
+    const x2 = cx + Math.cos(rad) * 2.6 * k;
+    const y2 = cy + Math.sin(rad) * 2.6 * k;
+    return `<path d="M${cx} ${cy} L${x2.toFixed(2)} ${y2.toFixed(2)}" stroke="#FFF6E6" stroke-width="${(0.45 * k).toFixed(2)}"/><circle cx="${x2.toFixed(2)}" cy="${y2.toFixed(2)}" r="${(0.45 * k).toFixed(2)}" fill="#F2C230"/>`;
+  }).join('');
+  return `<g>
+    <path d="M${cx - R * 1.15} ${cy + R * 1.15} L${cx + R * 1.15} ${cy - R * 1.15}" stroke="#5F6368" stroke-width="${(1.2 * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="M${cx - R * 1.15} ${cy + R * 1.15} l${(1.6 * k).toFixed(2)} -${(1.6 * k).toFixed(2)}" stroke="#5C3A1A" stroke-width="${(1.8 * k).toFixed(2)}" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="#FFFBF3" stroke="#B8332A" stroke-width="${(1.1 * k).toFixed(2)}"/>
+    <circle cx="${cx}" cy="${cy}" r="${(R - 1.3 * k).toFixed(2)}" fill="none" stroke="#B8332A" stroke-width="${(0.4 * k).toFixed(2)}"/>
+    ${petals}<circle cx="${cx}" cy="${cy}" r="${(1.1 * k).toFixed(2)}" fill="#8E241D"/>${lines}
+  </g>`;
+}
+
 // ---------- 문파 옷 ----------
 // equip.sect 가 있으면 도포를 문파 옷으로: 바탕색·깃·소매 끝·가슴 문양·장식이 바뀌고,
 // 내가 고른 '옷 색'은 허리띠 색으로 남음
@@ -360,11 +382,8 @@ const SECT_UNIFORM = {
   // 화산파: 흰 비단 도포 + 붉은 깃·소매, 가슴에 매화 자수, 머리에 매화 장식
   hwasan: {
     cloth: '#F4EFE6', dark: '#D9CEBF', collar: '#B8332A', cuff: '#B8332A',
-    // 가슴: 굽은 매화 가지에 핀 꽃 두 송이와 꽃봉오리 자수
-    chest: `<path d="M64 101 Q68 96 72 95 Q76 94 80 89" stroke="#5C3A1A" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-      <path d="M72 95 Q71 91 73 88" stroke="#5C3A1A" stroke-width="1.1" fill="none" stroke-linecap="round"/>
-      ${plumBlossom(74, 92.5, 1)}${plumBlossom(79.5, 89.5, 0.75)}
-      <circle cx="73" cy="87.6" r="1.1" fill="#D9536F"/><circle cx="66.5" cy="99" r="0.9" fill="#D9536F"/>`,
+    // 가슴: 화산파 문장
+    chest: hwasanCrest(73.5, 93, 1),
     head: '',
     extra: '<path d="M30 130 L90 130" stroke="#B8332A" stroke-width="2.5" opacity="0.9"/>',
   },

@@ -10168,3 +10168,15 @@ body.modal-open {
 .story-screen {
   overscroll-behavior: contain;
 }
+
+/* 화산파 문장 그림 */
+.sect-emblem.crest {
+  background: #FFFBF3;
+  border-color: #B8332A;
+}
+
+.sect-emblem.crest .crest-svg {
+  width: 92%;
+  height: 92%;
+  overflow: visible;
+}
