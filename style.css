@@ -10183,3 +10183,55 @@ body.modal-open {
 
 .sect-emblem.crest-wudang { background: #F4EBDD; border-color: #24394F; }
 .sect-emblem.crest-gaibang { background: #FBF3E4; border-color: #8C6A44; }
+
+/* ==========================================================
+   마왕 퇴장: 도망 (1~5급) / 가루가 되어 소멸 (6급)
+   ========================================================== */
+.monster.fleeing {
+  animation: monster-flee 0.85s cubic-bezier(0.5, 0, 0.8, 0.6) forwards !important;
+}
+
+@keyframes monster-flee {
+  0% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(12px) translateY(-14px) rotate(8deg); }
+  35% { transform: translateX(6px) translateY(0) rotate(-6deg); }
+  100% { transform: translateX(-340px) translateY(-6px) rotate(-12deg); opacity: 0.9; }
+}
+
+.fx-dust {
+  width: 34px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(233, 220, 196, 0.95), rgba(168, 146, 110, 0.6) 60%, transparent 72%);
+  transform: translate(-50%, -50%) scale(calc(var(--s, 1) * 0.4));
+  animation: dust-puff 0.9s ease-out forwards;
+}
+
+@keyframes dust-puff {
+  0% { transform: translate(-50%, -50%) scale(calc(var(--s, 1) * 0.4)); opacity: 0.95; }
+  100% { transform: translate(-30%, -90%) scale(calc(var(--s, 1) * 1.6)); opacity: 0; }
+}
+
+.monster.dissolving {
+  animation: monster-dissolve 1.6s ease-in forwards !important;
+}
+
+@keyframes monster-dissolve {
+  0% { opacity: 1; filter: none; clip-path: inset(0 0 0 0); }
+  30% { opacity: 1; filter: brightness(1.2) saturate(0.6); }
+  100% { opacity: 0; filter: blur(3px) grayscale(1); clip-path: inset(0 0 100% 0); transform: translate(18px, -10px); }
+}
+
+.fx-ash {
+  width: var(--sz, 4px);
+  height: var(--sz, 4px);
+  border-radius: 1px;
+  background: var(--c, #3A2A44);
+  transform: translate(-50%, -50%);
+  animation: ash-drift 1.5s ease-out forwards;
+}
+
+@keyframes ash-drift {
+  0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(220deg); opacity: 0; }
+}

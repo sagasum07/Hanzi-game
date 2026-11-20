@@ -1513,6 +1513,68 @@ function monsterAttack(current, guarded = false) {
   }, ATTACK_MS);
 }
 
+// 1~5급 마왕: '크윽... 두고보자!!' 하고 한 번 물러났다가 흙먼지를 일으키며 화면 밖으로 도망
+// 돌려주는 값: 이 연출에 드는 추가 시간(ms)
+function monsterFlee() {
+  Sfx.ko();
+  if (battle && battle.monsterArt) monsterEl.innerHTML = renderMonster(battle.monsterArt, 'hurt');
+  bubbleKind.textContent = '';
+  bubbleText.textContent = '크윽... 두고보자!!';
+  bubbleText.removeAttribute('lang');
+  flash('rgba(244,235,221,0.7)', 350);
+  const m = centerOf(monsterEl);
+  if (reduceMotion.matches) {
+    monsterEl.classList.add('defeated');
+    return 600;
+  }
+  stageEffect('shake-m', 400);
+  impactBurst(m.x, m.y, { big: true, word: '胜!' });
+  setTimeout(() => {
+    if (!battle) return;
+    monsterEl.className = 'monster fleeing';
+    Sfx.whoosh(true);
+    // 달아나는 발자취마다 흙먼지
+    [0, 160, 320, 480, 640].forEach((t, i) => setTimeout(() => {
+      const p = centerOf(monsterEl);
+      spawnFx('fx-dust', p.x + 10, p.y + p.w * 0.35, 900, (el) => { el.style.setProperty('--s', String(0.7 + i * 0.12)); });
+    }, t));
+  }, 650);
+  return 1500;
+}
+
+// 6급 마왕: '졌다...' 하고 가루가 되어 바람에 흩날려 사라짐
+function monsterDissolve() {
+  Sfx.dissolve();
+  if (battle && battle.monsterArt) monsterEl.innerHTML = renderMonster(battle.monsterArt, 'ko');
+  bubbleKind.textContent = '';
+  bubbleText.textContent = '졌다...';
+  bubbleText.removeAttribute('lang');
+  if (reduceMotion.matches) {
+    monsterEl.classList.add('defeated');
+    return 800;
+  }
+  setTimeout(() => {
+    if (!battle) return;
+    monsterEl.classList.add('dissolving');
+    const r = monsterEl.getBoundingClientRect();
+    const stage = battleStage.getBoundingClientRect();
+    // 아래에서 위로 차례로 부서지며 오른쪽 위로 날아가는 가루
+    for (let i = 0; i < 70; i++) {
+      const fx = r.left - stage.left + Math.random() * r.width;
+      const fy = r.top - stage.top + r.height * (1 - (i / 70)) + (Math.random() - 0.5) * 14;
+      setTimeout(() => {
+        spawnFx('fx-ash', fx, fy, 1500, (el) => {
+          el.style.setProperty('--dx', `${40 + Math.random() * 90}px`);
+          el.style.setProperty('--dy', `${-30 - Math.random() * 70}px`);
+          el.style.setProperty('--c', ['#3A2A44', '#6B2A8C', '#1F1A17', '#9B4FC0', '#C9A14A'][i % 5]);
+          el.style.setProperty('--sz', `${2 + Math.random() * 4}px`);
+        });
+      }, i * 22);
+    }
+  }, 700);
+  return 2200;
+}
+
 // 마지막 일격: 몬스터가 폭발하며 사라짐
 function monsterExplode() {
   Sfx.ko();
@@ -1592,20 +1654,21 @@ function finishBattle(won) {
   if (won && !battle.exploded) {
     battle.exploded = true;
     const current = battle;
-    monsterExplode();
+    // 마왕성: 1~5급 마왕은 '두고보자!' 하며 도망가고, 6급 마왕은 '졌다...' 하며 가루가 되어 사라짐
+    const exitMs = current.stage.final ? (current.level >= 6 ? monsterDissolve() : monsterFlee()) : (monsterExplode(), 0);
     setPlayerMood('win');
     playerBubbleText.textContent = battle.stage.final ? '마왕을 쓰러뜨렸다!' : battle.stage.boss ? '두목을 쓰러뜨렸다!' : '이겼다!';
     playerBubbleText.lang = 'ko';
     playerBubbleSub.textContent = '';
-    // 폭발 → 胜！ 연출 → 결과 창
+    // 폭발(또는 도망·소멸) → 胜！ 연출 → 결과 창
     setTimeout(() => {
       if (battle === current) playVictory(current.stage);
-    }, 700);
+    }, 700 + exitMs);
     setTimeout(() => {
       if (battle !== current) return;
       hideVictory();
       finishBattle(true);
-    }, 2700);
+    }, 2700 + exitMs);
     return;
   }
   // 졌으면 패배 연출을 먼저 보여 줌

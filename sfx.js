@@ -273,6 +273,12 @@ const Sfx = (() => {
       [1, 2.76, 5.4].forEach((r, i) => tone(c, 620 * r, 0, 0.5 - i * 0.12, { type: 'triangle', gain: 0.16 / (i + 1) }));
       tone(c, 180, 0, 0.15, { gain: 0.4, slideTo: 90 });
     }),
+    // 마왕이 가루가 되어 사라짐: 낮은 징 + 바람 + 흩어지는 종소리
+    dissolve: () => play('dissolve', (c) => {
+      gong(c, 0, 0.35, 73);
+      hiss(c, 0.6, 2.2, { gain: 0.3, type: 'bandpass', freq: 600, slideTo: 3500, q: 0.8 });
+      [9, 7, 5, 4, 2, 0].forEach((n, i) => tone(c, PENTA[n], 0.8 + i * 0.22, 0.7, { type: 'sine', gain: 0.08 }));
+    }),
     // 몬스터 쓰러짐
     ko: () => play(`ko`, (c) => {
       drum(c, 0, 1, 65);
