@@ -492,27 +492,13 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
   // 문파 옷 장식 (가슴 문양·덧댄 조각·머리 장식). 투구·모자를 쓰면 머리 장식은 숨김
   const sectChest = u ? `${u.extra || ''}${u.chest}` : '';
   const sectHead = u && u.head && !(equip && equip.hat) ? u.head : '';
-  // 그린 그림 마감: 먹 윤곽선 + 입체감 + 한지 결 (선은 흔들지 않아 얼굴이 또렷)
-  const fid = typeof illusId === 'function' ? illusId('av') : 'av';
-  const finish = typeof illusFilter === 'function'
-    ? illusFilter(fid, { wobble: 0, outline: 1.1, outlineWobble: 1.4, volume: 0.9, grain: 0.22, seed: 17 })
-    : '';
-  const ink = '#1F1A17';
-  // 옷 주름 (몸통·소매·치맛단)
-  const folds = `<path d="M44 92 Q46.5 99 45 107 M76 92 Q73.5 99 75 107 M52 96 Q53 101 52 106" stroke="${clothDark}" stroke-width="1.2" fill="none" opacity="0.55" stroke-linecap="round"/>
-    <path d="M40 116 Q42 122 40 128 M80 116 Q78 122 80 128" stroke="${clothDark}" stroke-width="1.1" fill="none" opacity="0.45" stroke-linecap="round"/>`;
   return `<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg" class="avatar-svg" overflow="visible">
-  <defs>${finish}</defs>
   <ellipse cx="60" cy="152" rx="30" ry="5" fill="rgba(0,0,0,0.18)"/>
-  <g filter="url(#${fid})">
   <g transform="translate(60 80) scale(0.86) translate(-60 -80)">${hairBack(a.hair, a.hairColor)}</g>
   ${legs}
-  <path d="M41 150 Q41 143 50 143 Q58 143 58 150 Z M62 150 Q62 143 70 143 Q79 143 79 150 Z" fill="#2B2321"/>
-  <path d="M41.5 149.5 H57.5 M62.5 149.5 H78.5" stroke="#E9E2D3" stroke-width="1.6"/>
-  <path d="M46 145 Q50 143.5 54 145 M66 145 Q70 143.5 74 145" stroke="#4A423A" stroke-width="0.9" fill="none"/>
-  <g class="arm-back"><path d="M80 88 Q91 99 89 111" fill="none" stroke="${ink}" stroke-width="14.2" stroke-linecap="round"/><path d="M80 88 Q91 99 89 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M84 96 Q88 101 87 106" stroke="${clothDark}" stroke-width="1" fill="none" opacity="0.6"/><path d="M84 108 L95 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/><circle cx="89" cy="115" r="6" fill="${skin}"/></g>
+  <ellipse cx="50" cy="148" rx="9" ry="5" fill="#2B2321"/><ellipse cx="70" cy="148" rx="9" ry="5" fill="#2B2321"/>
+  <g class="arm-back"><path d="M80 88 Q91 99 89 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M84 108 L95 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/><circle cx="89" cy="115" r="6" fill="${skin}"/></g>
   <path d="M38 88 Q60 78 82 88 L86 110 L34 110 Z" fill="${cloth}"/>
-  ${folds}
   ${collar}
   ${sash}
   ${sectChest}
@@ -527,8 +513,7 @@ function renderAvatar(avatarIn, mood = 'normal', equip = null) {
   ${sectHead}
   ${hat}
   </g>
-  <g class="arm-front"><path d="M40 88 Q29 99 31 111" fill="none" stroke="${ink}" stroke-width="14.2" stroke-linecap="round"/><path d="M40 88 Q29 99 31 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M36 96 Q32 101 33 106" stroke="${clothDark}" stroke-width="1" fill="none" opacity="0.6"/><path d="M25 108 L37 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/>${armorShoulder}${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
-  </g>
+  <g class="arm-front"><path d="M40 88 Q29 99 31 111" fill="none" stroke="${cloth}" stroke-width="12" stroke-linecap="round"/><path d="M25 108 L37 108" stroke="${cuffColor}" stroke-width="3" stroke-linecap="round"/>${armorShoulder}${weaponUnder}<circle class="fist" cx="31" cy="115" r="6.5" fill="${skin}" stroke="${skinDark}" stroke-width="1.2"/>${weaponOver}</g>
 </svg>`;
 }
 
