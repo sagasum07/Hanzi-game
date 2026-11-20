@@ -10180,3 +10180,6 @@ body.modal-open {
   height: 92%;
   overflow: visible;
 }
+
+.sect-emblem.crest-wudang { background: #F4EBDD; border-color: #24394F; }
+.sect-emblem.crest-gaibang { background: #FBF3E4; border-color: #8C6A44; }

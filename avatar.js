@@ -375,6 +375,54 @@ function hwasanCrest(cx, cy, k = 1) {
   </g>`;
 }
 
+// 무당파 문장: 남색 팔각 테두리 + 팔괘의 효(爻) 막대 8개 + 가운데 태극
+function wudangCrest(cx, cy, k = 1) {
+  const R = 6.4 * k;
+  const oct = [...Array(8)].map((_, i) => {
+    const a = (i * 45 + 22.5) * Math.PI / 180;
+    return `${(cx + Math.cos(a) * R).toFixed(2)},${(cy + Math.sin(a) * R).toFixed(2)}`;
+  }).join(' ');
+  // 효 막대: 양효(긴 막대)·음효(가운데가 끊긴 막대)를 번갈아
+  const bars = [...Array(8)].map((_, i) => {
+    const a = i * 45;
+    const r = 4.9 * k;
+    const len = 2.2 * k;
+    const broken = i % 2 === 1;
+    const seg = broken
+      ? `<path d="M${-len} 0 L${-len * 0.25} 0 M${len * 0.25} 0 L${len} 0" stroke="#F4EBDD" stroke-width="${(0.7 * k).toFixed(2)}"/>`
+      : `<path d="M${-len} 0 L${len} 0" stroke="#F4EBDD" stroke-width="${(0.7 * k).toFixed(2)}"/>`;
+    return `<g transform="translate(${cx} ${cy}) rotate(${a}) translate(0 ${-r})">${seg}</g>`;
+  }).join('');
+  const t = 2.9 * k;
+  return `<g>
+    <polygon points="${oct}" fill="#24394F" stroke="#C9A14A" stroke-width="${(0.6 * k).toFixed(2)}"/>
+    ${bars}
+    <circle cx="${cx}" cy="${cy}" r="${t}" fill="#F4EBDD" stroke="#1F1A17" stroke-width="${(0.3 * k).toFixed(2)}"/>
+    <path d="M${cx} ${cy - t} A${t} ${t} 0 0 1 ${cx} ${cy + t} A${t / 2} ${t / 2} 0 0 1 ${cx} ${cy} A${t / 2} ${t / 2} 0 0 0 ${cx} ${cy - t} Z" fill="#1F1A17"/>
+    <circle cx="${cx}" cy="${cy - t / 2}" r="${(0.5 * k).toFixed(2)}" fill="#1F1A17"/>
+    <circle cx="${cx}" cy="${cy + t / 2}" r="${(0.5 * k).toFixed(2)}" fill="#F4EBDD"/>
+  </g>`;
+}
+
+// 개방 문장: 새끼줄로 엮은 둥근 테 + 엇갈린 대나무 지팡이와 붉은 끈을 맨 표주박
+function gaibangCrest(cx, cy, k = 1) {
+  const R = 6.2 * k;
+  return `<g>
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="#F1E3C8" stroke="#8C6A44" stroke-width="${(1.3 * k).toFixed(2)}"/>
+    <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#C9A27A" stroke-width="${(0.9 * k).toFixed(2)}" stroke-dasharray="${(1.1 * k).toFixed(2)} ${(0.9 * k).toFixed(2)}"/>
+    <path d="M${cx - 4 * k} ${cy + 4.2 * k} L${cx + 4 * k} ${cy - 4.2 * k}" stroke="#5E8C3E" stroke-width="${(1.3 * k).toFixed(2)}" stroke-linecap="round"/>
+    <path d="M${cx - 1.6 * k} ${cy + 1.2 * k} l${0.9 * k} ${0.9 * k} M${cx + 1.4 * k} ${cy - 1.9 * k} l${0.9 * k} ${0.9 * k}" stroke="#3F6B2A" stroke-width="${(0.5 * k).toFixed(2)}"/>
+    <g transform="translate(${cx + 0.6 * k} ${cy + 0.4 * k}) rotate(-28)">
+      <circle cx="0" cy="${-2 * k}" r="${(1.25 * k).toFixed(2)}" fill="#C98E3A" stroke="#4A3828" stroke-width="${(0.35 * k).toFixed(2)}"/>
+      <ellipse cx="0" cy="${1.4 * k}" rx="${(2 * k).toFixed(2)}" ry="${(2.4 * k).toFixed(2)}" fill="#C98E3A" stroke="#4A3828" stroke-width="${(0.35 * k).toFixed(2)}"/>
+      <path d="M${-1.1 * k} ${-0.7 * k} q${1.1 * k} ${0.6 * k} ${2.2 * k} 0" stroke="#B8332A" stroke-width="${(0.55 * k).toFixed(2)}" fill="none"/>
+      <path d="M0 ${-3.2 * k} v${-0.9 * k}" stroke="#5C3A1A" stroke-width="${(0.6 * k).toFixed(2)}"/>
+    </g>
+  </g>`;
+}
+
+const SECT_CRESTS = { hwasan: hwasanCrest, wudang: wudangCrest, gaibang: gaibangCrest };
+
 // ---------- 문파 옷 ----------
 // equip.sect 가 있으면 도포를 문파 옷으로: 바탕색·깃·소매 끝·가슴 문양·장식이 바뀌고,
 // 내가 고른 '옷 색'은 허리띠 색으로 남음
@@ -390,7 +438,7 @@ const SECT_UNIFORM = {
   // 무당파: 짙은 남색 도사 도포 + 흰 깃, 가슴에 태극, 머리에 도관
   wudang: {
     cloth: '#33506E', dark: '#24394F', collar: '#F4EBDD', cuff: '#F4EBDD',
-    chest: `<g transform="translate(73 93)"><circle r="5" fill="#F4EBDD" stroke="#1F1A17" stroke-width="0.8"/><path d="M0 -5 A5 5 0 0 1 0 5 A2.5 2.5 0 0 1 0 0 A2.5 2.5 0 0 0 0 -5 Z" fill="#1F1A17"/><circle cy="-2.5" r="0.9" fill="#1F1A17"/><circle cy="2.5" r="0.9" fill="#F4EBDD"/></g>`,
+    chest: wudangCrest(73.5, 93, 1),
     head: '<path d="M52 24 Q52 14 60 13 Q68 14 68 24 Z" fill="#2B2321"/><rect x="51" y="21" width="18" height="5" rx="2" fill="#C9A14A"/><path d="M60 13 L60 7" stroke="#C9A14A" stroke-width="2"/>',
     hideHeadWithHat: true,
     extra: '<path d="M36 112 L84 112" stroke="#F4EBDD" stroke-width="1.5" opacity="0.6"/>',
@@ -398,7 +446,7 @@ const SECT_UNIFORM = {
   // 개방: 해진 갈색 옷에 기운 조각, 새끼줄 허리띠, 허리에 술 호리병
   gaibang: {
     cloth: '#8B6A48', dark: '#6B4E34', collar: '#C9A27A', cuff: '#C9A27A', rope: true,
-    chest: '<rect x="68" y="88" width="9" height="8" fill="#6E8B5A" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1" transform="rotate(-8 72 92)"/><rect x="42" y="92" width="7" height="7" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1"/>',
+    chest: '<rect x="42" y="92" width="7" height="7" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1"/>' + gaibangCrest(73.5, 93, 1),
     head: '',
     extra: '<rect x="38" y="116" width="9" height="8" fill="#A8925E" stroke="#4A3828" stroke-width="0.8" stroke-dasharray="1.5 1" transform="rotate(10 42 120)"/><path d="M78 118 l3 6 -4 4 3 4" stroke="#4A3828" stroke-width="1" fill="none"/>'
       + '<g transform="translate(86 112)"><path d="M0 -6 v3" stroke="#C9A27A" stroke-width="1.5"/><circle cy="-1" r="3" fill="#C98E3A" stroke="#4A3828" stroke-width="1"/><ellipse cy="6" rx="4.5" ry="5.5" fill="#C98E3A" stroke="#4A3828" stroke-width="1"/><path d="M-2 0 q2 1.5 4 0" stroke="#B8332A" stroke-width="1.2" fill="none"/></g>',

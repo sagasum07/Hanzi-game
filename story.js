@@ -370,10 +370,12 @@ let sectDone = null;
 
 function sectEmblem(s, size = 'big') {
   // 화산파는 매화 문장 그림, 나머지는 문파 글자
-  const inner = s.id === 'hwasan' && typeof hwasanCrest === 'function'
-    ? `<svg viewBox="-8 -8 16 16" class="crest-svg" aria-hidden="true">${hwasanCrest(0, 0, 1)}</svg>`
+  // 문파마다 그린 문장 (없으면 문파 글자)
+  const crest = typeof SECT_CRESTS !== 'undefined' && SECT_CRESTS[s.id];
+  const inner = crest
+    ? `<svg viewBox="-8 -8 16 16" class="crest-svg" aria-hidden="true">${crest(0, 0, 1)}</svg>`
     : `<b>${s.emblem}</b>`;
-  return `<span class="sect-emblem ${size}${s.id === 'hwasan' ? ' crest' : ''}" style="--sect:${s.color};--sect-light:${s.light}">${inner}</span>`;
+  return `<span class="sect-emblem ${size}${crest ? ` crest crest-${s.id}` : ''}" style="--sect:${s.color};--sect-light:${s.light}">${inner}</span>`;
 }
 
 function openSectSelect(onDone) {
