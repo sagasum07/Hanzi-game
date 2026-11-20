@@ -299,6 +299,10 @@ function storyPages(kind, n) {
       ['journey', '마왕은 비법서를 여섯 장으로 찢어 중원 여섯 지역(HSK 1~6급)의 마왕성에 숨겼다고 합니다. 이제 당신의 여정이 시작됩니다!'],
     ];
   }
+  if (kind === 'pages') {
+    const total = recoveredPageCount();
+    return [['page', `낮은 급수의 마왕성에 숨겨져 있던 비법서 ${n}장을 한꺼번에 되찾았습니다! 지금까지 ${total}장을 모았어요. (${total}/${RECIPE_PAGES})`]];
+  }
   if (kind === 'page') {
     return [['page', n >= RECIPE_PAGES
       ? `마왕을 물리치고 마지막 비법서까지 되찾았습니다! 드디어 여섯 장이 모두 모였어요. (${n}/${RECIPE_PAGES})`
@@ -459,6 +463,44 @@ btnSectJoin.addEventListener('click', () => {
   if (done) done();
 });
 
+// ---------- 낮은 급수 한꺼번에 클리어 ----------
+function levelFinalCleared(lv) {
+  const prog = userRecord.game[lv];
+  return Boolean(prog && prog.cleared >= levelStages(lv).length);
+}
+
+// 그 급수의 모든 스테이지를 클리어로 (받은 별은 그대로, 없으면 1개) + 마왕성 칭호
+function clearWholeLevel(lv) {
+  const prog = gameProgress(lv);
+  const total = levelStages(lv).length;
+  prog.cleared = total;
+  for (let no = 1; no <= total; no++) prog.stars[no] = Math.max(prog.stars[no] || 0, 1);
+  if (typeof grantMasterTitle === 'function') grantMasterTitle(lv);
+}
+
+function offerLowerClear(onContinue) {
+  const st = storyState();
+  if (!st.lowerAsked) st.lowerAsked = {};
+  for (let lv = RECIPE_PAGES; lv >= 2; lv--) {
+    if (!levelFinalCleared(lv) || st.lowerAsked[lv]) continue;
+    st.lowerAsked[lv] = true;
+    scheduleRecordSave();
+    const lower = [];
+    for (let l = 1; l < lv; l++) if (!levelFinalCleared(l)) lower.push(l);
+    if (!lower.length) continue;
+    const range = lower.length === 1 ? `HSK ${lower[0]}급` : `HSK ${lower[0]}~${lower[lower.length - 1]}급`;
+    if (!confirm(`낮은 급수의 스테이지를 모두 클리어처리 할 수 있습니다. 하시겠습니까?\n(${range}, 비법서와 칭호도 함께 받아요)`)) return false;
+    lower.forEach(clearWholeLevel);
+    // 되찾은 비법서를 한 장면에서 한꺼번에
+    lower.forEach((l) => { st.pages[l] = true; });
+    scheduleRecordSave();
+    if (typeof syncMyProgress === 'function') syncMyProgress();
+    openStory('pages', lower.length, onContinue);
+    return true;
+  }
+  return false;
+}
+
 // ---------- 게임 모드 들어올 때 이어질 이야기 ----------
 // 프롤로그 → 문파 선택 → (캐릭터 만들기·튜토리얼은 stage-game.js) / 마왕을 물리친 뒤 → 비법서 장면 → 엔딩
 // 이어서 보여 줄 이야기가 있으면 보여 주고 true, 없으면 false
@@ -482,6 +524,8 @@ function runStoryGate(onContinue) {
     return true;
   }
   if (!getAvatar()) return false;
+  // 높은 급수의 마왕성을 깼으면: 그보다 낮은 급수를 한꺼번에 클리어 처리할지 물어봄 (급수마다 한 번)
+  if (offerLowerClear(onContinue)) return true;
   // 마왕성을 깬 급수마다 비법서 한 장
   for (let lv = 1; lv <= RECIPE_PAGES; lv++) {
     const prog = userRecord.game[lv];
